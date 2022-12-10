@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Permissions">
+	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
+	<title>Permissions</title>    
+
+	<link rel="shortcut icon" href="../favicon.ico">
+	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+	<link rel="manifest" href="../site.webmanifest">
+
+	<!-- Bootstrap core CSS -->
+	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta name="theme-color" content="#7952b3">
+
+	<link href="css/admin.css" rel="stylesheet">
+
+</head>
+<body>
+    
+<main>
+
+<section class="py-5 container" id="loading">
+	<div class="px-4 py-5 my-5 text-center">
+		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="loading_logo">
+		<h2 class="display-5">Loading...</h2>
+	</div>
+</section>
+
+<section class="py-5 container d-none" id="page">
+	<div class="px-4 text-center">
+		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<h1 class="display-5 fw-bold">Permissions</h1>
+	</div>
+	<div id="alerts"></div>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="home.html">Home</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Permissions</li>
+		</ol>
+	</nav>
+	<form action="" class="">
+		<div class="input-group">
+			<input type="text" class="form-control" id="search" placeholder="Search Names">
+			<button class="input-group-text btn-success" id="search_btn">Search</button>
+			<a class="btn btn-primary" href="permissionedit.html" role="button">New permission</a>
+		</div>
+	</form>
+	<br/>
+	<table class = "table table-striped">
+	  <thead>
+		<tr>
+		  <th scope = "col">#</th>
+		  <th scope = "col">Permissions</th>
+		  <th scope = "col">Roles</th>
+		  <th scope = "col"></th>
+		</tr>
+	  </thead>
+	  <tbody id = "table_items">
+	  </tbody>
+	</table>
+	<div class="text-center">
+		<button type="button" class="btn btn-primary" id="load_more_btn">Load more</button>
+	</div>
+</section>
+
+</main>
+
+<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
+<script src="../libs/jquery-3.6.1.min.js"></script>
+<script src="../js/common.js" type="text/javascript" ></script>
+<script src="js/common.js" type="text/javascript" ></script>
+<script src="js/permission.js" type="text/javascript" ></script>
+
+</body>
+</html>

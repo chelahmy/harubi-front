@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Member edit">
+	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
+	<title>Member Edit</title>    
+
+	<link rel="shortcut icon" href="../favicon.ico">
+	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+	<link rel="manifest" href="../site.webmanifest">
+
+	<!-- Bootstrap core CSS -->
+	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta name="theme-color" content="#7952b3">
+
+	<link href="css/main.css" rel="stylesheet">
+
+</head>
+<body>
+    
+<main>
+
+<section class="py-5 container" id="loading">
+	<div class="px-4 py-5 my-5 text-center">
+		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="loading_logo">
+		<h2 class="display-5">Loading...</h2>
+	</div>
+</section>
+
+<section class="py-5 container d-none" id="page">
+	<div class="px-4 text-center">
+		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<h1 class="display-5 fw-bold">Member Edit</h1>
+		<h2 class="display-5" id="groupname"></h2>
+		<h3 class="display-8">A group by <span id="ownername"></span></h3>
+	</div>
+	<div id="alerts"></div>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="home.html">Home</a></li>
+			<li class="breadcrumb-item"><a href="mygroup.html">Groups</a></li>
+			<li class="breadcrumb-item"><a href="mymember.html" id="members">Members</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Edit</li>
+		</ol>
+	</nav>
+	<form>
+		<div class="mb-3">
+			<label for="name" class="form-label">Name</label>
+			<input type="text" class="form-control" id="name" aria-describedby="nameHelp">
+			<div id="nameHelp" class="form-text">The user name of the new member. <span id="name_help_extra"></span></div>
+		</div>
+		<p>Roles :</p>
+		<div class="mb-3" id="roles"></div>
+		<br/>
+	</form>	
+	<button class="btn btn-primary d-none" id="update_btn">Update</button>
+	<button class="btn btn-primary d-none" id="create_btn">Add</button>
+	<button class="btn btn-secondary d-none" id="delete_btn" data-bs-toggle="modal" data-bs-target="#confirm_delete">Remove</button>
+
+	<!-- Modal Confirm Delete -->
+	<div class="modal fade" id="confirm_delete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Remove</h1>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+				<div class="modal-body">
+					<p>Are you sure you want to remove this membership?</p>
+					<p><span id="delete_type"></span> &ndash; <strong id="delete_details"></strong><p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" id="confirmed_delete_btn" data-bs-dismiss="modal">Yes</button>
+					<button type="button" class="btn btn-primary" data-bs-dismiss="modal">No</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</section>
+
+</main>
+
+<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
+<script src="../libs/jquery-3.6.1.min.js"></script>
+<script src="../js/common.js" type="text/javascript" ></script>
+<script src="js/common.js" type="text/javascript" ></script>
+<script src="js/mymemberedit.js" type="text/javascript" ></script>
+
+</body>
+</html>
