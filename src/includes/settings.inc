@@ -12,8 +12,8 @@
 	
     "mysql" : {
         "hostname" : "localhost",
-        "username" : "root",
-        "password" : "asus",
+        "username" : "",
+        "password" : "",
         "database" : "harubi-front",
         "prefix"   : ""
     },
