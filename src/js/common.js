@@ -363,6 +363,11 @@ var add_home_menu_item = function (icon, title, description, url) {
 		class : "home-icon bi-" + icon
 	});
 
+	var ele_icon_url = $("<a>", {
+		"href" : encodeURI(url),
+		"html" : ele_icon.prop('outerHTML') 
+	});
+
 	var ele_title_url = $("<a>", {
 		"href" : encodeURI(url),
 		"text" : title 
@@ -376,7 +381,7 @@ var add_home_menu_item = function (icon, title, description, url) {
 	var ele_col = $("<div>", {
 		class : "feature col",
 		append : [
-			ele_icon,
+			ele_icon_url,
 			ele_title,
 			$("<p>", {"text" : description})
 		]
