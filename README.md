@@ -10,7 +10,7 @@ can be made as an example. There are various reusable components in the built-in
 sorting, searching and filtering, and client-side access control.
 
 The framework is page-based. Every page is based on a pair of a HTML and a Javascript files. A breadcrumb can be set
-to navigate from page to page. Communication with a Harubi server is asynchronous. Hence, a page must be ready with
+to navigate from page to page. Communication with a Harubi server is asynchronous. Hence, a page must be made ready with
 placeholders to accept the asynchronous data from the server.
 
 Please read the pages source codes from the built-in application to get a better idea.
@@ -19,7 +19,7 @@ You must be familiar with HTML, Javascript and CSS on the client side, and PHP a
 the client and server are totally separated in term of programming approaches. The communication from the client to the
 server is using JQuery. The pages were made using JQuery and Bootstrap with priority for mobile usage. The server side
 is using Harubi which is based on PHP and MySQL. Harubi Model is based on object-relational mapping. Hence, low-level
-SQL scripting may not be necessary. 
+SQL scripting may not be necessary. If you are using table joins then you should consider using SQL View.
 
 ## Installation
 
