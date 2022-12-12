@@ -75,7 +75,7 @@ $(window).on('load', function () {
 		var input_order_by = 'name';
 		var input_sort = 'ASC';
 
-		sortables("user_table", "name", function (order_by, sort) {
+		sortables("user_table", input_order_by, input_sort, function (order_by, sort) {
 			input_order_by = order_by;
 			input_sort = sort;
 			input_search = $('#search').val();

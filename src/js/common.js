@@ -301,7 +301,7 @@ var when_allowed = function (permname, do_task, on_access_denied_redirect_url = 
 //   'ASC' or 'DESC'.
 // - The on_click event should refresh the HTML table by reloading the database
 //   table according to the *order_by* and *sort*.
-var sortables = function (table_id, selected_column, on_click) {
+var sortables = function (table_id, selected_column, sort, on_click) {
 	var columns = {};
 	
 	// Iterate all sortable columns
@@ -321,7 +321,7 @@ var sortables = function (table_id, selected_column, on_click) {
 			// Attach sort arrow to a column label
 			var ele_sort = $("<span>", {
 				"id" : '_sort_' + col,
-				"html" : selected_column == col ? "&uarr;" : ""
+				"html" : selected_column == col ? (sort == 'ASC' ? "&uarr;" : "&darr;") : ""
 			});
 			
 			// Make a column sortable

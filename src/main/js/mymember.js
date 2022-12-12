@@ -125,7 +125,7 @@ $(window).on('load', function () {
 			input_search = $('#search').val();
 			list_members(1, groupref, input_search, input_order_by, input_sort);
 			
-			sortables("member_table", "created_utc", function (order_by, sort) {
+			sortables("member_table", input_order_by, input_sort, function (order_by, sort) {
 				input_order_by = order_by;
 				input_sort = sort;
 				input_search = $('#search').val();

@@ -100,7 +100,7 @@ $(window).on('load', function () {
 			load_groups(1, group_type, input_search, input_order_by, input_sort);
 		});
 		
-		sortables("usergroup_table", "name", function (order_by, sort) {
+		sortables("usergroup_table", input_order_by, input_sort, function (order_by, sort) {
 			input_order_by = order_by;
 			input_sort = sort;
 			input_search = $('#search').val();
