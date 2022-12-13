@@ -66,7 +66,7 @@ $error_messages = array(
 	err_cannot_create_ref => "Cannot create ref.",
 );
 
-function error_pack($code, $ext = "")
+function error_pack($code, $ext = "", $ext_param = array())
 {
 	global $error_messages, $harubi_settings, $harubi_logs;
 	
@@ -80,8 +80,9 @@ function error_pack($code, $ext = "")
 		'data' => array(
 			'error' => $code,
 			'error_msg' => array_key_exists($code, $error_messages) ?
-				$error_messages[$code] : "Unknown error code $code.",
+				$error_messages[$code] : $error_messages[err_unknown],
 			'error_ext' => $ext,
+			'error_ext_params' => $ext_param,
 			'logs' => $logs ? print_r($harubi_logs, true) : ''
 		)
 	);
@@ -473,6 +474,19 @@ function is_signedin($uid = 0)
 	return true;
 }
 
+function is_signedin_admin()
+{
+	return (isset_session('admin_uid') && intval(get_session('admin_uid')) > 0);
+}
+
+function signedin_language()
+{
+	if (isset_session('language'))
+		return get_session('language');
+		
+	return 'en'; // default language
+}
+
 function signedin_uid()
 {
 	if (isset_session('uid'))
@@ -642,7 +656,7 @@ function has_permission($permname) {
 
 beat('system', 'heartbeat', function ()
 {
-	set_session('last_accessed', time());
+	is_signedin(); // this will update the last access time
 
 	return array(
 		'status' => 1
@@ -651,12 +665,14 @@ beat('system', 'heartbeat', function ()
 
 beat('system', 'signedin', function ()
 {
-	set_session('last_accessed', time());
-
+	$is_signedin = is_signedin(); // this will update the last access time
+	
 	return array(
 		'status' => 1,
 		'data' => array(
-			'is_signedin' => is_signedin(),
+			'is_signedin' => $is_signedin,
+			'is_signedin_admin' => is_signedin_admin(),
+			'signedin_language' => signedin_language(),
 			'signedin_uname' => signedin_uname()
 		)
 	);
@@ -794,6 +810,7 @@ beat('user', 'signin', function ($name, $password)
 				if (inc_user_signins($uid, $all_signins))
 					$data['all_signins'] = $data['all_signins'] + 1;
 				
+				set_session('language', 'en');
 				set_session('uid', $uid);
 				set_session('uname', $name);
 				set_session('uroleid', $uroleid);
