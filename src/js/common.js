@@ -6,6 +6,10 @@
 var main_server = "main/includes/main.php";
 var loading_logo_path = "logo/logo.png";
 var page_logo_path = "logo/logo.png";
+var languages_path = "languages/";
+
+var language = 'en';
+var language_strings = {};
 
 // Server error codes
 const serr_not_signed_in = 1;
@@ -42,6 +46,26 @@ function gup(name){
 		return results[1];
 	}
 } // gup() - Get URL Param
+
+// from https://stackoverflow.com/a/4399718
+function getTextNodesIn(node, includeWhitespaceNodes) {
+    var textNodes = [], nonWhitespaceMatcher = /\S/;
+
+    function getTextNodes(node) {
+        if (node.nodeType == 3) {
+            if (includeWhitespaceNodes || nonWhitespaceMatcher.test(node.nodeValue)) {
+                textNodes.push(node);
+            }
+        } else {
+            for (var i = 0, len = node.childNodes.length; i < len; ++i) {
+                getTextNodes(node.childNodes[i]);
+            }
+        }
+    }
+
+    getTextNodes(node);
+    return textNodes;
+}
 
 var load_logo = function () {
 	$('#loading_logo').attr('src', loading_logo_path);
@@ -190,7 +214,8 @@ var qserv = function (path, args, on_ready, extra = '') {
 			if ((typeof rst !== 'undefined') && 
 				(typeof rst.status !== 'undefined')) {
 				if (rst.status == 1) {
-					on_ready(rst, extra);
+					if (typeof on_ready === 'function')
+						on_ready(rst, extra);
 					handled = true;
 				}
 				else if (rst.status == 0 || rst.status == -1) {
@@ -264,6 +289,65 @@ var alert_after_remove = function (rst = {}, extra = '') {
 	alert_after("Removed", extra);
 }
 
+// Load signed-in data.
+// Get the current user signed-in data which are
+// 1. is_signedin
+// 2. is_signedin_admin
+// 3. signedin_language
+// 4. signedin_uname
+// and call on_ready(data) when the data is ready.
+var load_signedin = function (on_ready) {
+	if (typeof on_ready === 'function')
+		qserv(main_server, {model: 'system', action: 'signedin'}, function(rst, extra) {
+			if (typeof on_ready === 'function')
+				on_ready(rst.data);
+		});
+}
+
+// Translate all elements texts.
+var te = function () {
+	var title = $('title').text().trim();
+
+	if (title in language_strings)
+		$('title').text(language_strings[title]);
+	
+	var tnodes = getTextNodesIn($('body')[0]);
+	
+	$.each(tnodes , function(index, tn) { 
+		var text = tn.nodeValue.trim();
+		if (text in language_strings)
+			tn.nodeValue = language_strings[text];
+	});
+	
+	$('form').find("input").each(function(ev) {
+		var ph = $(this).attr("placeholder");
+		
+		if (typeof ph !== 'undefined' && ph !== false) {
+			ph = ph.trim();
+			if (ph in language_strings)
+				$(this).attr("placeholder", language_strings[ph]);
+		}
+	});	
+}
+
+// Load language strings.
+// And translate the current page.
+// And trigger on_ready() if specified.
+var load_language = function (lang, on_ready) {
+	if (lang == 'en') // default language
+		return;
+		
+	$.getJSON( languages_path + lang + '.json', function( data ) {
+		language = lang;
+		language_strings = data;
+		
+		te();
+		
+		if (typeof on_ready === 'function')
+			on_ready();
+	});
+}
+
 // When the current user has the permission then execute do_task().
 var when_allowed = function (permname, do_task, on_access_denied_redirect_url = '') {
 	$.post(main_server, {model: 'user', action: 'has_permission', permname: permname}, function(result, status) {
@@ -287,6 +371,14 @@ var when_allowed = function (permname, do_task, on_access_denied_redirect_url = 
 		}
 		if (!handled)		// Redirect to the error page with no error details
 			show_error();	// because the user has not accessed the system yet.
+	});
+}
+
+// Prevent all forms from triggering submit.
+var prevent_form_submit = function () {
+	$(document).on("submit", "form", function(e){
+		e.preventDefault();
+		return  false;
 	});
 }
 
