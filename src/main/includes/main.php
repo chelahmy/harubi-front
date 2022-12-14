@@ -357,7 +357,7 @@ beat('member', 'list_own', function ($restart, $groupref, $search = '', $order_b
 	if (record_cnt($records) > 0)
 		$usergroupid = intval($records[0]['id']);
 	else // record does not exist
-		return error_pack(err_record_missing, "groupref: $groupref");
+		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
 		
 	$where = equ('usergroupid', $usergroupid);
 	
@@ -415,7 +415,7 @@ beat('member', 'read_own', function ($groupref, $username)
 	$userid = get_userid_by_name($username);
 
 	if ($userid <= 0)
-		return error_pack(err_record_missing, "member: $username");
+		return error_pack(err_record_missing, "member: @username", array('@username' => $username));
 	
 	$usergroupid = 0;
 	$records = $ginfo['group_records'];
@@ -425,13 +425,13 @@ beat('member', 'read_own', function ($groupref, $username)
 		$usergroupid = intval($records[0]['id']);
 		
 	if ($usergroupid <= 0)
-		return error_pack(err_record_missing, "groupref: $groupref");
+		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
 	
 	$where = equ('userid', $userid) . ' AND ' . equ('usergroupid', $usergroupid);
 	$records = read('member', FALSE, $where);
 	
 	if (read_failed($records))
-		return error_pack(err_read_failed, "groupref: $ref, member: $name");
+		return error_pack(err_read_failed, "groupref: @groupref, member: @username", array('@groupref' => $groupref, '@username' => $username));
 	
 	$rcnt = record_cnt($records);
 	
@@ -458,7 +458,7 @@ beat('member', 'read_own', function ($groupref, $username)
 	);
 });
 
-beat('member', 'add_own', function ($groupref, $name, $rolename = 'member')
+beat('member', 'add_own', function ($groupref, $username, $rolename = 'member')
 {
 	if (!has_permission('member_add_own'))
 		return error_pack(err_access_denied);
@@ -468,10 +468,10 @@ beat('member', 'add_own', function ($groupref, $name, $rolename = 'member')
 	if (!$ginfo['owner'] && !$ginfo['admin'])
 		return error_pack(err_access_denied);
 	
-	$userid = get_userid_by_name($name);
+	$userid = get_userid_by_name($username);
 
 	if ($userid <= 0)
-		return error_pack(err_record_missing, "member: $name");
+		return error_pack(err_record_missing, "member: @username", array('@username' => $username));
 
 	$usergroupid = 0;
 	$records = $ginfo['group_records'];
@@ -481,13 +481,13 @@ beat('member', 'add_own', function ($groupref, $name, $rolename = 'member')
 		$usergroupid = intval($records[0]['id']);
 	
 	if ($usergroupid <= 0)
-		return error_pack(err_record_missing, "groupref: $groupref");
+		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
 	
 	$where = equ('userid', $userid) . ' AND ' . equ('usergroupid', $usergroupid);
 	$records = read('member', FALSE, $where);
 	
 	if (read_failed($records))
-		return error_pack(err_read_failed, "groupref: $groupref, member: $name");
+		return error_pack(err_read_failed, "groupref: @groupref, member: @username", array('@groupref' => $groupref, '@username' => $name));
 	
 	$rcnt = record_cnt($records);
 	
@@ -526,7 +526,7 @@ beat('member', 'update_own', function ($groupref, $username, $rolename)
 	$userid = get_userid_by_name($username);
 
 	if ($userid <= 0)
-		return error_pack(err_record_missing, "member: $username");
+		return error_pack(err_record_missing, "member: @username", array('@username' => $username));
 	
 	$usergroupid = 0;
 	$records = $ginfo['group_records'];
@@ -536,7 +536,7 @@ beat('member', 'update_own', function ($groupref, $username, $rolename)
 		$usergroupid = intval($records[0]['id']);
 		
 	if ($usergroupid <= 0)
-		return error_pack(err_record_missing, "groupref: $groupref");
+		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
 	
 	$now = time();
 	$where = equ('userid', $userid) . ' AND ' . equ('usergroupid', $usergroupid);
@@ -552,7 +552,7 @@ beat('member', 'update_own', function ($groupref, $username, $rolename)
 	);
 });
 
-beat('member', 'remove_own', function ($groupref, $name)
+beat('member', 'remove_own', function ($groupref, $username)
 {
 	if (!has_permission('member_remove_own'))
 		return error_pack(err_access_denied);
@@ -562,10 +562,10 @@ beat('member', 'remove_own', function ($groupref, $name)
 	if (!$ginfo['owner'] && !$ginfo['admin'])
 		return error_pack(err_access_denied);
 	
-	$userid = get_userid_by_name($name);
+	$userid = get_userid_by_name($username);
 
 	if ($userid <= 0)
-		return error_pack(err_record_missing, "member: $name");
+		return error_pack(err_record_missing, "member: @username", array('@username' => $username));
 
 	$usergroupid = 0;
 	$records = $ginfo['group_records'];
@@ -575,13 +575,13 @@ beat('member', 'remove_own', function ($groupref, $name)
 		$usergroupid = intval($records[0]['id']);
 	
 	if ($usergroupid <= 0)
-		return error_pack(err_record_missing, "groupref: $groupref");
+		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
 	
 	$where = equ('userid', $userid) . ' AND ' . equ('usergroupid', $usergroupid);
 	$records = read('member', FALSE, $where);
 	
 	if (read_failed($records))
-		return error_pack(err_read_failed, "groupref: $groupref, member: $name");
+		return error_pack(err_read_failed, "groupref: @groupref, member: @username", array('@groupref' => $groupref, '@username' => $username));
 	
 	$rcnt = record_cnt($records);
 	
@@ -599,7 +599,7 @@ beat('member', 'remove_own', function ($groupref, $name)
 	$records = read('member', FALSE, $where);
 	
 	if (read_failed($records))
-		return error_pack(err_read_failed, "groupref: $groupref, member: $name");
+		return error_pack(err_read_failed, "groupref: @groupref, member: @username", array('@groupref' => $groupref, '@username' => $username));
 	
 	$rcnt = record_cnt($records);
 	

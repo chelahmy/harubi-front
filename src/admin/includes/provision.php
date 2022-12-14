@@ -128,12 +128,15 @@ beat('system', 'provision', function ()
 		return error_pack(err_access_denied);
 	
 	$err_ext = array();
+	$err_ext_params = array();
 	
 	foreach ($preferences as $preference => $value) {
 		$prefid = set_preference($preference, $value);
 		
-		if ($prefid <= 0)
-			$err_ext[] = "preference '$preference'";
+		if ($prefid <= 0) {
+			$err_ext[] = "preference '@preference'";
+			$err_ext_params[] = array('@preference' => $preference);
+		}
 	}
 	
 	foreach ($roles as $role => &$data) {
@@ -150,8 +153,10 @@ beat('system', 'provision', function ()
 			));
 		}
 		
-		if ($data['id'] <= 0)
-			$err_ext[] = "role '$role'";
+		if ($data['id'] <= 0) {
+			$err_ext[] = "role '@role'";
+			$err_ext_params[] = array('@role' => $role);
+		}
 	}
 
 	if (!create_superadmin())
@@ -187,17 +192,21 @@ beat('system', 'provision', function ()
 						));	
 					}
 					
-					if ($id <= 0)
-						$err_ext[] = "permission '$permission' -> role '$permrole'";
+					if ($id <= 0) {
+						$err_ext[] = "permission '@permission' -> role '@permrole'";
+						$err_ext_params[] = array('@permission' => $permission, '@permrole' => $permrole);
+					}
 				}
 			}
 		}
-		else
-			$err_ext[] = "permission '$permission'";
+		else {
+			$err_ext[] = "permission '@permission'";
+			$err_ext_params[] = array('@permission' => $permission);
+		}
 	}
 	
 	if (count($err_ext) > 0)
-		error_pack(err_record_missing, $err_ext);
+		error_pack(err_record_missing, $err_ext, $err_ext_params);
 	
 	return array(
 		'status' => 1
