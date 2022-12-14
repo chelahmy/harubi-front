@@ -26,20 +26,16 @@ define("err_user_exists", 4);
 define("err_user_update_failed", 5);
 define("err_user_restricted", 6);
 define("err_signin_failed", 7);
-define("err_user_read_failed", 8);
-define("err_name_exists", 9);
-define("err_access_denied", 10);
-define("err_create_failed", 11);
-define("err_read_failed", 12);
-define("err_update_failed", 13);
-define("err_delete_failed", 14);
-define("err_record_already_exists", 15);
-define("err_parent_record_missing", 16);
-define("err_remove_failed", 17);
-define("err_cannot_change_password", 18);
-define("err_cannot_delete", 19);
-define("err_missing", 20);
-define("err_cannot_create_ref", 21);
+define("err_access_denied", 8);
+define("err_create_failed", 9);
+define("err_read_failed", 10);
+define("err_update_failed", 11);
+define("err_delete_failed", 12);
+define("err_record_already_exists", 13);
+define("err_cannot_change_password", 14);
+define("err_cannot_delete", 15);
+define("err_record_missing", 16);
+define("err_cannot_create_ref", 17);
 
 $error_messages = array(
 	err_unknown => "Unknown error.",
@@ -50,19 +46,15 @@ $error_messages = array(
 	err_user_update_failed => "Could not update user record.",
 	err_user_restricted => "The user has been restricted.",
 	err_signin_failed => "Could not sign in user.", // for security reason: should not give more details on why the sign in failed
-	err_user_read_failed => "Could not read user record.",
-	err_name_exists => "The name already exists.",
 	err_access_denied => "Access denied.",
 	err_create_failed => "Record creation failed.",
 	err_read_failed => "Record reading failed.",
 	err_update_failed => "Record updating failed.",
 	err_delete_failed => "Record deletion failed.",
 	err_record_already_exists => "Record already exists.",
-	err_parent_record_missing => "Parent record missing.",
-	err_remove_failed => "Remove failed.",
 	err_cannot_change_password => "Cannot change password.",
 	err_cannot_delete => "Cannot delete record.",
-	err_missing => "Record missing.",
+	err_record_missing => "Record missing.",
 	err_cannot_create_ref => "Cannot create ref.",
 );
 

@@ -12,6 +12,7 @@ var language = 'en';
 var language_strings = {};
 
 // Server error codes
+const serr_unknown = 0;
 const serr_not_signed_in = 1;
 const serr_try_signup_later = 2;
 const serr_signup_failed = 3;
@@ -19,20 +20,16 @@ const serr_user_exists = 4;
 const serr_user_update_failed = 5;
 const serr_user_restricted = 6;
 const serr_signin_failed = 7;
-const serr_user_read_failed = 8;
-const serr_name_exists = 9;
-const serr_access_denied = 10;
-const serr_create_failed = 11;
-const serr_read_failed = 12;
-const serr_update_failed = 13;
-const serr_delete_failed = 14;
-const serr_record_already_exists = 15;
-const serr_parent_record_missing = 16;
-const serr_remove_failed = 17;
-const serr_cannot_change_password = 18;
-const serr_cannot_delete = 19;
-const serr_missing = 20;
-const err_cannot_create_ref = 21;
+const serr_access_denied = 8;
+const serr_create_failed = 9;
+const serr_read_failed = 10;
+const serr_update_failed = 11;
+const serr_delete_failed = 12;
+const serr_record_already_exists = 13;
+const serr_cannot_change_password = 14;
+const serr_cannot_delete = 15;
+const serr_record_missing = 16;
+const err_cannot_create_ref = 17;
 
 // gup - from https://gist.github.com/cgravolet/185484
 function gup(name){
