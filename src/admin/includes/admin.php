@@ -285,7 +285,7 @@ beat('usergroup', 'create', function ($ownername, $name)
 	$owneruserid = get_userid_by_name($ownername);
 
 	if ($owneruserid <= 0)
-		return error_pack(serr_missing, "Owner: $ownername");
+		return error_pack(err_missing, "Owner: $ownername");
 	
 	$ref = new_table_row_ref('usergroup');
 	

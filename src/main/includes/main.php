@@ -197,7 +197,7 @@ beat('usergroup', 'create_own', function ($name)
 	$owneruserid = signedin_uid();
 
 	if ($owneruserid <= 0)
-		return error_pack(serr_missing, "Owner");
+		return error_pack(err_missing, "Owner");
 	
 	$ref = new_table_row_ref('usergroup');
 	
