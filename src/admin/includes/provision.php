@@ -159,8 +159,10 @@ beat('system', 'provision', function ()
 		}
 	}
 
-	if (!create_superadmin())
+	if (!create_superadmin()) {
 		$err_ext[] = "superadmin";
+		$err_ext_params[] = array();
+	}
 	
 	foreach ($permissions as $permission => $permroles) {
 		$where = equ('name', $permission, 'string');
