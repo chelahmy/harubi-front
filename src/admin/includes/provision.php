@@ -197,7 +197,7 @@ beat('system', 'provision', function ()
 	}
 	
 	if (count($err_ext) > 0)
-		error_pack(err_missing, $err_ext);
+		error_pack(err_record_missing, $err_ext);
 	
 	return array(
 		'status' => 1
