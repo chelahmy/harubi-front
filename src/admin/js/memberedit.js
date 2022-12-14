@@ -95,14 +95,14 @@ var update_member = function (groupref, username, rolename) {
 		groupref: groupref, username: username, rolename: rolename}, alert_after_update);
 }
 
-var add_member = function (groupref, name, rolename) {
+var add_member = function (groupref, username, rolename) {
 	qserv(admin_server, {model: 'member', action: 'add',
-		groupref: groupref, name: name, rolename: rolename}, alert_after_add);
+		groupref: groupref, username: username, rolename: rolename}, alert_after_add);
 }
 
-var remove_member = function (groupref, name) {
+var remove_member = function (groupref, username) {
 	qserv(admin_server, {model: 'member', action: 'remove', 
-		groupref: groupref, name: name}, alert_after_remove, 'member.html?groupref=' + groupref);
+		groupref: groupref, username: username}, alert_after_remove, 'member.html?groupref=' + groupref);
 }
 
 $(window).on('load', function () {
