@@ -1,0 +1,40 @@
+{
+"Loading..." : "Sedang dimuatnaik...",
+"Home" : "Laman Utama",
+"Search" : "Capai",
+"Since" : "Semenjak",
+
+"Unknown error." : "Masalah tidak diketahui.",
+"User had not signed in." : "Pengguna belum lagi masuk",
+"Could not sign up new user now. Please try again later." : "Tidak boleh mendaftar pengguna baru sekarang. Sila cuba lagi kemudian.",
+"Could not sign up new user." : "Tidak boleh mendaftar pengguna baru.",
+"User of the given name already exists." : "Nama yang diberi sudah ada pengguna lain.",
+"Could not update user record." : "Tidak boleh mengemaskini rekod pengguna.",
+"The user has been restricted." : "Pengguna ini telah dihadkan.",
+"Could not sign in user." : "Tidak boleh mendaftar masuk pengguna.",
+"Access denied." : "Akses dinafikan.",
+"Record creation failed." : "Gagal membuat rekod baru.",
+"Record reading failed." : "Gagal membaca rekod.",
+"Record updating failed." : "Gagal mengemaskini rekod.",
+"Record deletion failed." : "Gagal memadamkan rekod.",
+"Record already exists." : "Rekod sudah sedia ada.",
+"Cannot change password." : "Tidak boleh mengubah katalaluan.",
+"Cannot delete record." : "Tidak boleh memadamkan rekod.",
+"Record missing." : "Rekod tidak ditemui.",
+"Cannot create ref." : "Tidak boleh membuat ref.",
+
+"Members" : "Ahli-ahli",
+"Owner" : "Pemilik",
+"Owner: @ownername" : "Pemilik: @ownername",
+"Permission roles" : "Peranan-peranan untuk kebenaran akses",
+"groupref: @groupref" : "ref kumpulan: @groupref",
+"groupref: @groupref, member: @username" : "ref kumpulan: @groupref, ahli: @username",
+"member: @username" : "ahli: @username",
+
+"preference '@preference'" : "pilihan '@preference'",
+"role '@role'" : "peranan '@role'",
+"superadmin" : "superadmin",
+"permission '@permission' -> role '@permrole'" : "kebenaran akses '@permission' -> peranan '@permrole'",
+"permission '@permission'" : "kebenaran akses '@permission'"
+
+}
