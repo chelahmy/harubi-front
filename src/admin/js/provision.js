@@ -6,7 +6,7 @@
 
 var go_provision = function () {
 	qserv("includes/provision.php", {model: 'system', action: 'provision'}, function (rst, extra) {
-		show_alert("System provisioning successful.", "success");
+		show_alert(t("System provisioning successful."), "success");
 	});
 }
 
@@ -14,6 +14,10 @@ $(window).on('load', function () {
 
 	load_logo();
 
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("system_provision", function () {
 		
 		$('#go_btn').click(function(){

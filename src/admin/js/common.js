@@ -7,4 +7,5 @@ var admin_server = "includes/admin.php";
 main_server = "includes/admin.php";
 loading_logo_path = "../logo/logo.png";
 page_logo_path = "../logo/logo.png";
+languages_path = "../languages/"
 

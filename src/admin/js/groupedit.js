@@ -40,6 +40,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_usergroups", function () {
 		
 		$(document).on("submit", "form", function(e){
@@ -53,12 +57,12 @@ $(window).on('load', function () {
 		
 		if (groupref.length > 0) {
 		
-			show_alert("WARNING: Group is private. Do not update or delete a group without the owner consent.", "warning");
+			show_alert(t("WARNING: Group is private. Do not update or delete a group without the owner consent."), "warning");
 
 			show_update_button();
 			show_delete_button();
 			$('#ownername').prop('readonly', true);
-			$('#owner_help_extra').text('Cannot change owner.');
+			$('#owner_help_extra').text(t('Cannot change owner.'));
 			
 			load_group(groupref);
 
@@ -70,12 +74,12 @@ $(window).on('load', function () {
 					input_groupname = new_groupname;
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				var delete_groupname = $("#name").val();
-				$("#delete_type").text("Group");
+				$("#delete_type").text(t("Group"));
 				$("#delete_details").text(delete_groupname);
 			});
 
@@ -86,7 +90,7 @@ $(window).on('load', function () {
 		else {
 			// new group
 			
-			show_alert("WARNING: Group is private. Do not create a group without the owner consent.", "warning");
+			show_alert(t("WARNING: Group is private. Do not create a group without the owner consent."), "warning");
 
 			show_create_button();
 			

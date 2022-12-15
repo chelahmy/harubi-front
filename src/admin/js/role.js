@@ -52,6 +52,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("list_roles", function () {
 	
 		show_page();

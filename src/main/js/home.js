@@ -22,6 +22,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	var signin_params = '?ref=1'; // with message: access denied
 	var ref = gup('ref');
 	
@@ -37,8 +41,8 @@ $(window).on('load', function () {
 		show_page();
 		load_signedin();
 		
-		add_home_menu_item("person", "Profile", "My profile.", "myprofile.html");
-		add_home_menu_item("people", "Groups", "My private user groups.", "mygroup.html");
+		add_home_menu_item("person", t("Profile"), t("My profile."), "myprofile.html");
+		add_home_menu_item("people", t("Groups"), t("My private user groups."), "mygroup.html");
 
 		$('#signout_btn').click(function(){
 			signout_user();

@@ -100,6 +100,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_own_members", function () {
 		
 		$(document).on("submit", "form", function(e){
@@ -126,7 +130,7 @@ $(window).on('load', function () {
 				show_delete_button();
 				
 				$('#name').prop('readonly', true);
-				$('#name_help_extra').text('Cannot change name.');
+				$('#name_help_extra').text(t('Cannot change name.'));
 				$("#name").val(username);
 
 				// delaying load member; expecting roles to finish loading first 
@@ -142,11 +146,11 @@ $(window).on('load', function () {
 						selected_role = input_rolename;
 					}
 					else
-						show_alert("No change", "info");
+						show_alert(t("No change"), "info");
 				});
 
 				$('#delete_btn').click(function(){
-					$("#delete_type").text("Member");
+					$("#delete_type").text(t("Member"));
 					$("#delete_details").text(username);
 				});
 
@@ -163,12 +167,12 @@ $(window).on('load', function () {
 					var input_name = $("#name").val();
 					
 					if (input_name.length <= 0)
-						show_alert("Name cannot be empty.");
+						show_alert(t("Name cannot be empty."));
 					else {
 						var input_role = get_checked_role();
 						
 						if (input_role.length <= 0)
-							show_alert("Please select a role.");
+							show_alert(t("Please select a role."));
 						else {
 							add_member(groupref, input_name, input_role);
 						}

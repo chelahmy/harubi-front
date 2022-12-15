@@ -28,7 +28,7 @@ var load_user = function () {
 			$("#email").val(r.email);
 			$("#language").val(r.language);
 			$("#rolename").text(r.rolename);
-			$("#membership").text("Member since" + " " + since_phrase(r.created_utc));
+			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
 			user.name = r.name;
 			user.email = r.email;
 			user.rolename = r.rolename;
@@ -46,6 +46,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_own_profile", function () {
 		
 		show_page();
@@ -60,15 +64,15 @@ $(window).on('load', function () {
 				var re_password = $("#re_password").val();
 				
 				if (password.length > 0 && password != re_password)
-					show_alert("Passwords mismatched", "warning");
+					show_alert(t("Passwords mismatched"), "warning");
 				else {
 					var email = $("#email").val();
 					var language = $("#language").val();
 					
 					if (email.length <= 0)
-						show_alert("Email cannot be empty", "warning");
+						show_alert(t("Email cannot be empty"), "warning");
 					else if (language.length <= 0)
-						show_alert("Language cannot be empty", "warning");
+						show_alert(t("Language cannot be empty"), "warning");
 					else
 						update_user(password, email, language);
 				}

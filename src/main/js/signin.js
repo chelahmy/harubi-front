@@ -19,15 +19,19 @@ $(window).on('load', function () {
 		return  false;
 	});
 
-	var ref = gup('ref');
-	
-	if (ref.length > 0) {
-		var refval = parseInt(ref);
-		
-		if (refval == 1)
-			show_alert("Access denied", "warning");
-	}
-	 
+	load_signedin(function (data) {
+		load_language(data.signedin_language, function () {
+			var ref = gup('ref');
+			
+			if (ref.length > 0) {
+				var refval = parseInt(ref);
+				
+				if (refval == 1)
+					show_alert(t("Access denied"), "warning");
+			}
+		});
+	});
+		 
 	$('#signin_btn').click(function(){
 		var name = $("#name").val();
 		var password = $("#password").val();
@@ -35,7 +39,7 @@ $(window).on('load', function () {
 		if (name.length > 0 && password.length > 0)
 			signin_user(name, password);
 		else
-			show_alert("Both name and password are required.", "warning");
+			show_alert(t("Both name and password are required."), "warning");
 	});
 		
 })

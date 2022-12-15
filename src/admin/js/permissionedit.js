@@ -33,6 +33,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_permissions", function () {
 		
 		show_page();
@@ -43,7 +47,7 @@ $(window).on('load', function () {
 		
 			var ele_editroles = $("<a>", {
 				"href" : "permrole.html?permname=" + permissionname,
-				"text" : "Edit roles"
+				"text" : t("Edit roles")
 			});
 
 			$("#editroles").html(ele_editroles.prop('outerHTML'));
@@ -61,12 +65,12 @@ $(window).on('load', function () {
 					permissionname = new_permissionname;
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				delete_permissionname = $("#name").val();
-				$("#delete_type").text("Permission");
+				$("#delete_type").text(t("Permission"));
 				$("#delete_details").text(delete_permissionname);
 			});
 

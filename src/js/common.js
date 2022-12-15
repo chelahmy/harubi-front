@@ -86,17 +86,17 @@ var since_phrase = function (ts) {
 	if (days > 365) {
 		var years = parseInt(days / 365);
 		if (years > 1)
-			since = years + " years ago";
+			since = t("@years years ago", {'@years' : years});
 		else
-			since = "1 year ago";
+			since = t("1 year ago");
 	}
 	else {
 		if (days > 1)
-			since = days + " days ago";
+			since = t("@days days ago", {'@days' : days});
 		else if (days == 1)
-			since = "yesterday";
+			since = t("yesterday");
 		else
-			since = "today";
+			since = t("today");
 	}
 	
 	return since;
@@ -177,7 +177,7 @@ var parse_response = function (resp) {
 		status: -1, 
 		data: {
 			error: -1, 
-			error_msg: "Server responded with unknown data format."
+			error_msg: t("Server responded with unknown data format.")
 		}
 	};	
 };
@@ -187,19 +187,19 @@ var show_resp_err = function (data) {
 	if ((typeof data !== 'undefined') && (typeof data.error_msg !== 'undefined')) {
 		if ((typeof data.logs !== 'undefined') && data.logs.length > 0) {
 			if ((typeof data.error_ext !== 'undefined') && data.error_ext.length > 0)
-				show_alert(data.error_msg + " - " + data.error_ext + ' : ' + data.logs, "danger");
+				show_alert(t(data.error_msg) + " - " + t(data.error_ext, data.error_ext_params) + ' : ' + data.logs, "danger");
 			else
-				show_alert(data.error_msg + " : " + data.logs, "danger");
+				show_alert(t(data.error_msg) + " : " + data.logs, "danger");
 		}
 		else {
 			if ((typeof data.error_ext !== 'undefined') && data.error_ext.length > 0)
-				show_alert(data.error_msg + " - " + data.error_ext, "danger");
+				show_alert(t(data.error_msg) + " - " + t(data.error_ext, data.error_ext_params), "danger");
 			else
-				show_alert(data.error_msg, "danger");
+				show_alert(t(data.error_msg), "danger");
 		}
 	}
 	else
-		show_alert("Unknown error", "danger");
+		show_alert(t("Unknown error"), "danger");
 };
 
 // Query server wrapper.
@@ -224,10 +224,10 @@ var qserv = function (path, args, on_ready, extra = '') {
 			}
 			
 			if (!handled) // system communication was ok but response was unexpected
-				show_alert("Unknown error", "danger");
+				show_alert(t("Unknown error"), "danger");
 		}
 		else
-			show_alert("System error", "danger");
+			show_alert(t("System error"), "danger");
 	});
 }
 
@@ -263,27 +263,27 @@ var alert_after = function (msg, extra = '') {
 
 // for qserv on_ready when creating is successful.
 var alert_after_create = function (rst = {}, extra = '') {
-	alert_after("Created", extra);
+	alert_after(t("Created"), extra);
 }
 
 // for qserv on_ready when updating is successful.
 var alert_after_update = function (rst = {}, extra = '') {
-	alert_after("Updated", extra);
+	alert_after(t("Updated"), extra);
 }
 
 // for qserv on_ready when deleting is successful.
 var alert_after_delete = function (rst = {}, extra = '') {
-	alert_after("Deleted", extra);
+	alert_after(t("Deleted"), extra);
 }
 
 // for qserv on_ready when adding is successful.
 var alert_after_add = function (rst = {}, extra = '') {
-	alert_after("Added", extra);
+	alert_after(t("Added"), extra);
 }
 
 // for qserv on_ready when removing is successful.
 var alert_after_remove = function (rst = {}, extra = '') {
-	alert_after("Removed", extra);
+	alert_after(t("Removed"), extra);
 }
 
 // Load signed-in data.
@@ -301,6 +301,24 @@ var load_signedin = function (on_ready) {
 		});
 }
 
+// Translate string
+var t = function (str, params) {
+	str = str.trim();
+	
+	if (str.length > 0) {
+		if (str in language_strings)
+			str = language_strings[str];
+	}
+	
+	if (typeof params === 'object') {
+		for (var p in params) {
+			str = str.replaceAll(p, params[p]);
+		}
+	}
+	
+	return str;	
+}
+
 // Translate all elements texts.
 var te = function () {
 	var title = $('title').text().trim();
@@ -310,7 +328,7 @@ var te = function () {
 	
 	var tnodes = getTextNodesIn($('body')[0]);
 	
-	$.each(tnodes , function(index, tn) { 
+	$.each(tnodes, function(index, tn) { 
 		var text = tn.nodeValue.trim();
 		if (text in language_strings)
 			tn.nodeValue = language_strings[text];
@@ -331,8 +349,12 @@ var te = function () {
 // And translate the current page.
 // And trigger on_ready() if specified.
 var load_language = function (lang, on_ready) {
-	if (lang == 'en') // default language
+	if (lang == 'en') { // default language
+		if (typeof on_ready === 'function')
+			on_ready();
+			
 		return;
+	}
 		
 	$.getJSON( languages_path + lang + '.json', function( data ) {
 		language = lang;

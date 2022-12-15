@@ -13,6 +13,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	var signin_params = '?ref=1'; // with message: access denied
 	var ref = gup('ref');
 	
@@ -27,11 +31,12 @@ $(window).on('load', function () {
 	
 		show_page();
 		
-		add_home_menu_item("person", "Users", "Users data and activities.", "user.html");
-		add_home_menu_item("people", "Groups", "Private user groups.", "group.html");
-		add_home_menu_item("incognito", "Roles", "Users roles including administrative and management roles.", "role.html");
-		add_home_menu_item("card-heading", "Permissions", "Access control by roles.", "permission.html");
-		add_home_menu_item("gear", "Preferences", "System preferences.", "preference.html");
+		add_home_menu_item("person", t("Users"), t("Users data and activities."), "user.html");
+		add_home_menu_item("people", t("Groups"), t("Private user groups."), "group.html");
+		add_home_menu_item("file-earmark-medical", t("Disease Cases"), t("Agriculture disease cases."), "../modules/agro-diseases/admin/disease-case.html");
+		add_home_menu_item("incognito", t("Roles"), t("Users roles including administrative and management roles."), "role.html");
+		add_home_menu_item("card-heading", t("Permissions"), t("Access control by roles."), "permission.html");
+		add_home_menu_item("gear", t("Preferences"), t("System preferences."), "preference.html");
 
 		$('#signout_btn').click(function(){
 			signout_user();

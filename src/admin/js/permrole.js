@@ -76,18 +76,22 @@ var strong = function (str) {
 
 var add_permrole = function (permname, rolename) {
 	qserv(admin_server, {model: 'permrole', action: 'add',
-		permname: permname, rolename: rolename}, alert_after_add, {msg: rolename + ' role added'});
+		permname: permname, rolename: rolename}, alert_after_add, {msg: t('@rolename role added', {'@rolename' : rolename})});
 }
 
 var remove_permrole = function (permname, rolename) {
 	qserv(admin_server, {model: 'permrole', action: 'remove',
-		permname: permname, rolename: rolename}, alert_after_remove, {msg: rolename + ' role removed'});
+		permname: permname, rolename: rolename}, alert_after_remove, {msg: t('@rolename role removed', {'@rolename' : rolename})});
 }
 
 $(window).on('load', function () {
 
 	load_logo();
 
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_permission_roles", function () {
 		
 		show_page();
@@ -129,7 +133,7 @@ $(window).on('load', function () {
 				});
 				
 				if (!changed)
-					show_alert('No changes', 'info');
+					show_alert(t('No changes'), 'info');
 					
 				checked_roles = new_checked_roles;
 				

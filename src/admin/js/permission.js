@@ -15,7 +15,7 @@ var append_permission = function (name, roles) {
 
 	var ele_editroles = $("<a>", {
 		"href" : "permrole.html?permname=" + name,
-		"text" : '+/- roles' 
+		"text" : t('+/- roles')
 	});
 
 	var ele_permission = $("<tr>", {
@@ -57,6 +57,10 @@ var load_permissions = function (restart, search = '') {
 $(window).on('load', function () {
 
 	load_logo();
+	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
 	
 	when_allowed("list_permissions", function () {
 	

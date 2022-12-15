@@ -61,6 +61,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("list_users", function () {
 	
 		$(document).on("submit", "form", function(e){

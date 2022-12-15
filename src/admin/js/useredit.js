@@ -87,7 +87,7 @@ var load_user = function (name) {
 			$("#name").val(r.name);
 			$("#email").val(r.email);
 			$("#role_" + r.rolename).prop('checked', true);
-			$("#membership").text("Member since" + " " + since_phrase(r.created_utc));
+			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
 			user.name = r.name;
 			user.email = r.email;
 			user.rolename = r.rolename;
@@ -122,6 +122,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_users", function () {
 		
 		show_page();
@@ -136,8 +140,8 @@ $(window).on('load', function () {
 			show_update_button();
 			show_delete_button();
 			$('#name').prop('readonly', true);
-			$('#name_help_extra').text('This field cannot be changed.');
-			$('#password_help_extra').text('Leave this field empty to keep the existing password.');
+			$('#name_help_extra').text(t('This cannot be changed.'));
+			$('#password_help_extra').text(t('Leave this field empty to keep the existing password.'));
 			
 			load_user_after_roles(username);
 
@@ -149,20 +153,20 @@ $(window).on('load', function () {
 					var rolename = get_selected_role();
 					
 					if (email.length <= 0)
-						show_alert("Email cannot be empty", "warning");
+						show_alert(t("Email cannot be empty"), "warning");
 					else if (rolename.length <= 0)
-						show_alert("Please select a role", "warning");
+						show_alert(t("Please select a role"), "warning");
 					else {
 						update_user(name, password, email, rolename);
 					}			
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				delete_username = $("#name").val();
-				$("#delete_type").text("user");
+				$("#delete_type").text(t("User"));
 				$("#delete_details").text(delete_username);
 			});
 
@@ -183,13 +187,13 @@ $(window).on('load', function () {
 				var rolename = get_selected_role();
 				
 				if (name.length <= 0)
-					show_alert("Name cannot be empty", "warning");
+					show_alert(t("Name cannot be empty"), "warning");
 				else if (password.length <= 0)
-					show_alert("Password cannot be empty", "warning");
+					show_alert(t("Password cannot be empty"), "warning");
 				else if (email.length <= 0)
-					show_alert("Email cannot be empty", "warning");
+					show_alert(t("Email cannot be empty"), "warning");
 				else if (rolename.length <= 0)
-					show_alert("Please select a role", "warning");
+					show_alert(t("Please select a role"), "warning");
 				else {
 					create_user(name, password, email, rolename);
 				}			

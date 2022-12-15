@@ -20,7 +20,7 @@ var append_group = function (name, ref, owner, created_utc) {
 
 	var ele_members = $("<a>", {
 		"href" : "mymember.html?groupref=" + ref,
-		"text" : "members" 
+		"text" : t("members") 
 	});
 
 	var ele_group = $("<tr>", {
@@ -66,6 +66,10 @@ var load_groups = function (restart, type = 0, search = '', order_by = 'name', s
 $(window).on('load', function () {
 
 	load_logo();
+	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
 	
 	when_allowed("list_own_groups", function () {
 	

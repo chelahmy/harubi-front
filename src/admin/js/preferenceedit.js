@@ -36,6 +36,10 @@ $(window).on('load', function () {
 
 	load_logo();
 
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_preferences", function () {
 		
 		show_page();
@@ -47,7 +51,7 @@ $(window).on('load', function () {
 			show_update_button();
 			show_delete_button();
 			$('#name').prop('readonly', true);
-			$('#name_help_extra').text('This field cannot be changed.');
+			$('#name_help_extra').text(t('This cannot be changed.'));
 			load_preference(preference_name);
 
 			$('#update_btn').click(function(){
@@ -58,12 +62,12 @@ $(window).on('load', function () {
 					preference_value = new_preference_value;
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				delete_preference_name = $("#name").val();
-				$("#delete_type").text("Preference");
+				$("#delete_type").text(t("Preference"));
 				$("#delete_details").text(delete_preference_name);
 			});
 

@@ -80,6 +80,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("list_members", function () {
 	
 		$(document).on("submit", "form", function(e){
@@ -93,7 +97,7 @@ $(window).on('load', function () {
 		
 		if (groupref.length > 0) {
 				
-			show_alert("WARNING: Group is private.", "warning");
+			show_alert(t("WARNING: Group is private."), "warning");
 			
 			$('#addmember').prop('href', 'memberedit.html?groupref=' + groupref);
 

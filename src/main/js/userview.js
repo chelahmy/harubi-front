@@ -9,7 +9,7 @@ var load_user_profile = function (name) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
 			$('#username').text(r.name);
-			$("#membership").text("Member since" + " " + since_phrase(r.created_utc));
+			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
 		}
 	});
 }
@@ -17,6 +17,10 @@ var load_user_profile = function (name) {
 $(window).on('load', function () {
 
 	load_logo();
+	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
 	
 	when_allowed("view_user_profile", function () {
 		

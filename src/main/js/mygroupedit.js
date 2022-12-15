@@ -39,6 +39,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_own_usergroups", function () {
 		
 		$(document).on("submit", "form", function(e){
@@ -55,7 +59,7 @@ $(window).on('load', function () {
 			show_update_button();
 			show_delete_button();
 			$('#ownername').prop('readonly', true);
-			$('#owner_help_extra').text('Cannot change owner.');
+			$('#owner_help_extra').text(t('Cannot change owner.'));
 			
 			load_group(groupref);
 
@@ -67,12 +71,12 @@ $(window).on('load', function () {
 					input_groupname = new_groupname;
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				var delete_groupname = $("#name").val();
-				$("#delete_type").text("Group");
+				$("#delete_type").text(t("Group"));
 				$("#delete_details").text(delete_groupname);
 			});
 

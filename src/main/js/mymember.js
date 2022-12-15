@@ -81,7 +81,7 @@ var load_group = function (ref) {
 				"href" : 'mymemberedit.html?groupref=' + ref,
 				"role" : "button",
 				"id" : "addmember",
-				"text" : "Add member"
+				"text" : t("Add member")
 			});
 
 			if (group_owner || group_admin)
@@ -102,6 +102,10 @@ var load_group = function (ref) {
 $(window).on('load', function () {
 
 	load_logo();
+	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
 	
 	when_allowed("list_own_members", function () {
 	

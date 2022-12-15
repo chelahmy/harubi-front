@@ -40,6 +40,10 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 	when_allowed("edit_roles", function () {
 		
 		show_page();
@@ -62,12 +66,12 @@ $(window).on('load', function () {
 					premium = new_premium;
 				}
 				else
-					show_alert("No change", "info");
+					show_alert(t("No change"), "info");
 			});
 
 			$('#delete_btn').click(function(){
 				delete_rolename = $("#name").val();
-				$("#delete_type").text("Role");
+				$("#delete_type").text(t("Role"));
 				$("#delete_details").text(delete_rolename);
 			});
 
