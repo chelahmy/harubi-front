@@ -43,7 +43,13 @@
 
 <script>
 $(window).on('load', function () {
+
 	load_logo();
+
+	load_signedin(function (data) {
+		load_language(data.signedin_language);
+	});
+	
 })
 </script>
 
