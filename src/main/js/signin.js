@@ -27,7 +27,7 @@ $(window).on('load', function () {
 				var refval = parseInt(ref);
 				
 				if (refval == 1)
-					show_alert(t("Access denied"), "warning");
+					show_alert(t("Access denied."), "warning");
 			}
 		});
 	});
