@@ -7,7 +7,7 @@ Harubi itself does not need Harubi Front.
 Harubi Front comes with a user-based application with access control by roles. It also has basic user groups. The
 application can be extended. Or, totally new applications can be created using the framework. The built-in application
 can be made as an example. There are various reusable components in the built-in application such as table listing and
-sorting, searching and filtering, and client-side access control.
+sorting, searching and filtering, and client-side access control. It is also translatable. It comes with a Malay translation.
 
 The framework is page-based. Every page is based on a pair of a HTML and a Javascript files. A breadcrumb can be set
 to navigate from page to page. Communication with a Harubi server is asynchronous. Hence, a page must be made ready with
@@ -23,7 +23,7 @@ SQL scripting may not be necessary. If you are using table joins then you should
 
 ## Installation
 
-You must have access to your host which must already been installed with PHP and MySQL.
+You must have access to your webhost which must already been installed with PHP and MySQL.
 
 - Copy everything from the **src** folder into your host.
 - Create a MySQL database and import *includes/harubi-front.sql*.
@@ -44,3 +44,10 @@ file, there is a *load_user()* function which requests the server with parameter
 The corresponding server handler is the *beat('user', 'read_own', function () {})* call in the */main/includes/main.php* file.
   
 The best approach is to copy and paste the codes, and make adjustment from there.
+
+In *My Profile* you can change language. English (en) is the default. You can choose Malay (ms) by entering *ms* into the *Language*
+field. Take a look at the *languages* folder. There is a *ms.json* file which contains Malay translation strings. You can use it as
+an example to create translations for other languages. Refer to [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag)
+for naming your language file.
+
+
