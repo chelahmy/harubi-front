@@ -1,5 +1,5 @@
 {
-	"appname" : "agro-diseases",
+	"appname" : "harubi-front",
 	"language" : "en",
 	
 	"session" : {
