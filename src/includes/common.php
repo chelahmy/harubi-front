@@ -450,6 +450,20 @@ function get_session_timeout() {
 	return 0; // no timeout
 }
 
+// Sign out the current user
+function sign_out() {
+	set_session('uid', 0);
+	unset_session('uid');
+	set_session('admin_uid', 0);
+	unset_session('admin_uid');
+	set_session('uname', '');
+	unset_session('uname');
+	set_session('uroleid', 0);
+	unset_session('uroleid');
+	unset_session('last_accessed');
+	unset_session('language');
+}
+
 function is_signedin($uid = 0)
 {
 	if (!isset_session('uid') || get_session('uid') <= 0)
@@ -467,16 +481,7 @@ function is_signedin($uid = 0)
 		if ($duration > $timeout) // timed out
 		{
 			// sign out user
-			set_session('uid', 0);
-			unset_session('uid');
-			set_session('admin_uid', 0);
-			unset_session('admin_uid');
-			set_session('uname', '');
-			unset_session('uname');
-			set_session('uroleid', 0);
-			unset_session('uroleid');
-			unset_session('last_accessed');
-			unset_session('language');
+			sign_out();
 			
 			return false; 
 		}
@@ -664,6 +669,8 @@ function has_permission($permname) {
 		}
 	}
 
+	sign_out();
+	
 	return false;
 }
 
@@ -845,17 +852,8 @@ beat('user', 'signin', function ($name, $password)
 
 beat('user', 'signout', function ()
 {
-	set_session('uid', 0);
-	unset_session('uid');
-	set_session('uname', '');
-	unset_session('uname');
-	set_session('admin_uid', 0);
-	unset_session('admin_uid');
-	set_session('uroleid', 0);
-	unset_session('uroleid');
-	unset_session('last_accessed');
-	unset_session('language');
-			
+	sign_out();
+				
 	return array(
 		'status' => 1,
 	);
