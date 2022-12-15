@@ -38,8 +38,13 @@ var load_user = function () {
 }
 
 var update_user = function (password, email, language) {
-	qserv(main_server, {model: 'user', action: 'update_own',
-		password: password, email: email, language: language}, alert_after_update);
+	qserv(main_server, {model: 'user', action: 'update_own', // alert_after_update
+		password: password, email: email, language: language}, function (rst, extra) {
+			if (language != user.language)
+				window.location.reload();
+				
+			alert_after_update(rst, extra);
+		}); 
 }
 
 $(window).on('load', function () {
