@@ -153,15 +153,15 @@ $(window).on('load', function () {
 					var rolename = get_selected_role();
 					
 					if (email.length <= 0)
-						show_alert(t("Email cannot be empty"), "warning");
+						show_alert(t("Email cannot be empty."), "warning");
 					else if (rolename.length <= 0)
-						show_alert(t("Please select a role"), "warning");
+						show_alert(t("Please select a role."), "warning");
 					else {
 						update_user(name, password, email, rolename);
 					}			
 				}
 				else
-					show_alert(t("No change"), "info");
+					show_alert(t("Nothing changed."), "info");
 			});
 
 			$('#delete_btn').click(function(){
@@ -187,13 +187,13 @@ $(window).on('load', function () {
 				var rolename = get_selected_role();
 				
 				if (name.length <= 0)
-					show_alert(t("Name cannot be empty"), "warning");
+					show_alert(t("Name cannot be empty."), "warning");
 				else if (password.length <= 0)
-					show_alert(t("Password cannot be empty"), "warning");
+					show_alert(t("Password cannot be empty."), "warning");
 				else if (email.length <= 0)
-					show_alert(t("Email cannot be empty"), "warning");
+					show_alert(t("Email cannot be empty."), "warning");
 				else if (rolename.length <= 0)
-					show_alert(t("Please select a role"), "warning");
+					show_alert(t("Please select a role."), "warning");
 				else {
 					create_user(name, password, email, rolename);
 				}			

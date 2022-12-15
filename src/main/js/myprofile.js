@@ -69,21 +69,21 @@ $(window).on('load', function () {
 				var re_password = $("#re_password").val();
 				
 				if (password.length > 0 && password != re_password)
-					show_alert(t("Passwords mismatched"), "warning");
+					show_alert(t("Passwords mismatched."), "warning");
 				else {
 					var email = $("#email").val();
 					var language = $("#language").val();
 					
 					if (email.length <= 0)
-						show_alert(t("Email cannot be empty"), "warning");
+						show_alert(t("Email cannot be empty."), "warning");
 					else if (language.length <= 0)
-						show_alert(t("Language cannot be empty"), "warning");
+						show_alert(t("Language cannot be empty."), "warning");
 					else
 						update_user(password, email, language);
 				}
 			}
 			else
-				show_alert("No change", "info");
+				show_alert("Nothing changed.", "info");
 		});
 	});
 		

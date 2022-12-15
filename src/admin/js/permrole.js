@@ -133,7 +133,7 @@ $(window).on('load', function () {
 				});
 				
 				if (!changed)
-					show_alert(t('No changes'), 'info');
+					show_alert(t('Nothing changed.'), 'info');
 					
 				checked_roles = new_checked_roles;
 				

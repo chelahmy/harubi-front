@@ -66,7 +66,7 @@ $(window).on('load', function () {
 					premium = new_premium;
 				}
 				else
-					show_alert(t("No change"), "info");
+					show_alert(t("Nothing changed."), "info");
 			});
 
 			$('#delete_btn').click(function(){

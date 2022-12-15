@@ -71,7 +71,7 @@ $(window).on('load', function () {
 					input_groupname = new_groupname;
 				}
 				else
-					show_alert(t("No change"), "info");
+					show_alert(t("Nothing changed."), "info");
 			});
 
 			$('#delete_btn').click(function(){

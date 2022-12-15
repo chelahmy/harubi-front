@@ -62,7 +62,7 @@ $(window).on('load', function () {
 					preference_value = new_preference_value;
 				}
 				else
-					show_alert(t("No change"), "info");
+					show_alert(t("Nothing changed."), "info");
 			});
 
 			$('#delete_btn').click(function(){
