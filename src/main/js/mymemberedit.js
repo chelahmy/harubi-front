@@ -130,7 +130,7 @@ $(window).on('load', function () {
 				show_delete_button();
 				
 				$('#name').prop('readonly', true);
-				$('#name_help_extra').text(t('Cannot change name.'));
+				$('#name_help_extra').text(t('This cannot be changed.'));
 				$("#name").val(username);
 
 				// delaying load member; expecting roles to finish loading first 
