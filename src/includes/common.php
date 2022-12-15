@@ -382,7 +382,7 @@ function get_language() {
 	// Try to get it from preference
 	$lang = get_preference('language');
 	
-	if (strlen($lang) > 0) {
+	if (strlen($lang) > 0)
 		return $lang;
 	
 	// Otherwise, get it from settings
