@@ -46,26 +46,26 @@ $(window).on('load', function () {
 	load_logo();
 	
 	load_signedin(function (data) {
-		load_language(data.signedin_language);
-	});
-	
-	var msg = ['Error', 'Access Denied'];
-	var id = gup('id');
-	
-	if (id.length > 0) {
-		if (isNaN(id))
-			$('#error_msg').text(id);
-		else {
-			id = parseInt(id);
+		load_language(data.signedin_language, function () {
+			var msg = [t('Error'), t('Access Denied')];
+			var id = gup('id');
 			
-			if (isNaN(id) || id < 0 || id >= msg.length)
-				id = 0;
-				
-			$('#error_msg').text(msg[id]);
-		}
-	}
-	else
-		$('#error_msg').text(msg[0]);
+			if (id.length > 0) {
+				if (isNaN(id))
+					$('#error_msg').text(id);
+				else {
+					id = parseInt(id);
+					
+					if (isNaN(id) || id < 0 || id >= msg.length)
+						id = 0;
+						
+					$('#error_msg').text(msg[id]);
+				}
+			}
+			else
+				$('#error_msg').text(msg[0]);
+		});
+	});
 })
 </script>
 	
