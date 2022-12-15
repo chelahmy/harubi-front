@@ -21,6 +21,7 @@
 "Groups I'm in including my own" : "Kumpulan saya termasuk yang saya miliki",
 "Groups" : "Kumpulan",
 "Home" : "Laman Utama",
+"Language" : "Bahasa",
 "Last Signed-in" : "Daftar Masuk Terakhir",
 "Load more" : "Muatnaik lagi",
 "Loading..." : "Sedang dimuatnaik...",
@@ -91,10 +92,11 @@
 "Yes" : "Ya",
 "Your email address." : "Alamat email anda.",
 "Your new password. Leave this field empty to keep the existing password." : "Katalaluan baharu anda. Biarkan ruang ini kosong untuk mengekalkan katalaluan sedia ada.",
+"Your preferred language." : "Bahasa pilihan anda.",
 "Your user name. This cannot be changed." : "Nama pengguna anda, Ini tidak boleh diubah.",
 
 
-"Disease Cases" : "Kes-kes Penyakit",
+"Disease Cases" : "Kes Penyakit",
 "Search Problems & Solutions" : "Capai Masalah & Penyelesaian",
 "New Disease Case" : "Kes Penyakit Baru",
 "Problems" : "Masalah",

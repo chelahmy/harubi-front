@@ -378,18 +378,38 @@ function set_preference($name, $value) {
 	return $id;	
 }
 
+function get_language() {
+	// Try to get it from preference
+	$lang = get_preference('language');
+	
+	if (strlen($lang) > 0) {
+		return $lang;
+	
+	// Otherwise, get it from settings
+	if (isset($harubi_settings)) {
+		if (isset($harubi_settings['language'])) {
+			$lang = $harubi_settings['language'];
+			if (strlen($lang) > 0)
+				return $lang;
+		}
+	}
+	
+	return 'en'; // default
+}
+
 function get_page_size() {
 	// Try to get it from preference
 	$ps = intval(get_preference('page_size'));
 	
+	if ($ps > 0)
+		return $ps;
+		
 	// Otherwise, get it from settings
-	if ($ps <= 0) {
-		if (isset($harubi_settings)) {
-			if (isset($harubi_settings['page_size'])) {
-				$psz = intval($harubi_settings['page_size']);
-				if ($psz > 0)
-					return $psz;
-			}
+	if (isset($harubi_settings)) {
+		if (isset($harubi_settings['page_size'])) {
+			$psz = intval($harubi_settings['page_size']);
+			if ($psz > 0)
+				return $psz;
 		}
 	}
 	
@@ -456,6 +476,7 @@ function is_signedin($uid = 0)
 			set_session('uroleid', 0);
 			unset_session('uroleid');
 			unset_session('last_accessed');
+			unset_session('language');
 			
 			return false; 
 		}
@@ -476,7 +497,7 @@ function signedin_language()
 	if (isset_session('language'))
 		return get_session('language');
 		
-	return 'en'; // default language
+	return get_language(); // default language
 }
 
 function signedin_uid()
@@ -703,6 +724,7 @@ beat('user', 'signup', function ($name, $password, $email)
 			'password' => $hash,
 			'email' => $email,
 			'roleid' => get_new_user_roleid(),
+			'language' => get_language(),
 			'valid_thru' => 0,
 			'signins' => 0,
 			'last_signedin_utc' => 0,
@@ -802,11 +824,11 @@ beat('user', 'signin', function ($name, $password)
 				if (inc_user_signins($uid, $all_signins))
 					$data['all_signins'] = $data['all_signins'] + 1;
 				
-				set_session('language', 'en');
 				set_session('uid', $uid);
 				set_session('uname', $name);
 				set_session('uroleid', $uroleid);
 				set_session('last_accessed', time());
+				set_session('language', $records[0]['language']);
 				
 				return array(
 					'status' => 1,
@@ -832,6 +854,7 @@ beat('user', 'signout', function ()
 	set_session('uroleid', 0);
 	unset_session('uroleid');
 	unset_session('last_accessed');
+	unset_session('language');
 			
 	return array(
 		'status' => 1,

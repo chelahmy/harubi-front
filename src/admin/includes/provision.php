@@ -15,6 +15,7 @@ $preferences = array(
 	'page_size' => '25',
 	'session_max_signins_per_week' => '30',
 	'session_timeout' => '7200',
+	'language' => get_language()
 );
 
 $roles = array(

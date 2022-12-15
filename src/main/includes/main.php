@@ -62,7 +62,7 @@ beat('user', 'read_own', function ()
 	);
 });
 
-beat('user', 'update_own', function ($password, $email)
+beat('user', 'update_own', function ($password, $email, $language)
 {
 	if (!has_permission('user_update_own'))
 		return error_pack(err_access_denied);
@@ -76,6 +76,7 @@ beat('user', 'update_own', function ($password, $email)
 		if (!update('user', array(
 			'password' => $hash,
 			'email' => $email,
+			'language' => $language,
 			'updated_utc' => $now
 			), $where))
 			return error_pack(err_update_failed);
@@ -83,10 +84,13 @@ beat('user', 'update_own', function ($password, $email)
 	else {
 		if (!update('user', array(
 			'email' => $email,
+			'language' => $language,
 			'updated_utc' => $now
 			), $where))
 			return error_pack(err_update_failed);
 	}
+	
+	set_session('language', $language);
 	
 	return array(
 		'status' => 1

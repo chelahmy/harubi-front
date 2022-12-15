@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 11, 2022 at 01:22 AM
+-- Generation Time: Dec 15, 2022 at 10:11 AM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -111,6 +111,7 @@ CREATE TABLE `user` (
   `password` varchar(60) NOT NULL,
   `email` varchar(80) NOT NULL,
   `roleid` int NOT NULL,
+  `language` varchar(8) NOT NULL,
   `valid_thru` bigint NOT NULL,
   `signins` int NOT NULL,
   `last_signedin_utc` bigint NOT NULL,

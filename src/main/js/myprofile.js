@@ -3,7 +3,7 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 7 December 2022
 
-var user = {name:'',email:'',rolename:''};
+var user = {name:'',email:'',rolename:'',language:''};
 
 var input_has_changed = function () {
 	if ($("#email").val() != user.email)
@@ -12,6 +12,9 @@ var input_has_changed = function () {
 	if ($("#password").val().length > 0)
 		return true;
 		
+	if ($("#language").val() != user.language)
+		return true;
+
 	return false;
 }
 
@@ -23,18 +26,20 @@ var load_user = function () {
 			$("#username").text(r.name);
 			$("#name").val(r.name);
 			$("#email").val(r.email);
+			$("#language").val(r.language);
 			$("#rolename").text(r.rolename);
 			$("#membership").text("Member since" + " " + since_phrase(r.created_utc));
 			user.name = r.name;
 			user.email = r.email;
 			user.rolename = r.rolename;
+			user.language = r.language;
 		}
 	});
 }
 
-var update_user = function (password, email) {
+var update_user = function (password, email, language) {
 	qserv(main_server, {model: 'user', action: 'update_own',
-		password: password, email:email}, alert_after_update);
+		password: password, email: email, language: language}, alert_after_update);
 }
 
 $(window).on('load', function () {
@@ -58,11 +63,14 @@ $(window).on('load', function () {
 					show_alert("Passwords mismatched", "warning");
 				else {
 					var email = $("#email").val();
+					var language = $("#language").val();
 					
 					if (email.length <= 0)
 						show_alert("Email cannot be empty", "warning");
+					else if (language.length <= 0)
+						show_alert("Language cannot be empty", "warning");
 					else
-						update_user(password, email);
+						update_user(password, email, language);
 				}
 			}
 			else

@@ -99,6 +99,7 @@ beat('user', 'create', function ($name, $password, $email, $rolename)
 			'password' => $hash,
 			'email' => $email,
 			'roleid' => get_roleid_by_name($rolename),
+			'language' => get_language(),
 			'valid_thru' => 0,
 			'signins' => 0,
 			'last_signedin_utc' => 0,

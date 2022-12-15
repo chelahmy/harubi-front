@@ -1,5 +1,6 @@
 {
-	"appname" : "harubi-front",
+	"appname" : "agro-diseases",
+	"language" : "en",
 	
 	"session" : {
 		"timeout" : 7200,
@@ -12,9 +13,9 @@
 	
     "mysql" : {
         "hostname" : "localhost",
-        "username" : "",
-        "password" : "",
-        "database" : "harubi-front",
+        "username" : "root",
+        "password" : "asus",
+        "database" : "agro-diseases",
         "prefix"   : ""
     },
 
@@ -25,6 +26,7 @@
             "password" : "string",
             "email" : "string",
             "roleid" : "int",
+            "language" : "string",
             "valid_thru" : "int",
             "signins" : "int",
             "last_signedin_utc" : "int",
@@ -76,6 +78,16 @@
             "id" : "int",
             "name" : "string",
             "value" : "string"
+        },
+        "disease_case" : {
+            "id" : "int",
+            "ref" : "string",
+            "name" : "string",
+            "problem" : "string",
+            "solution" : "string",
+            "reported_by" : "int",
+            "created_utc" : "int",
+            "updated_utc" : "int"
         }
     }
 }
