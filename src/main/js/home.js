@@ -16,6 +16,25 @@ $(window).on('load', function () {
 
 	load_logo();
 	
+	load_preferences('site', function (data) {
+		if (data.count > 0) {
+			var r = data.records;
+			for (var i in r) {
+				if (r.hasOwnProperty(i)) {
+					var name = r[i].name;
+					var value = r[i].value;
+					if (name == 'site_title') {
+						$('title').text(t(value));
+						$('#site-title').text(t(value));
+					}
+					else if (name == 'site_description') {
+						$('meta[name="description"]').attr('content', t(value));
+					}
+				}
+			}
+		}
+	});
+	
 	load_signedin(function (data) {
 		load_language(data.signedin_language);
 		is_signedin = data.is_signedin;

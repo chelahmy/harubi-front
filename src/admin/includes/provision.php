@@ -12,6 +12,8 @@ $superuser_password = 'Admin1234!';
 
 // Initial preferences
 $preferences = array(
+	'site_title' => 'Harubi Front',
+	'site_description' => 'Harubi Front home page.',
 	'new_user_role' => 'member',
 	'page_size' => '25',
 	'session_max_signins_per_week' => '30',

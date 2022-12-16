@@ -6,7 +6,7 @@
 	<meta name="description" content="Harubi Front home page">
 	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
 	
-	<title>Harubi Front</title>    
+	<title>Harubi Front</title>
 
 	<link rel="shortcut icon" href="favicon.ico">
 	<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -27,7 +27,7 @@
 <section class="py-5 container">
 	<div class="px-4 py-5 my-5 text-center">
 		<img class="d-block mx-auto mb-4" src="logo/logo.png" alt="logo" id="page_logo">
-		<h1 class="display-5 fw-bold">Harubi Front</h1>
+		<h1 class="display-5 fw-bold" id="site-title">Harubi Front</h1>
 		<h2 class="display-5">Welcome</h2>
 		<p><a href="admin/index.html">Administration</a></p>
 		<p><a href="admin/provision.html">Provisioning</a></p>
@@ -46,6 +46,25 @@ $(window).on('load', function () {
 
 	load_logo();
 
+	load_preferences('site', function (data) {
+		if (data.count > 0) {
+			var r = data.records;
+			for (var i in r) {
+				if (r.hasOwnProperty(i)) {
+					var name = r[i].name;
+					var value = r[i].value;
+					if (name == 'site_title') {
+						$('title').text(t(value));
+						$('#site-title').text(t(value));
+					}
+					else if (name == 'site_description') {
+						$('meta[name="description"]').attr('content', t(value));
+					}
+				}
+			}
+		}
+	});
+	
 	load_signedin(function (data) {
 		load_language(data.signedin_language);
 	});

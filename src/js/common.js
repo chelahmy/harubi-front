@@ -521,5 +521,14 @@ var load_home_menu = function (name) {
 	});
 }
 
+// Load preferences with name starts with *name*.
+// And call on_ready(data) when the data is ready.
+var load_preferences = function (name, on_ready) {
+	if (typeof on_ready === 'function')
+		qserv(main_server, {model: 'preference', action: 'read_starts_with',
+			name: name}, function(rst, extra) {
+			on_ready(rst.data);
+		});
+}
 
 
