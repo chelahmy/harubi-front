@@ -19,13 +19,13 @@ $preferences = array(
 	'session_max_signins_per_week' => '30',
 	'session_timeout' => '7200',
 	'language' => get_language(),
-	'home_admin_menu_item_1' => '{"i":"person","t":"Users","d":"Users data and activities.","u":"user.html"}',
-	'home_admin_menu_item_2' => '{"i":"people","t":"Groups","d":"Private user groups.","u":"group.html"}',
-	'home_admin_menu_item_3' => '{"i":"incognito","t":"Roles","d":"Users roles including administrative and management roles.","u":"role.html"}',
-	'home_admin_menu_item_4' => '{"i":"card-heading","t":"Permissions","d":"Access control by roles.","u":"permission.html"}',
-	'home_admin_menu_item_5' => '{"i":"gear","t":"Preferences","d":"System preferences.","u":"preference.html"}',
-	'home_main_menu_item_1' => '{"i":"person","t":"Profile","d":"My profile.","u":"myprofile.html"}',
-	'home_main_menu_item_2' => '{"i":"people","t":"Groups","d":"My private user groups.","u":"mygroup.html"}',
+	'home_admin_menu_item_1' => '{"w":1,"i":"person","t":"Users","d":"Users data and activities.","u":"user.html"}',
+	'home_admin_menu_item_2' => '{"w":2,"i":"people","t":"Groups","d":"Private user groups.","u":"group.html"}',
+	'home_admin_menu_item_3' => '{"w":3,"i":"incognito","t":"Roles","d":"Users roles including administrative and management roles.","u":"role.html"}',
+	'home_admin_menu_item_4' => '{"w":4,"i":"card-heading","t":"Permissions","d":"Access control by roles.","u":"permission.html"}',
+	'home_admin_menu_item_5' => '{"w":5,"i":"gear","t":"Preferences","d":"System preferences.","u":"preference.html"}',
+	'home_main_menu_item_1' => '{"w":1,"i":"person","t":"Profile","d":"My profile.","u":"myprofile.html"}',
+	'home_main_menu_item_2' => '{"w":2,"i":"people","t":"Groups","d":"My private user groups.","u":"mygroup.html"}',
 );
 
 $roles = array(
