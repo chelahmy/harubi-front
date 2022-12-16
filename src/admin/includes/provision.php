@@ -10,12 +10,20 @@ require_once "../../includes/common.php";
 $superuser_name = 'admin';
 $superuser_password = 'Admin1234!';
 
+// Initial preferences
 $preferences = array(
 	'new_user_role' => 'member',
 	'page_size' => '25',
 	'session_max_signins_per_week' => '30',
 	'session_timeout' => '7200',
-	'language' => get_language()
+	'language' => get_language(),
+	'home_admin_menu_item_1' => '{"i":"person","t":"Users","d":"Users data and activities.","u":"user.html"}',
+	'home_admin_menu_item_2' => '{"i":"people","t":"Groups","d":"Private user groups.","u":"group.html"}',
+	'home_admin_menu_item_3' => '{"i":"incognito","t":"Roles","d":"Users roles including administrative and management roles.","u":"role.html"}',
+	'home_admin_menu_item_4' => '{"i":"card-heading","t":"Permissions","d":"Access control by roles.","u":"permission.html"}',
+	'home_admin_menu_item_5' => '{"i":"gear","t":"Preferences","d":"System preferences.","u":"preference.html"}',
+	'home_main_menu_item_1' => '{"i":"person","t":"Profile","d":"My profile.","u":"myprofile.html"}',
+	'home_main_menu_item_2' => '{"i":"people","t":"Groups","d":"My private user groups.","u":"mygroup.html"}',
 );
 
 $roles = array(
@@ -64,6 +72,7 @@ $permissions = array(
 	'preference_delete' => array('administrator'),
 	'preference_list' => array('administrator'),
 	'preference_read' => array('administrator'),
+	'preference_read_starts_with' => array('administrator', 'member'),
 	'preference_update' => array('administrator'),
 	'role_create' => array('administrator'),
 	'role_delete' => array('administrator'),
@@ -132,11 +141,15 @@ beat('system', 'provision', function ()
 	$err_ext_params = array();
 	
 	foreach ($preferences as $preference => $value) {
-		$prefid = set_preference($preference, $value);
-		
-		if ($prefid <= 0) {
-			$err_ext[] = "preference '@preference'";
-			$err_ext_params[] = array('@preference' => $preference);
+		$v = get_preference($preference);
+
+		if (strlen($v) <= 0) { // set only when it is new
+			$prefid = set_preference($preference, $value);
+			
+			if ($prefid <= 0) {
+				$err_ext[] = "preference '@preference'";
+				$err_ext_params[] = array('@preference' => $preference);
+			}
 		}
 	}
 	

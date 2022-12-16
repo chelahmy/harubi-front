@@ -171,7 +171,7 @@ var parse_response = function (resp) {
 	try {
 		return JSON.parse(resp);
 	} catch (e) {
-		// warning_dialog("Server: " + resp);
+		// show_alert("Server: " + resp, 'warning');
 	}
 	return {
 		status: -1, 
@@ -296,8 +296,7 @@ var alert_after_remove = function (rst = {}, extra = '') {
 var load_signedin = function (on_ready) {
 	if (typeof on_ready === 'function')
 		qserv(main_server, {model: 'system', action: 'signedin'}, function(rst, extra) {
-			if (typeof on_ready === 'function')
-				on_ready(rst.data);
+			on_ready(rst.data);
 		});
 }
 
@@ -501,7 +500,26 @@ var add_home_menu_item = function (icon, title, description, url) {
 	$("#home_menu").append(ele_col);
 }
 
-
+// Load home menu from preferences.
+// Standard *name* are *admin* and *home*.
+var load_home_menu = function (name) {
+	var pref = "home_" + name + "_menu_item_";
+	qserv(main_server, {model: 'preference', action: 'read_starts_with',
+		name: pref}, function(rst, extra) {
+			var r = rst.data.records;
+			for (var i in r) {
+				if (r.hasOwnProperty(i)) {
+					var pval = r[i].value;
+					try {
+						var pobj = JSON.parse(pval);
+						add_home_menu_item(pobj.i, t(pobj.t), t(pobj.d), pobj.u);
+					} catch (e) {
+						// show_alert("Invalid menu item object", 'warning');
+					}					
+				}
+			}	
+	});
+}
 
 
 

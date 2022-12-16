@@ -39,8 +39,7 @@ $(window).on('load', function () {
 		if (is_signedin)
 			$('#username').text(signedin_uname);
 	
-		add_home_menu_item("person", t("Profile"), t("My profile."), "myprofile.html");
-		add_home_menu_item("people", t("Groups"), t("My private user groups."), "mygroup.html");
+		load_home_menu('main');
 
 		$('#signout_btn').click(function(){
 			signout_user();

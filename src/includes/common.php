@@ -859,6 +859,30 @@ beat('user', 'signout', function ()
 	);
 });
 
+beat('preference', 'read_starts_with', function ($name)
+{
+	if (!has_permission('preference_read_starts_with'))
+		return error_pack(err_access_denied);
+	
+	$where = "name LIKE '" . $name . "%'";
+	$records = read('preference', FALSE, $where, 'name', 'ASC');
+	$rcnt = count($records);
+
+	if ($rcnt > 0) {	
+		foreach ($records as &$r) {
+			unset($r['id']);
+		}
+	}
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'records' => $records,
+			'count' => $rcnt
+		)
+	);
+});
+
 
 
 

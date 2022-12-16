@@ -30,13 +30,9 @@ $(window).on('load', function () {
 	when_allowed("view_administration", function () {
 	
 		show_page();
-		
-		add_home_menu_item("person", t("Users"), t("Users data and activities."), "user.html");
-		add_home_menu_item("people", t("Groups"), t("Private user groups."), "group.html");
-		add_home_menu_item("incognito", t("Roles"), t("Users roles including administrative and management roles."), "role.html");
-		add_home_menu_item("card-heading", t("Permissions"), t("Access control by roles."), "permission.html");
-		add_home_menu_item("gear", t("Preferences"), t("System preferences."), "preference.html");
 
+		load_home_menu('admin');
+		
 		$('#signout_btn').click(function(){
 			signout_user();
 		})
