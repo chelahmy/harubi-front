@@ -35,7 +35,7 @@
 "Names" : "Nama",
 "New Password" : "Katalaluan Baharu",
 "New group" : "Kumpulan baharu",
-"New permission" : "Kebenaran baharu",
+"New permission" : "Kebenaran akses baharu",
 "New preference" : "Pilihan baharu",
 "New role" : "Peranan baharu",
 "New user" : "Pengguna baharu",
@@ -43,10 +43,10 @@
 "Oops!" : "Alamak!",
 "Owner" : "Pemilik",
 "Password" : "Katalaluan",
-"Permission Edit" : "Penyuntingan Kebenaran Masuk",
-"Permission Roles" : "Peranan untuk Kebenaran Masuk",
-"Permission" : "Kebenaran Masuk",
-"Permissions" : "Kebenaran Masuk",
+"Permission Edit" : "Penyuntingan Kebenaran Akses",
+"Permission Roles" : "Peranan untuk Kebenaran Akses",
+"Permission" : "Kebenaran Akses",
+"Permissions" : "Kebenaran Akses",
 "Preference Edit" : "Penyuntingan Pilihan",
 "Preferences" : "Pilihan",
 "Premium Members Only" : "Keahlian Premium Sahaja",
@@ -70,7 +70,7 @@
 "System Provisioning" : "Penyedian Sistem",
 "The name of the group." : "Nama untuk kumpulan.",
 "The name of the member." : "Nama untuk ahli.",
-"The name of the permission." : "Nama untuk kebenaran masuk.",
+"The name of the permission." : "Nama untuk kebenaran akses.",
 "The name of the preference." : "Nama untuk pilihan.",
 "The name of the role." : "Nama untuk peranan.",
 "The name of the user." : "Nama untuk pengguna.",
@@ -174,7 +174,18 @@
 "role '@role'" : "peranan '@role'",
 "superadmin" : "superadmin",
 "permission '@permission' -> role '@permrole'" : "kebenaran akses '@permission' -> peranan '@permrole'",
-"permission '@permission'" : "kebenaran akses '@permission'"
+"permission '@permission'" : "kebenaran akses '@permission'",
 
+
+"Agro-Diseases" : "Agro-Penyakit",
+"Disease Cases" : "Kes Penyakit",
+"Search Problems & Solutions" : "Capai Masalah & Penyelesaian",
+"New Disease Case" : "Kes Penyakit Baru",
+"Problems" : "Masalah",
+"Solutions" : "Penyelesaian",
+"Reported By" : "Dilaporkan Oleh",
+
+
+"Agriculture disease cases." : "Kes-kes penyakit agrikultur."
 
 }
