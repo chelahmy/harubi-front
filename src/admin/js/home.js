@@ -33,7 +33,6 @@ $(window).on('load', function () {
 		
 		add_home_menu_item("person", t("Users"), t("Users data and activities."), "user.html");
 		add_home_menu_item("people", t("Groups"), t("Private user groups."), "group.html");
-		add_home_menu_item("file-earmark-medical", t("Disease Cases"), t("Agriculture disease cases."), "../modules/agro-diseases/admin/disease-case.html");
 		add_home_menu_item("incognito", t("Roles"), t("Users roles including administrative and management roles."), "role.html");
 		add_home_menu_item("card-heading", t("Permissions"), t("Access control by roles."), "permission.html");
 		add_home_menu_item("gear", t("Preferences"), t("System preferences."), "preference.html");
