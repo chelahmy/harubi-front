@@ -534,35 +534,38 @@ var new_home_menu_item = function (type, icon, title, description, url) {
 	var name = "home_" + type + "_menu_item_";
 	qserv(main_server, {model: 'preference', action: 'read_starts_with',
 		name: name}, function(rst, extra) {
-			// get last index
-			var index = 0, isnew = true;
-			var nlen = name.length;
-			var r = rst.data.records;
-			for (var i in r) {
-				if (r.hasOwnProperty(i)) {
-					var ival = r[i].value;
-					try {
-						var iobj = JSON.parse(ival);
-						if (iobj.t == title) {
-							isnew = false;
-							break;
-						}
-					} catch (e) {
-						// show_alert("Invalid menu item object", 'warning');
-					}					
-					var iname = r[i].name;
-					var idx = parseInt(iname.substring(nlen));
-					if (idx > index)
-						index = idx;
-				}
+		// get last index
+		var index = 0, isnew = true, nlen = name.length;
+		var r = rst.data.records;
+		for (var i in r) {
+			if (r.hasOwnProperty(i)) {
+				var ival = r[i].value;
+				try {
+					var iobj = JSON.parse(ival);
+					if (iobj.t == title) {
+						isnew = false;
+						break;
+					}
+				} catch (e) {
+					// show_alert("Invalid menu item object", 'warning');
+				}					
+				var iname = r[i].name;
+				var idx = parseInt(iname.substring(nlen));
+				if (idx > index)
+					index = idx;
 			}
-			if (isnew) {
-				++index; // new index
-				var nobj = {w:index,i:icon,t:title,d:description,u:url};
-				var njson = JSON.stringify(nobj);
-				qserv(main_server, {model: 'preference', action: 'create',
-					name: name + index, value: njson}, alert_after_create);
-			}
+		}
+		if (isnew) {
+			++index; // new index
+			var nobj = {w:(index*10),i:icon,t:title,d:description,u:url};
+			var njson = JSON.stringify(nobj);
+			var nname = name + index;
+			//console.log(nname);
+			qserv(main_server, {model: 'preference', action: 'write',
+				name: nname, value: njson}, function(rst, extra) {
+					show_alert(t("A home menu item created."), "success");
+				});
+		}
 	});
 }
 
