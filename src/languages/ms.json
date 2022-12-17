@@ -27,6 +27,7 @@
 "Loading..." : "Sedang dimuatnaik...",
 "Member Edit" : "Penyuntingan Ahli",
 "Members" : "Ahli",
+"Module Provisioning" : "Penyediaan Modul",
 "My Group Edit" : "Penyuntingan Kumpulan Saya",
 "My Groups" : "Kumpulan Saya",
 "My Profile" : "Profil Saya",
@@ -67,7 +68,7 @@
 "Sign-in" : "Daftar masuk",
 "Sign-ins" : "Daftar masuk",
 "Since" : "Sejak",
-"System Provisioning" : "Penyedian Sistem",
+"System Provisioning" : "Penyediaan Sistem",
 "The name of the group." : "Nama untuk kumpulan.",
 "The name of the member." : "Nama untuk ahli.",
 "The name of the permission." : "Nama untuk kebenaran akses.",
@@ -100,6 +101,7 @@
 "@rolename role added" : "peranan @rolename telah dimasukkan",
 "@rolename role removed" : "peranan @rolename telah dikeluarkan",
 "@years years ago" : "@years tahun lepas",
+"A home menu item created." : "Satu item menu laman utama telah dibuat.",
 "Access control by roles." : "Kawalan akses berdasarkan peranan",
 "Added" : "Telah dimasukkan",
 "Both name and password are required." : "Kedua-dua nama dan katalaluan diperlukan.",
@@ -108,11 +110,13 @@
 "Deleted" : "Telah dipadam",
 "Edit roles" : "Sunting peranan",
 "Email cannot be empty." : "Email tidak boleh kosong.",
+"Failed to create a home menu item." : "Gagal membuat satu item menu laman utama.",
 "Group" : "Kumpulan",
 "Language cannot be empty." : "Bahasa tidak boleh kosong.",
 "Leave this field empty to keep the existing password." : "Biarkan ruang ini kosong untuk mengekalkan katalaluan sedia ada.",
 "Member since @ago" : "Ahli sejak @ago",
 "Member" : "Ahli",
+"Module provisioning done." : "Penyediaan module selesai.",
 "My private user groups." : "Kumpulan persendirian saya.",
 "My profile." : "Profil saya.",
 "Name cannot be empty." : "Nama tidak boleh kosong.",
@@ -176,16 +180,5 @@
 "permission '@permission' -> role '@permrole'" : "kebenaran akses '@permission' -> peranan '@permrole'",
 "permission '@permission'" : "kebenaran akses '@permission'",
 
-
-"Agro-Diseases" : "Agro-Penyakit",
-"Disease Cases" : "Kes Penyakit",
-"Search Problems & Solutions" : "Capai Masalah & Penyelesaian",
-"New Disease Case" : "Kes Penyakit Baru",
-"Problems" : "Masalah",
-"Solutions" : "Penyelesaian",
-"Reported By" : "Dilaporkan Oleh",
-
-
-"Agriculture disease cases." : "Kes-kes penyakit agrikultur."
 
 }
