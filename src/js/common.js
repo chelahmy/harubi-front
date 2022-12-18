@@ -6,6 +6,7 @@
 var main_server = "main/includes/main.php";
 var loading_logo_path = "logo/logo.png";
 var page_logo_path = "logo/logo.png";
+var modules_path = "modules/";
 var languages_path = "languages/";
 
 var language = 'en';
@@ -358,9 +359,35 @@ var load_language = function (lang, on_ready) {
 		return;
 	}
 		
-	$.getJSON( languages_path + lang + '.json', function( data ) {
+	$.getJSON(languages_path + lang + '.json', function (data) {
 		language = lang;
 		language_strings = data;
+		
+		te();
+		
+		if (typeof on_ready === 'function')
+			on_ready();
+	});
+}
+
+// Load module language strings and append them into the existing language strings.
+// And translate the current page.
+// And trigger on_ready() if specified.
+var load_module_language = function (module, on_ready) {
+	var lang = language;
+	if (lang == 'en') { // default language
+		if (typeof on_ready === 'function')
+			on_ready();
+			
+		return;
+	}
+	
+	var path = modules_path + module + '/languages/' + lang + '.json'
+	$.getJSON(path, function (data) {
+
+		for (var i in data) {
+			language_strings[i] = data[i];
+		}
 		
 		te();
 		
@@ -526,14 +553,30 @@ var load_home_menu = function (type) {
 				return a.w - b.w;
 			});
 			items.forEach(function(mi){
-				add_home_menu_item(mi.i, t(mi.t), t(mi.d), mi.u);
+				var url = mi.u, module = false;
+				if (typeof mi.m !== "undefined") {
+					if (mi.m.length > 0) {
+						module = true;
+						url = modules_path + mi.m + "/" + type + "/" + mi.u;
+						load_module_language(mi.m);
+					}
+				}
+				if (!module)
+					add_home_menu_item(mi.i, t(mi.t), t(mi.d), url);
+				else {
+					// Wait for the module language to be loaded,
+					// mostly from the browser cache. It should be fast.
+					setTimeout(function() {
+						add_home_menu_item(mi.i, t(mi.t), t(mi.d), url); 
+					}, 200);				
+				}
 			})
 	});
 }
 
 // Create a new home menu item if not already existed.
 // Standard *type* are *admin* and *main*.
-var new_home_menu_item = function (type, icon, title, description, url) {
+var new_home_menu_item = function (type, icon, title, description, module, url) {
 	var name = "home_" + type + "_menu_item_";
 	qserv(main_server, {model: 'preference', action: 'read_starts_with',
 		name: name}, function(rst, extra) {
@@ -560,7 +603,7 @@ var new_home_menu_item = function (type, icon, title, description, url) {
 		}
 		if (isnew) {
 			++index; // new index
-			var nobj = {w:(index*10),i:icon,t:title,d:description,u:url};
+			var nobj = {w:(index*10),i:icon,t:title,d:description,m:module,u:url};
 			var njson = JSON.stringify(nobj);
 			var nname = name + index;
 			//console.log(nname);

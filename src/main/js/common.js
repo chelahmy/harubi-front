@@ -6,5 +6,6 @@
 main_server = "includes/main.php";
 loading_logo_path = "../logo/logo.png";
 page_logo_path = "../logo/logo.png";
+modules_path = "../modules/"
 languages_path = "../languages/"
 
