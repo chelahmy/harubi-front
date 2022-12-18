@@ -178,7 +178,7 @@
 "role '@role'" : "peranan '@role'",
 "superadmin" : "superadmin",
 "permission '@permission' -> role '@permrole'" : "kebenaran akses '@permission' -> peranan '@permrole'",
-"permission '@permission'" : "kebenaran akses '@permission'",
+"permission '@permission'" : "kebenaran akses '@permission'"
 
 
 }
