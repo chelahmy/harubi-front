@@ -306,7 +306,7 @@ function harubi($settings = 'settings.inc')
 		if (file_exists($settings))
 			$settings = file_get_contents($settings);
 		elseif ($settings == 'settings.inc')	
-			harubi_log(__FILE__,__FUNCTION__, __LINE__, 'error', 'File settings.inc does not exist');
+			harubi_log(__FILE__,__FUNCTION__, __LINE__, 'error', 'settings.inc file does not exist');
 		
 		$settings = json_decode($settings, TRUE);
 	}
@@ -348,6 +348,29 @@ function harubi($settings = 'settings.inc')
 		$harubi_table_settings = $settings['tables'];
 	else
 		harubi_log(__FILE__,__FUNCTION__, __LINE__, 'warning', 'No setting for tables');
+}
+
+/**
+* Add to harubi table settings.
+*/
+function add_table_settings($settings = 'settings.inc') {
+	global $harubi_table_settings;
+
+	if (!is_array($settings)) {
+		if (file_exists($settings))
+			$settings = file_get_contents($settings);
+		elseif ($settings == 'settings.inc')	
+			harubi_log(__FILE__,__FUNCTION__, __LINE__, 'error', 'settings.inc file does not exist');
+		
+		$settings = json_decode($settings, TRUE);
+	}
+	
+	if (isset($settings['tables'])) {
+		if (count($harubi_table_settings) <= 0)
+			$harubi_table_settings = $settings['tables'];
+		else
+			$harubi_table_settings = array_merge($harubi_table_settings, $settings['tables']);
+	}
 }
 
 /**
