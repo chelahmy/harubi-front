@@ -300,46 +300,49 @@ var load_signedin = function (on_ready) {
 		});
 }
 
-// Translate string
-var t = function (str, params) {
+// Get the string of the current language.
+var get_language_string = function (str) {
 	str = str.trim();
-	
 	if (str.length > 0) {
-		if (str in language_strings)
-			str = language_strings[str];
-	}
-	
-	if (typeof params === 'object') {
-		for (var p in params) {
-			str = str.replaceAll(p, params[p]);
+		if (typeof language_strings === 'object') {
+			if (str in language_strings) {
+				var lstr = language_strings[str];
+				lstr = lstr.trim();
+				if (lstr.length > 0)
+					str = lstr;
+			}
 		}
 	}
-	
+	return str;
+}
+ 
+// Translate string
+var t = function (str, params) {
+	str = get_language_string(str);
+	if (str.length > 0) {	
+		if (typeof params === 'object') {
+			for (var p in params) {
+				str = str.replaceAll(p, params[p]);
+			}
+		}
+	}
 	return str;	
 }
 
 // Translate all elements texts.
 var te = function () {
-	var title = $('title').text().trim();
+	$('title').text(get_language_string($('title').text()));
 
-	if (title in language_strings)
-		$('title').text(language_strings[title]);
-	
-	var tnodes = getTextNodesIn($('body')[0]);
-	
+	var tnodes = getTextNodesIn($('body')[0]);	
 	$.each(tnodes, function(index, tn) { 
-		var text = tn.nodeValue.trim();
-		if (text in language_strings)
-			tn.nodeValue = language_strings[text];
+		tn.nodeValue = get_language_string(tn.nodeValue);
 	});
 	
 	$('form').find("input").each(function(ev) {
 		var ph = $(this).attr("placeholder");
 		
 		if (typeof ph !== 'undefined' && ph !== false) {
-			ph = ph.trim();
-			if (ph in language_strings)
-				$(this).attr("placeholder", language_strings[ph]);
+			$(this).attr("placeholder", get_language_string(ph));
 		}
 	});	
 }
