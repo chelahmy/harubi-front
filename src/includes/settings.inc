@@ -78,16 +78,6 @@
             "id" : "int",
             "name" : "string",
             "value" : "string"
-        },
-        "disease_case" : {
-            "id" : "int",
-            "ref" : "string",
-            "name" : "string",
-            "problem" : "string",
-            "solution" : "string",
-            "reported_by" : "int",
-            "created_utc" : "int",
-            "updated_utc" : "int"
         }
     }
 }
