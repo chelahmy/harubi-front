@@ -23,7 +23,9 @@ var load_group = function (ref) {
 
 var create_group = function (ownername, name) {
 	qserv(admin_server, {model: 'usergroup', action: 'create',
-		ownername: ownername, name: name}, alert_after_create, "group.html"); // redirect to prevent accidental multiple create
+		ownername: ownername, name: name}, function (rst, extra) {
+		alert_after_create(rst, "groupedit.html?groupref=" + rst.data.ref); // redirect to prevent accidental multiple create
+	});
 }
 
 var update_group = function (ref, name) {
