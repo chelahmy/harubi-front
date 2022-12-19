@@ -164,6 +164,7 @@ var show_alert = function (message, type = "primary") {
 	});
 	
 	$("#alerts").append(ele_alert);
+	$('html,body').animate({scrollTop: ele_alert.offset().top}, 'fast');
 }
 
 // Parse query response according to the harubi convention.
