@@ -308,6 +308,37 @@ function get_perm_roleids($permname) {
 	return $roleids;
 }
 
+// Get post parent ref, or create one.
+function get_post_parent_ref($post_parent_name) {
+	$where = equ('name', $post_parent_name, 'string');
+
+	$records = read('post_parent', FALSE, $where);
+	
+	if (count($records) > 0)
+		return $records[0]['ref'];
+	else {
+		$ref = new_table_row_ref('post_parent');
+		
+		if (strlen($ref) > 0) {
+			$id = create('post_parent', array(
+				'name' => $post_parent_name,
+				'ref' => $ref
+			));
+			
+			if ($id > 0)
+				return $ref;
+		}
+	}
+		
+	return '';
+}
+
+// Get group info:
+// int		'uid'				- signed-in user id.
+// bool		'owner'				- is the signed-in user the group owner.
+// bool		'member'			- is the signed-in user a member of the group.
+// bool		'admin'				- id the signed-in user an admin of the group.
+// array	'member_records'	- the group member records.
 function get_group_info($groupref) {
 	$info = array('owner' => FALSE, 'member' => FALSE, 'admin' => FALSE,
 		'uid' => 0, 'group_records' => FALSE, 'member_records' => FALSE);
@@ -882,6 +913,140 @@ beat('preference', 'read_starts_with', function ($name)
 		)
 	);
 });
+
+beat('preference', 'write', function ($name, $value)
+{
+	if (!has_permission('preference_write'))
+		return error_pack(err_access_denied);
+	
+	$where = equ('name', $name, 'string');
+	$records = read('preference', FALSE, $where);
+	$rcnt = count($records);
+
+	if ($rcnt > 0) {	
+		if (!update('preference', array('value' => $value), $where))
+			return error_pack(err_update_failed);
+	}
+	else {
+		$id = create('preference', array(
+			'name' => $name,
+			'value' => $value
+		));
+		
+		if ($id <= 0)
+			return error_pack(err_create_failed);
+	}
+
+	return array(
+		'status' => 1
+	);
+});
+
+beat('post', 'list', function ($restart, $parent_ref)
+{
+	global $page_size;
+	
+	if (!has_permission('post_list'))
+		return error_pack(err_access_denied);
+	
+	if (isset($page_size) && $page_size > 0)
+		$limit = $page_size;
+	else
+		$limit = 25;
+		
+	$ses_table_offset = 'post_list_offset_' . $parent_ref;
+	
+	if ($restart == 1)
+		set_session($ses_table_offset, 0);
+		
+	$offset = get_session($ses_table_offset);
+	
+	$where = equ('ref', $parent_ref, 'string');
+
+	$post_parent_id = 0;
+	$records = read('post_parent', FALSE, $where);
+	
+	if (count($records) > 0)
+		$post_parent_id = intval($records[0]['id']);
+	else // record does not exist
+		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+		
+	$where = equ('post_parent_id', $post_parent_id);
+	
+	$order_by = clean($order_by, 'string');
+	$sort = clean($sort, 'string');
+	
+	$records = read('post', FALSE, $where, 'created_utc', 'DESC', $limit, $offset);
+	$rcnt = count($records);
+
+	if ($rcnt > 0) {
+	
+		foreach ($records as &$r) {
+			unset($r['id']);
+			unset($r['post_parent_id']);
+			$posted_by = $r['posted_by'];
+			unset($r['posted_by']);
+			$r['posted_by_username'] = get_username_by_id($posted_by);
+		}
+		
+		set_session($ses_table_offset, $offset + $limit);
+	}
+	else
+		set_session($ses_table_offset, 0);
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'records' => $records,
+			'count' => $rcnt
+		)
+	);
+});
+
+beat('post', 'new', function ($parent_ref, $username, $body, $attachment)
+{
+	if (!has_permission('post_new'))
+		return error_pack(err_access_denied);
+	
+	$userid = get_userid_by_name($username);
+
+	if ($userid <= 0)
+		return error_pack(err_record_missing, "user: @username", array('@username' => $username));
+
+	$post_parent_id = 0;
+	$where = equ('ref', $parent_ref, 'string');
+	$records = read('post_parent', FALSE, $where);
+	
+	if (read_failed($records))
+		return error_pack(err_read_failed, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+	
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt > 0)
+		$post_parent_id = intval($records[0]['id']);
+	
+	if ($post_parent_id <= 0)
+		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+	
+	$now = time();
+	$id = create('post', array(
+		'post_parent_id' => $post_parent_id,
+		'body' => $body,
+		'attachment' => $attachment,
+		'posted_by' => $userid,
+		'created_utc' => $now,
+		'updated_utc' => $now
+	));    
+	
+	if ($id <= 0)
+		return error_pack(err_create_failed);
+	
+	return array(
+		'status' => 1
+	);
+});
+
+
 
 
 

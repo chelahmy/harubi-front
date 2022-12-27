@@ -1,6 +1,6 @@
 {
-	"appname" : "harubi-front",
-	"language" : "en",
+	"appname" : "agro-diseases",
+	"language" : "ms",
 	
 	"session" : {
 		"timeout" : 7200,
@@ -13,9 +13,9 @@
 	
     "mysql" : {
         "hostname" : "localhost",
-        "username" : "",
-        "password" : "",
-        "database" : "harubi-front",
+        "username" : "root",
+        "password" : "asus",
+        "database" : "agro-diseases",
         "prefix"   : ""
     },
 
@@ -53,12 +53,19 @@
             "created_utc" : "int",
             "updated_utc" : "int"
         },
-        "groupmsg" : {
+        "post_parent" : {
             "id" : "int",
-            "usergroupid" : "int",
-            "userid" : "int",
-            "message" : "string",
-            "created_utc" : "int"
+            "ref" : "string",
+            "name" : "string"
+        },
+        "post" : {
+            "id" : "int",
+            "post_parent_id" : "int",
+            "body" : "string",
+            "attachment" : "string",
+            "posted_by" : "int",
+            "created_utc" : "int",
+            "updated_utc" : "int"
         },
         "role" : {
             "id" : "int",

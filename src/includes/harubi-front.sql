@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 15, 2022 at 10:11 AM
+-- Generation Time: Dec 27, 2022 at 07:44 PM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -20,20 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `harubi-front`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `groupmsg`
---
-
-CREATE TABLE `groupmsg` (
-  `id` bigint NOT NULL,
-  `usergroupid` bigint NOT NULL,
-  `userid` bigint NOT NULL,
-  `message` text NOT NULL,
-  `created_utc` bigint NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -73,6 +59,34 @@ CREATE TABLE `permrole` (
   `id` int NOT NULL,
   `permissionid` int NOT NULL,
   `roleid` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `post`
+--
+
+CREATE TABLE `post` (
+  `id` bigint NOT NULL,
+  `post_parent_id` bigint NOT NULL,
+  `body` text NOT NULL,
+  `attachment` text NOT NULL,
+  `posted_by` bigint NOT NULL,
+  `created_utc` bigint NOT NULL,
+  `updated_utc` bigint NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `post_parent`
+--
+
+CREATE TABLE `post_parent` (
+  `id` bigint NOT NULL,
+  `ref` char(32) NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -141,16 +155,6 @@ CREATE TABLE `usergroup` (
 --
 
 --
--- Indexes for table `groupmsg`
---
-ALTER TABLE `groupmsg`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `group_created` (`usergroupid`,`created_utc`) USING BTREE,
-  ADD KEY `user_group_created` (`usergroupid`,`userid`,`created_utc`) USING BTREE,
-  ADD KEY `group` (`usergroupid`),
-  ADD KEY `user_group` (`usergroupid`,`userid`);
-
---
 -- Indexes for table `member`
 --
 ALTER TABLE `member`
@@ -172,6 +176,21 @@ ALTER TABLE `permission`
 ALTER TABLE `permrole`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `permission_role` (`permissionid`,`roleid`);
+
+--
+-- Indexes for table `post`
+--
+ALTER TABLE `post`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `post_parent` (`post_parent_id`);
+
+--
+-- Indexes for table `post_parent`
+--
+ALTER TABLE `post_parent`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD UNIQUE KEY `ref` (`ref`);
 
 --
 -- Indexes for table `preference`
@@ -214,12 +233,6 @@ ALTER TABLE `usergroup` ADD FULLTEXT KEY `name` (`name`);
 --
 
 --
--- AUTO_INCREMENT for table `groupmsg`
---
-ALTER TABLE `groupmsg`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `member`
 --
 ALTER TABLE `member`
@@ -236,6 +249,18 @@ ALTER TABLE `permission`
 --
 ALTER TABLE `permrole`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post`
+--
+ALTER TABLE `post`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post_parent`
+--
+ALTER TABLE `post_parent`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `preference`
