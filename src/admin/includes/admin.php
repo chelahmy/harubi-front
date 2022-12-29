@@ -307,7 +307,10 @@ beat('usergroup', 'create', function ($ownername, $name)
 		return error_pack(err_create_failed);
 	
 	return array(
-		'status' => 1
+		'status' => 1,
+		'data' => array(
+			'ref' => $ref
+		)
 	);
 });
 
@@ -321,6 +324,9 @@ beat('usergroup', 'read', function ($ref)
 	$rcnt = count($records);
 
 	if ($rcnt > 0) {	
+
+		$post_parent_ref = get_post_parent_ref('table_usergroup_' . $ref);
+		
 		foreach ($records as &$r) {
 			unset($r['id']);
 			$owneruserid = intval($r['owneruserid']);
@@ -329,6 +335,7 @@ beat('usergroup', 'read', function ($ref)
 			$created_by = intval($r['created_by']);
 			unset($r['created_by']);
 			$r['created_by_username'] = get_username_by_id($created_by);
+			$r['post_parent_ref'] = $post_parent_ref;
 		}
 	}
 

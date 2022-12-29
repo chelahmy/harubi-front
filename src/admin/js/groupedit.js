@@ -61,12 +61,17 @@ $(window).on('load', function () {
 		
 			show_alert(t("WARNING: Group is private. Do not update or delete a group without the owner consent."), "warning");
 
+			show_view_button();
 			show_update_button();
 			show_delete_button();
 			$('#ownername').prop('readonly', true);
 			$('#owner_help_extra').text(t('Cannot change owner.'));
 			
 			load_group(groupref);
+
+			$('#view_btn').click(function(){
+				show_url("groupview.html?groupref=" + groupref);
+			});
 
 			$('#update_btn').click(function(){
 				var new_groupname = $("#name").val();

@@ -105,7 +105,9 @@ $permissions = array(
 	'usergroup_read_own' => array('administrator', 'member'),
 	'usergroup_update' => array('administrator'),
 	'view_administration' => array('administrator'),
-	'view_user_profile' => array('administrator', 'member')
+	'view_main' => array('administrator', 'member'),
+	'view_user_profile' => array('administrator', 'member'),
+	'view_usergroups' => array('administrator')
 );
 
 function create_superadmin() {
