@@ -1000,7 +1000,7 @@ beat('post', 'list', function ($restart, $parent_ref)
 	);
 });
 
-beat('post', 'list_newer', function ($restart, $parent_ref, $last_id)
+beat('post', 'list_newer', function ($parent_ref, $last_id)
 {
 	global $page_size;
 	
@@ -1012,13 +1012,6 @@ beat('post', 'list_newer', function ($restart, $parent_ref, $last_id)
 	else
 		$limit = 25;
 		
-	$ses_table_offset = 'post_list_newer_offset_' . $parent_ref;
-	
-	if ($restart == 1)
-		set_session($ses_table_offset, 0);
-		
-	$offset = get_session($ses_table_offset);
-	
 	$where = equ('ref', $parent_ref, 'string');
 
 	$post_parent_id = 0;
@@ -1032,7 +1025,7 @@ beat('post', 'list_newer', function ($restart, $parent_ref, $last_id)
 	$where = equ('post_parent_id', $post_parent_id);
 	$where .= " AND `id` > " . intval($last_id);
 	
-	$records = read('post', FALSE, $where, 'id', 'ASC', $limit, $offset);
+	$records = read('post', FALSE, $where, 'id', 'ASC', $limit);
 	$rcnt = count($records);
 
 	if ($rcnt > 0) {
@@ -1043,11 +1036,7 @@ beat('post', 'list_newer', function ($restart, $parent_ref, $last_id)
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
 		}
-		
-		set_session($ses_table_offset, $offset + $limit);
 	}
-	else
-		set_session($ses_table_offset, 0);
 
 	return array(
 		'status' => 1,
