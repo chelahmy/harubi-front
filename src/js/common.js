@@ -79,8 +79,16 @@ var days_since = function (ts) {
 	return diffDays;
 }
 
-// Calculate the number of days since ts.
-// And return the phrase.
+// Calculate the number of minutes since ts.
+var minutes_since = function (ts) {
+	const lastLoginDate = new Date(ts * 1000);
+	const todaysDate = new Date(); // Current date
+	const diffMinutes = Math.round(Math.abs(lastLoginDate - todaysDate) / 60000);
+	return diffMinutes;
+}
+
+// Calculate the number of years, days, hours or minutes since ts.
+// And return the semantical phrase.
 var since_phrase = function (ts) {
 	var since = '', days = days_since(ts);
 	
@@ -96,8 +104,23 @@ var since_phrase = function (ts) {
 			since = t("@days days ago", {'@days' : days});
 		else if (days == 1)
 			since = t("yesterday");
-		else
-			since = t("today");
+		else {
+			// since = t("today");
+			var minutes = minutes_since(ts);
+			if (minutes < 1)
+				since = t("just now");
+			else if (minutes == 1)
+				since = t("1 minute ago");
+			else if (minutes < 60)
+				since = t("@minutes minutes ago", {'@minutes' : minutes});
+			else {
+				var hours = parseInt(minutes / 60);
+				if (hours > 1)
+					since = t("@hours hours ago", {'@hours' : hours});
+				else
+					since = t("1 hour ago");
+			}
+		}
 	}
 	
 	return since;
@@ -127,6 +150,11 @@ var show_error = function (id) {
 var show_page = function () {
 	$('#loading').addClass('d-none');
 	$('#page').removeClass('d-none');
+}
+
+// Unhide the view button
+var show_view_button = function () {
+	$('#view_btn').removeClass('d-none');
 }
 
 // Unhide the create button

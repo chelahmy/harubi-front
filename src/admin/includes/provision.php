@@ -71,6 +71,7 @@ $permissions = array(
 	'permrole_listall' => array('administrator'),
 	'permrole_remove' => array('administrator'),
 	'post_list' => array('administrator', 'member'),
+	'post_list_newer' => array('administrator', 'member'),
 	'post_new' => array('administrator', 'member'),
 	'preference_create' => array('administrator'),
 	'preference_delete' => array('administrator'),

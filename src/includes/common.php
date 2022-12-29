@@ -973,16 +973,12 @@ beat('post', 'list', function ($restart, $parent_ref)
 		
 	$where = equ('post_parent_id', $post_parent_id);
 	
-	$order_by = clean($order_by, 'string');
-	$sort = clean($sort, 'string');
-	
-	$records = read('post', FALSE, $where, 'created_utc', 'DESC', $limit, $offset);
+	$records = read('post', FALSE, $where, 'id', 'DESC', $limit, $offset);
 	$rcnt = count($records);
 
 	if ($rcnt > 0) {
 	
 		foreach ($records as &$r) {
-			unset($r['id']);
 			unset($r['post_parent_id']);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
@@ -998,17 +994,77 @@ beat('post', 'list', function ($restart, $parent_ref)
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
 
-beat('post', 'new', function ($parent_ref, $username, $body, $attachment)
+beat('post', 'list_newer', function ($restart, $parent_ref, $last_id)
+{
+	global $page_size;
+	
+	if (!has_permission('post_list_newer'))
+		return error_pack(err_access_denied);
+	
+	if (isset($page_size) && $page_size > 0)
+		$limit = $page_size;
+	else
+		$limit = 25;
+		
+	$ses_table_offset = 'post_list_newer_offset_' . $parent_ref;
+	
+	if ($restart == 1)
+		set_session($ses_table_offset, 0);
+		
+	$offset = get_session($ses_table_offset);
+	
+	$where = equ('ref', $parent_ref, 'string');
+
+	$post_parent_id = 0;
+	$records = read('post_parent', FALSE, $where);
+	
+	if (count($records) > 0)
+		$post_parent_id = intval($records[0]['id']);
+	else // record does not exist
+		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+		
+	$where = equ('post_parent_id', $post_parent_id);
+	$where .= " AND `id` > " . intval($last_id);
+	
+	$records = read('post', FALSE, $where, 'id', 'ASC', $limit, $offset);
+	$rcnt = count($records);
+
+	if ($rcnt > 0) {
+	
+		foreach ($records as &$r) {
+			unset($r['post_parent_id']);
+			$posted_by = $r['posted_by'];
+			unset($r['posted_by']);
+			$r['posted_by_username'] = get_username_by_id($posted_by);
+		}
+		
+		set_session($ses_table_offset, $offset + $limit);
+	}
+	else
+		set_session($ses_table_offset, 0);
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'records' => $records,
+			'count' => $rcnt,
+			'limit' => $limit
+		)
+	);
+});
+
+beat('post', 'new', function ($parent_ref, $body)
 {
 	if (!has_permission('post_new'))
 		return error_pack(err_access_denied);
 	
-	$userid = get_userid_by_name($username);
+	$userid = signedin_uid();
 
 	if ($userid <= 0)
 		return error_pack(err_record_missing, "user: @username", array('@username' => $username));
@@ -1028,11 +1084,13 @@ beat('post', 'new', function ($parent_ref, $username, $body, $attachment)
 	if ($post_parent_id <= 0)
 		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
 	
+	// TODO: get attachement
+	
 	$now = time();
 	$id = create('post', array(
 		'post_parent_id' => $post_parent_id,
 		'body' => $body,
-		'attachment' => $attachment,
+		'attachment' => '',
 		'posted_by' => $userid,
 		'created_utc' => $now,
 		'updated_utc' => $now
