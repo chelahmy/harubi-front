@@ -1055,9 +1055,6 @@ beat('post', 'new', function ($parent_ref, $body)
 	
 	$userid = signedin_uid();
 
-	if ($userid <= 0)
-		return error_pack(err_record_missing, "user: @username", array('@username' => $username));
-
 	$post_parent_id = 0;
 	$where = equ('ref', $parent_ref, 'string');
 	$records = read('post_parent', FALSE, $where);
