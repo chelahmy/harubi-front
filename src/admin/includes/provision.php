@@ -106,6 +106,7 @@ $permissions = array(
 	'usergroup_update' => array('administrator'),
 	'view_administration' => array('administrator'),
 	'view_main' => array('administrator', 'member'),
+	'view_own_usergroups' => array('administrator', 'member'),
 	'view_user_profile' => array('administrator', 'member'),
 	'view_usergroups' => array('administrator')
 );

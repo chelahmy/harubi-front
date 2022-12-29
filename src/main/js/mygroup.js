@@ -9,7 +9,7 @@ var table_index = 0;
 var append_group = function (name, ref, owner, created_utc) {
 	
 	var ele_name = $("<a>", {
-		"href" : "mygroupedit.html?groupref=" + ref,
+		"href" : "mygroupview.html?groupref=" + ref,
 		"text" : name 
 	});
 
