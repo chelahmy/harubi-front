@@ -1,6 +1,6 @@
 {
-	"appname" : "agro-diseases",
-	"language" : "ms",
+	"appname" : "harubi-front",
+	"language" : "en",
 	
 	"session" : {
 		"timeout" : 7200,
@@ -13,9 +13,9 @@
 	
     "mysql" : {
         "hostname" : "localhost",
-        "username" : "root",
-        "password" : "asus",
-        "database" : "agro-diseases",
+        "username" : "",
+        "password" : "",
+        "database" : "harubi-front",
         "prefix"   : ""
     },
 
