@@ -308,20 +308,20 @@ function get_perm_roleids($permname) {
 	return $roleids;
 }
 
-// Get post parent ref, or create one.
-function get_post_parent_ref($post_parent_name) {
-	$where = equ('name', $post_parent_name, 'string');
+// Get discussion ref, or create one.
+function get_discussion_ref($discussion_name) {
+	$where = equ('name', $discussion_name, 'string');
 
-	$records = read('post_parent', FALSE, $where);
+	$records = read('discussion', FALSE, $where);
 	
 	if (count($records) > 0)
 		return $records[0]['ref'];
 	else {
-		$ref = new_table_row_ref('post_parent');
+		$ref = new_table_row_ref('discussion');
 		
 		if (strlen($ref) > 0) {
-			$id = create('post_parent', array(
-				'name' => $post_parent_name,
+			$id = create('discussion', array(
+				'name' => $discussion_name,
 				'ref' => $ref
 			));
 			
@@ -942,7 +942,7 @@ beat('preference', 'write', function ($name, $value)
 	);
 });
 
-beat('post', 'list', function ($restart, $parent_ref)
+beat('post', 'list', function ($restart, $discussion_ref)
 {
 	global $page_size;
 	
@@ -954,24 +954,24 @@ beat('post', 'list', function ($restart, $parent_ref)
 	else
 		$limit = 25;
 		
-	$ses_table_offset = 'post_list_offset_' . $parent_ref;
+	$ses_table_offset = 'post_list_offset_' . $discussion_ref;
 	
 	if ($restart == 1)
 		set_session($ses_table_offset, 0);
 		
 	$offset = get_session($ses_table_offset);
 	
-	$where = equ('ref', $parent_ref, 'string');
+	$where = equ('ref', $discussion_ref, 'string');
 
-	$post_parent_id = 0;
-	$records = read('post_parent', FALSE, $where);
+	$discussion_id = 0;
+	$records = read('discussion', FALSE, $where);
 	
 	if (count($records) > 0)
-		$post_parent_id = intval($records[0]['id']);
+		$discussion_id = intval($records[0]['id']);
 	else // record does not exist
-		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 		
-	$where = equ('post_parent_id', $post_parent_id);
+	$where = equ('discussion_id', $discussion_id);
 	
 	$records = read('post', FALSE, $where, 'id', 'DESC', $limit, $offset);
 	$rcnt = count($records);
@@ -979,7 +979,7 @@ beat('post', 'list', function ($restart, $parent_ref)
 	if ($rcnt > 0) {
 	
 		foreach ($records as &$r) {
-			unset($r['post_parent_id']);
+			unset($r['discussion_id']);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
@@ -1000,7 +1000,7 @@ beat('post', 'list', function ($restart, $parent_ref)
 	);
 });
 
-beat('post', 'list_newer', function ($parent_ref, $last_id)
+beat('post', 'list_newer', function ($discussion_ref, $last_id)
 {
 	global $page_size;
 	
@@ -1012,17 +1012,17 @@ beat('post', 'list_newer', function ($parent_ref, $last_id)
 	else
 		$limit = 25;
 		
-	$where = equ('ref', $parent_ref, 'string');
+	$where = equ('ref', $discussion_ref, 'string');
 
-	$post_parent_id = 0;
-	$records = read('post_parent', FALSE, $where);
+	$discussion_id = 0;
+	$records = read('discussion', FALSE, $where);
 	
 	if (count($records) > 0)
-		$post_parent_id = intval($records[0]['id']);
+		$discussion_id = intval($records[0]['id']);
 	else // record does not exist
-		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 		
-	$where = equ('post_parent_id', $post_parent_id);
+	$where = equ('discussion_id', $discussion_id);
 	$where .= " AND `id` > " . intval($last_id);
 	
 	$records = read('post', FALSE, $where, 'id', 'ASC', $limit);
@@ -1031,7 +1031,7 @@ beat('post', 'list_newer', function ($parent_ref, $last_id)
 	if ($rcnt > 0) {
 	
 		foreach ($records as &$r) {
-			unset($r['post_parent_id']);
+			unset($r['discussion_id']);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
@@ -1048,33 +1048,33 @@ beat('post', 'list_newer', function ($parent_ref, $last_id)
 	);
 });
 
-beat('post', 'new', function ($parent_ref, $body)
+beat('post', 'new', function ($discussion_ref, $body)
 {
 	if (!has_permission('post_new'))
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
 
-	$post_parent_id = 0;
-	$where = equ('ref', $parent_ref, 'string');
-	$records = read('post_parent', FALSE, $where);
+	$discussion_id = 0;
+	$where = equ('ref', $discussion_ref, 'string');
+	$records = read('discussion', FALSE, $where);
 	
 	if (read_failed($records))
-		return error_pack(err_read_failed, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 	
 	$rcnt = record_cnt($records);
 	
 	if ($rcnt > 0)
-		$post_parent_id = intval($records[0]['id']);
+		$discussion_id = intval($records[0]['id']);
 	
-	if ($post_parent_id <= 0)
-		return error_pack(err_record_missing, "post_parent_ref: @parent_ref", array('@parent_ref' => $parent_ref));
+	if ($discussion_id <= 0)
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 	
 	// TODO: get attachement
 	
 	$now = time();
 	$id = create('post', array(
-		'post_parent_id' => $post_parent_id,
+		'discussion_id' => $discussion_id,
 		'body' => $body,
 		'attachment' => '',
 		'posted_by' => $userid,
@@ -1087,6 +1087,46 @@ beat('post', 'new', function ($parent_ref, $body)
 	
 	return array(
 		'status' => 1
+	);
+});
+
+beat('post', 'attachment', function ()
+{
+	if (!has_permission('post_attachment'))
+		return error_pack(err_access_denied);
+	
+	$countfiles = count($_FILES['files']['name']);
+
+	$upload_location = "uploads/";
+
+	$files_arr = array();
+
+	for ($index = 0; $index < $countfiles; $index++) {
+
+		if (isset($_FILES['files']['name'][$index]) && $_FILES['files']['name'][$index] != '') {
+			$filename = $_FILES['files']['name'][$index];
+
+			$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+			$valid_ext = array("png","jpeg","jpg");
+
+			if (in_array($ext, $valid_ext)) {
+
+				$path = $upload_location.$filename;
+
+				//if(move_uploaded_file($_FILES['files']['tmp_name'][$index], $path)){
+					$files_arr[] = $filename;
+				//}
+			}
+		}
+	}
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'count' => $countfiles,
+			'files' => $files_arr
+		)
 	);
 });
 

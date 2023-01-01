@@ -325,7 +325,7 @@ beat('usergroup', 'read', function ($ref)
 
 	if ($rcnt > 0) {	
 
-		$post_parent_ref = get_post_parent_ref('table_usergroup_' . $ref);
+		$discussion_ref = get_discussion_ref('table_usergroup_' . $ref);
 		
 		foreach ($records as &$r) {
 			unset($r['id']);
@@ -335,7 +335,7 @@ beat('usergroup', 'read', function ($ref)
 			$created_by = intval($r['created_by']);
 			unset($r['created_by']);
 			$r['created_by_username'] = get_username_by_id($created_by);
-			$r['post_parent_ref'] = $post_parent_ref;
+			$r['discussion_ref'] = $discussion_ref;
 		}
 	}
 

@@ -53,14 +53,14 @@
             "created_utc" : "int",
             "updated_utc" : "int"
         },
-        "post_parent" : {
+        "discussion" : {
             "id" : "int",
             "ref" : "string",
             "name" : "string"
         },
         "post" : {
             "id" : "int",
-            "post_parent_id" : "int",
+            "discussion_id" : "int",
             "body" : "string",
             "attachment" : "string",
             "posted_by" : "int",

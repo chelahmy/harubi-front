@@ -69,7 +69,7 @@ CREATE TABLE `permrole` (
 
 CREATE TABLE `post` (
   `id` bigint NOT NULL,
-  `post_parent_id` bigint NOT NULL,
+  `discussion_id` bigint NOT NULL,
   `body` text NOT NULL,
   `attachment` text NOT NULL,
   `posted_by` bigint NOT NULL,
@@ -80,10 +80,10 @@ CREATE TABLE `post` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `post_parent`
+-- Table structure for table `discussion`
 --
 
-CREATE TABLE `post_parent` (
+CREATE TABLE `discussion` (
   `id` bigint NOT NULL,
   `ref` char(32) NOT NULL,
   `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
@@ -182,12 +182,12 @@ ALTER TABLE `permrole`
 --
 ALTER TABLE `post`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `post_parent` (`post_parent_id`);
+  ADD KEY `discussion` (`discussion_id`);
 
 --
--- Indexes for table `post_parent`
+-- Indexes for table `discussion`
 --
-ALTER TABLE `post_parent`
+ALTER TABLE `discussion`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`),
   ADD UNIQUE KEY `ref` (`ref`);
@@ -257,9 +257,9 @@ ALTER TABLE `post`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `post_parent`
+-- AUTO_INCREMENT for table `discussion`
 --
-ALTER TABLE `post_parent`
+ALTER TABLE `discussion`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --

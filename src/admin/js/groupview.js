@@ -4,7 +4,7 @@
 // 29 December 2022
 
 
-var post_parent_ref = '';
+var discussion_ref = '';
 var latest_post_id = 0;
 var ele_since_list = [];
 
@@ -19,7 +19,7 @@ var append_post_input = function (text) {
 var ele_post = function (body, posted_by_username, created_utc) {
 	
 	var ele_posted_by = $("<a>", {
-		"href" : "../../../admin/useredit.html?name=" + posted_by_username,
+		"href" : "useredit.html?name=" + posted_by_username,
 		"text" : posted_by_username 
 	});
 
@@ -74,14 +74,14 @@ var append_post = function (body, posted_by_username, created_utc) {
 	$("#posts").append(ele);
 }
 
-var load_posts = function (restart, parent_ref) {
+var load_posts = function (restart, discussion_ref) {
 	if (restart) {
 		$("#posts").empty();
 		latest_post_id = 0;
 	}
 	
 	qserv(admin_server, {model: 'post', action: 'list',
-		restart: restart, parent_ref: parent_ref}, function (rst, extra) {
+		restart: restart, discussion_ref: discussion_ref}, function (rst, extra) {
 		
 		if (rst.data.count > 0) {
 			var r = rst.data.records;
@@ -104,9 +104,9 @@ var load_posts = function (restart, parent_ref) {
 	});
 }
 
-var load_newer_posts = function (parent_ref) {
+var load_newer_posts = function (discussion_ref) {
 	qserv(admin_server, {model: 'post', action: 'list_newer',
-		parent_ref: parent_ref, last_id: latest_post_id}, function (rst, extra) {
+		discussion_ref: discussion_ref, last_id: latest_post_id}, function (rst, extra) {
 		
 		if (rst.data.count > 0) {
 			var r = rst.data.records;
@@ -129,13 +129,13 @@ var load_newer_posts = function (parent_ref) {
 	});
 }
 
-var post_new = function (parent_ref, body) {
+var post_new = function (discussion_ref, body) {
 	qserv(admin_server, {model: 'post', action: 'new',
-		parent_ref: parent_ref, body: body}, function (rst, extra) {
+		discussion_ref: discussion_ref, body: body}, function (rst, extra) {
 		
 		$('#new_post').val(''); // empty the post input box
 		
-		load_newer_posts(parent_ref);
+		load_newer_posts(discussion_ref);
 	});
 }
 
@@ -159,8 +159,8 @@ var load_group = function (ref) {
 
 			$("#ownername").html(ele_owner.prop('outerHTML'));
 
-			post_parent_ref = r.post_parent_ref;
-			load_posts(1, r.post_parent_ref);
+			discussion_ref = r.discussion_ref;
+			load_posts(1, r.discussion_ref);
 		}
 	});
 }
@@ -189,16 +189,16 @@ $(window).on('load', function () {
 			load_group(groupref);
 
 			$('#load_earlier_btn').click(function(){
-				load_posts(0, post_parent_ref);
+				load_posts(0, discussion_ref);
 			});
 
 			$('#load_newer_btn').click(function(){
-				load_newer_posts(post_parent_ref);
+				load_newer_posts(discussion_ref);
 			});
 
 			$('#post_btn').click(function(){
 				var body = $('#new_post').val();
-				post_new(post_parent_ref, body);
+				post_new(discussion_ref, body);
 			});
 			
 			// Update posts timestamps every second
@@ -213,7 +213,7 @@ $(window).on('load', function () {
 
 			// Load new posts every 10 seconds
 			setInterval(function () {
-				load_newer_posts(post_parent_ref);
+				load_newer_posts(discussion_ref);
 			}, 10000);
 		}
 		else

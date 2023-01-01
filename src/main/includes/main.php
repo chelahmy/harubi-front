@@ -241,7 +241,7 @@ beat('usergroup', 'read_own', function ($ref)
 
 	if ($rcnt > 0) {	
 
-		$post_parent_ref = get_post_parent_ref('table_usergroup_' . $ref);
+		$discussion_ref = get_discussion_ref('table_usergroup_' . $ref);
 		
 		foreach ($records as &$r) {
 			unset($r['id']);
@@ -254,7 +254,7 @@ beat('usergroup', 'read_own', function ($ref)
 			$r['is_owner'] = $ginfo['owner'];
 			$r['is_member'] = $ginfo['member'];
 			$r['is_admin'] = $ginfo['admin'];
-			$r['post_parent_ref'] = $post_parent_ref;
+			$r['discussion_ref'] = $discussion_ref;
 		}
 	}
 

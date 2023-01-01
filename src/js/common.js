@@ -126,6 +126,35 @@ var since_phrase = function (ts) {
 	return since;
 }
 
+// Convert byte string to number.
+// E.g., "1024k" -> 1048576 
+var bytestr_to_num = function (bytes) {
+	if (Number.isInteger(bytes))
+		return bytes;
+	if (typeof bytes === 'string' || bytes instanceof String) {
+		var i, len = bytes.length, sval = '';
+		for (i = 0; i < len; i++) {
+			var c = bytes.substr(i, 1);
+			if (c >= '0' && c <= '9')
+				sval += c;
+			else {
+				var val = parseInt(sval);
+				if (c == 'k' || c == 'K')
+					return val * 1024;
+				if (c == 'm' || c == 'M')
+					return val * 1024 * 1024;
+				if (c == 'g' || c == 'G')
+					return val * 1024 * 1024 * 1024;
+				if (c == 't' || c == 'T')
+					return val * 1024 * 1024 * 1024 * 1024;
+				return val;
+			}
+		}
+		return parseInt(sval);
+	}
+	return parseInt(bytes);
+}
+
 // Redirect to the url. May delay (in 1000th seconds).
 var show_url = function (url, delay = 0) {
 	if (delay <= 0)
@@ -232,32 +261,43 @@ var show_resp_err = function (data) {
 		show_alert(t("Unknown error"), "danger");
 };
 
-// Query server wrapper.
-var qserv = function (path, args, on_ready, extra = '') {
-	$.post(path, args, function(result, status) {
-		if (status == "success") {
-			var handled = false;
-			var rst = parse_response(result);
-			if ((typeof rst !== 'undefined') && 
-				(typeof rst.status !== 'undefined')) {
-				if (rst.status == 1) {
-					if (typeof on_ready === 'function')
-						on_ready(rst, extra);
-					handled = true;
-				}
-				else if (rst.status == 0 || rst.status == -1) {
-					if (typeof rst.data !== 'undefined') {
-						show_resp_err(rst.data);
-						handled = true;
-					}
-				}
-			}
-			
-			if (!handled) // system communication was ok but response was unexpected
-				show_alert(t("Unknown error"), "danger");
+var handle_qserv_success = function (result, on_ready, extra = '', on_error = function () {}) {
+	var handled = false;
+	var rst = parse_response(result);
+	if ((typeof rst !== 'undefined') && 
+		(typeof rst.status !== 'undefined')) {
+		if (rst.status == 1) {
+			if (typeof on_ready === 'function')
+				on_ready(rst, extra);
+			handled = true;
 		}
-		else
+		else if (rst.status == 0 || rst.status == -1) {
+			if (typeof rst.data !== 'undefined') {
+				show_resp_err(rst.data);
+				if (typeof on_error === 'function')
+					on_error();
+				handled = true;
+			}
+		}
+	}
+	
+	if (!handled) { // system communication was ok but response was unexpected
+		show_alert(t("Unknown error"), "danger");
+		if (typeof on_error === 'function')
+			on_error();
+	}
+}
+
+// Query server wrapper.
+var qserv = function (path, args, on_ready, extra = '', on_error = function () {}) {
+	$.post(path, args, function(result, status) {
+		if (status == "success")
+			handle_qserv_success(result, on_ready, extra, on_error);
+		else {
 			show_alert(t("System error"), "danger");
+			if (typeof on_error === 'function')
+				on_error();
+		}
 	});
 }
 
