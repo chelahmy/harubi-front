@@ -5,6 +5,7 @@
 // 12 November 2022
 
 require_once 'harubi/harubi.php';
+require_once 'filerepo.php';
 
 // Application name will be loaded from settings when it is empty.
 // It should be unique for every application that uses this framework.
@@ -1070,13 +1071,21 @@ beat('post', 'new', function ($discussion_ref, $body)
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 	
-	// TODO: get attachement
+	// get attachment
+	$attachment_json = '';
+	$ses_attachment = "post_attachment_" . $discussion_ref;
+	
+	if (isset_session($ses_attachment)) {
+		$attachment = get_session($ses_attachment);
+		$attachment_json = json_encode($attachment);
+		unset_session($ses_attachment);
+	}
 	
 	$now = time();
 	$id = create('post', array(
 		'discussion_id' => $discussion_id,
 		'body' => $body,
-		'attachment' => '',
+		'attachment' => $attachment_json,
 		'posted_by' => $userid,
 		'created_utc' => $now,
 		'updated_utc' => $now
@@ -1090,47 +1099,122 @@ beat('post', 'new', function ($discussion_ref, $body)
 	);
 });
 
-beat('post', 'attachment', function ()
+beat('post', 'attachment', function ($discussion_ref)
 {
 	if (!has_permission('post_attachment'))
 		return error_pack(err_access_denied);
 	
-	$countfiles = count($_FILES['files']['name']);
+	$file_count = count($_FILES['files']['name']);
 
-	$upload_location = "uploads/";
+	$uploaded_files = array();
 
-	$files_arr = array();
-
-	for ($index = 0; $index < $countfiles; $index++) {
+	for ($index = 0; $index < $file_count; $index++) {
 
 		if (isset($_FILES['files']['name'][$index]) && $_FILES['files']['name'][$index] != '') {
 			$filename = $_FILES['files']['name'][$index];
 
 			$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-			$valid_ext = array("png","jpeg","jpg");
+			$valid_ext = array("png", "jpeg", "jpg", "gif", "pdf", "html", "txt", "text", "json", "geojson");
 
 			if (in_array($ext, $valid_ext)) {
 
-				$path = $upload_location.$filename;
+				$fn = new_frepo();
+				
+				if (strlen($fn) > 0) {
 
-				//if(move_uploaded_file($_FILES['files']['tmp_name'][$index], $path)){
-					$files_arr[] = $filename;
-				//}
+					$rpath = frepo_path($fn);
+
+					if ($rpath !== false && strlen($rpath) > 0) {
+
+						if (move_uploaded_file($_FILES['files']['tmp_name'][$index], $rpath . "/file.dt")){
+							$md = array("fname" => $filename, "ext" => $ext, "ref" => $discussion_ref, "ts" => time());
+							if (write_frepo_metadata($fn, $md)) {
+								unset($md["ext"]);
+								unset($md["ref"]);
+								unset($md["ts"]);
+								$md["repo"] = $fn;
+								$uploaded_files[] = $md;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
+	
+	// Keep the attachment info in session so that the new post can catch it
+	set_session("post_attachment_" . $discussion_ref, $uploaded_files);
 
 	return array(
 		'status' => 1,
 		'data' => array(
-			'count' => $countfiles,
-			'files' => $files_arr
+			'count' => count($uploaded_files),
+			'files' => $uploaded_files
 		)
 	);
 });
 
+beat('post', 'get_attachment', function ($discussion_ref, $repo)
+{
+	if (!has_permission('post_get_attachment'))
+		return;
+		
+	$md = read_frepo_metadata($repo);
+	
+	if ($md === false || !isset($md['ref']) || $md['ref'] != $discussion_ref)
+		return;
+	
+	if (!isset($md['fname']))
+		return;
+	
+	$fname = $md['fname'];
+	
+	if (strlen($fname) <= 0)
+		return;
+		
+	$path = frepo_path($repo);
+	
+	if ($path === false || strlen($path) <= 0)
+		return;
+		
+	$fd = $path . "/file.dt";
+	
+	if (!file_exists($fd))
+		return;
+		
+	header('Content-Description: File Transfer');
+	
+	$image_ext = array("png", "jpeg", "jpg", "gif");
+	$ext = $md['ext'];
+	
+	if (in_array($ext, $image_ext))
+		header('Content-Type: image/' . $ext);
+	else if ($ext == 'html')
+		header('Content-Type: text/html');
+	else if ($ext == 'txt' || $ext == 'text')
+		header('Content-Type: text/plain');
+	else if ($ext == 'pdf')
+		header('Content-Type: application/pdf');
+	else if ($ext == 'json')
+		header('Content-Type: application/json');
+	else if ($ext == 'geojson')
+		header('Content-Type: application/geo+json');
+	else
+		header('Content-Type: application/octet-stream');
+		
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Expires: 0");
+	header('Content-Disposition: attachment; filename="' . $fname . '"');
+	header('Content-Length: ' . filesize($fd));
+	header('Pragma: public');
 
+	flush();
+
+	readfile($fd);
+
+	die();	
+});
 
 
 
