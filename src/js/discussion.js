@@ -3,8 +3,6 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 4 January 2023
 
-var user_page_url = "main/userview.html";
-
 var attachment_max_file_size = "512k";
 var attachment_max_files = 8;
 var attachment_warnings = 0;

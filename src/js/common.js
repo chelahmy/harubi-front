@@ -10,6 +10,8 @@ var page_logo_path = app_rel_path + "logo/logo.png";
 var modules_path = app_rel_path + "modules/";
 var languages_path = app_rel_path + "languages/";
 
+var user_page_url = "main/userview.html";
+
 var language = 'en';
 var language_strings = {};
 
