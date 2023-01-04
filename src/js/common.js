@@ -3,11 +3,12 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 13 November 2022
 
-var main_server = "main/includes/main.php";
-var loading_logo_path = "logo/logo.png";
-var page_logo_path = "logo/logo.png";
-var modules_path = "modules/";
-var languages_path = "languages/";
+var app_rel_path = "./";
+var main_server = app_rel_path + "main/includes/main.php";
+var loading_logo_path = app_rel_path + "logo/logo.png";
+var page_logo_path = app_rel_path + "logo/logo.png";
+var modules_path = app_rel_path + "modules/";
+var languages_path = app_rel_path + "languages/";
 
 var language = 'en';
 var language_strings = {};
@@ -63,6 +64,15 @@ function getTextNodesIn(node, includeWhitespaceNodes) {
 
     getTextNodes(node);
     return textNodes;
+}
+
+var set_app_rel_path = function (path) {
+	app_rel_path = path;
+	main_server = app_rel_path + "main/includes/main.php";
+	loading_logo_path = app_rel_path + "logo/logo.png";
+	page_logo_path = app_rel_path + "logo/logo.png";
+	modules_path = app_rel_path + "modules/";
+	languages_path = app_rel_path + "languages/";
 }
 
 var load_logo = function () {
