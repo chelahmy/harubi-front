@@ -1,24 +1,30 @@
 body {
-  background-color: #f5f5f5;
+	background-color: #f5f5f5;
 }
 
 a:link {
-  text-decoration: none;
+	text-decoration: none;
 }
 
 a:visited {
-  text-decoration: none;
+	text-decoration: none;
 }
 
 a:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
 a:active {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
 .home-icon {
 	font-size: 6rem;
 	color: cornflowerblue;
+}
+
+.post-entry {
+	padding: 10px;
+	--bs-bg-opacity: 0.125;
+	background-color: rgba(var(--bs-secondary-rgb), var(--bs-bg-opacity)) !important;
 }
