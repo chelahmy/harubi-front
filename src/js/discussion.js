@@ -213,6 +213,28 @@ var split_post_body = function (body) {
 	return {body: body, quote_id: quote_id};
 }
 
+var tag_wrap = function (str, wrap, tag) {
+	var tstr = "";
+	while (str.length > 0) {
+		var pos = str.indexOf(wrap);
+		if (pos >= 0) {
+			var left = str.substring(0, pos);
+			var mid = str.substring(pos + wrap.length);
+			pos = mid.indexOf(wrap);
+			if (pos >= 0) {
+				var right = mid.substring(pos + wrap.length);
+				mid = mid.substring(0, pos);
+				tstr += left + "<" + tag + ">" + mid + "</" + tag + ">";
+				str = right;
+				continue;
+			}
+		}
+		tstr += str;
+		break;
+	}
+	return tstr;
+}
+
 var ele_post = function (id, body, attachment, posted_by_username, created_utc) {
 	
 	var body_parts = split_post_body(body);
@@ -221,15 +243,14 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	const options = {
 		defaultProtocol: 'https',
 		formatHref: {
-			mention: function (href) {
-				if (href.substring(0, 1) == "/") // skip "/"
-					href = href.substring(1);
-				return app_rel_path + user_page_url + "?name=" + href;
-			}
+			mention: (href) => app_rel_path + user_page_url + "?name=" + href.substr(1),
+			hashtag: (href) => "https://twitter.com/hashtag/" + href.substr(1),
 		}
 	};
 	
 	body = linkifyStr(body, options);
+	body = tag_wrap(body, "**", "strong");
+	body = tag_wrap(body, "*", "em");
 	
 	var ele_prepost_block = ele_prepost(body_parts.quote_id, true);
 	
