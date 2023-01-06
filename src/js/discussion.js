@@ -22,12 +22,38 @@ var ele_post_header = function (id, body, posted_by_username, created_utc) {
 		"text" : posted_by_username 
 	});
 
-	var ele_since = $("<span>", {
+	var ele_posted_by_strong = $("<strong>", {
+		append : [
+			ele_posted_by
+		]
+	});
+
+	var ele_since = $("<small>", {
 		"text" : created_utc > 0 ? since_phrase(created_utc) : ''
 	});
 
 	ele_since_list.push({ele: ele_since, utc: created_utc});
 
+	var ele_header = $("<p>", {
+		append : [
+			ele_posted_by_strong,
+			$("<span>", {"html" : "&nbsp;&ndash;&nbsp;"}),
+			ele_since
+		]	
+	});
+	
+	return ele_header;
+}
+
+var ele_post_footer = function (id) {
+	var ele_like = $("<i>", {
+		class : "home-icon bi-hand-thumbs-up-fill",
+		style : "font-size: 1.25rem; cursor: pointer;",
+		click : function () {
+
+		}
+	});
+	
 	var ele_reply = $("<i>", {
 		class : "home-icon bi-reply-fill",
 		style : "font-size: 1.5rem; cursor: pointer;",
@@ -47,26 +73,28 @@ var ele_post_header = function (id, body, posted_by_username, created_utc) {
 		}
 	});
 	
-	var ele_header = $("<p>", {
+	var ele_footer = $("<p>", {
 		append : [
-			ele_posted_by,
-			$("<span>", {"html" : "&nbsp;"}),
-			ele_since,
-			$("<span>", {"html" : "&nbsp;"}),
+			ele_like,
+			$("<span>", {"html" : "&nbsp;&nbsp;"}),
 			ele_reply,
+			$("<span>", {"html" : "&nbsp;"}),
 			ele_forward
 		]	
 	});
 	
-	return ele_header;
+	return ele_footer;
 }
+
 
 var ele_post_content = function (body, attachment) {
 
-	var ele_image_attachment = $("<div>");
-	var ele_file_attachment = $("<div>");
-
+	var ele_image_attachment = $("<div>", {class: "row gy-2"});
+	var ele_file_attachment = $("<div>", {class: "row gy-2"});
+	var ele_body = $("<div>", {class: "row gy-2"});
+	
 	var image_count = 0;
+	var file_count = 0;
 	
 	try {
 		var aobj = JSON.parse(attachment);
@@ -79,12 +107,13 @@ var ele_post_content = function (body, attachment) {
 				
 				if (image_ext.includes(ext)) {			
 					var ele_image = $("<img>", {
-						src : src,
-						style : "max-height: 100%; max-width: 100%; cursor: pointer;"
+						class : "img-responsive",
+						style : "max-height: 100%; max-width: 100%; cursor: pointer;",
+						src : src
 					});
 
 					var ele_image_div = $("<div>", {
-						style : "height: 100px; padding: 5px; float: left;",
+						class : "col-lg-2 col-md-3 col-sm-4",
 						append : [
 							ele_image
 						]
@@ -106,6 +135,7 @@ var ele_post_content = function (body, attachment) {
 					});
 				
 					ele_file_attachment.append(ele_link_p);
+					++file_count;
 				}
 			}
 		}
@@ -114,64 +144,63 @@ var ele_post_content = function (body, attachment) {
 		
 	}
 	
+	var ele_content = $("<div>", {
+		class : "row"
+	});
+	
 	if (image_count > 0) {
 		new Viewer(ele_image_attachment[0]);
-		ele_image_attachment.append($("<br>"));
+		ele_content.append(ele_image_attachment);
 	}
 	
-	var ele_content = $("<div>", {
-		class : "row",
-		append : [
-			ele_image_attachment,
-			ele_file_attachment,
-			$("<br>"),
-			$("<pre>", {"text" : body})
-		]
-	});
+	if (file_count > 0)
+		ele_content.append(ele_file_attachment);
+	
+	ele_body.append($("<pre>", {"html" : body}));
+	ele_content.append(ele_body);
 	
 	return ele_content;
 }
 
-var ele_prepost = function (quote_id, forward_id = 0, hr = false) {
+var ele_prepost = function (quote_id, hr = false) {
+
+	if (quote_id <= 0)
+		return;
 
 	var ele_prepost_block = $("<div>", {
 		class : "row"
 	});
 	
-	if (quote_id > 0) {
+	var ele_prepost_quote_icon = $("<i>", {
+		class : "home-icon bi-quote",
+		style : "font-size: 3rem;"
+	});
 	
-		var ele_prepost_quote_icon = $("<i>", {
-			class : "home-icon bi-quote",
-			style : "font-size: 3rem;"
-		});
-		
-		var ele_prepost_quote_icon_col = $("<div>", {
-			class : "col-1",
-			append : [
-				ele_prepost_quote_icon
-			]
-		});
-		
-		var ele_prepost_quote_body_col = $("<div>", {
-			class : "col"
-		});
+	var ele_prepost_quote_icon_col = $("<div>", {
+		class : "col-1",
+		append : [
+			ele_prepost_quote_icon
+		]
+	});
+	
+	var ele_prepost_quote_body_col = $("<div>", {
+		class : "col"
+	});
 
-		if (hr)
-			ele_prepost_quote_body_col.append($("<hr>"));
-		
-		// attach quote to post body
-		load_ref_post(ele_prepost_quote_body_col, quote_id);
-		
-		ele_prepost_block.append(ele_prepost_quote_icon_col);
-		ele_prepost_block.append(ele_prepost_quote_body_col);
-	}
+	if (hr)
+		ele_prepost_quote_body_col.append($("<hr>", {style : "border-top: 1px dotted"}));
 	
-	if (quote_id > 0)
-		return ele_prepost_block;
+	// attach quote to post body
+	load_ref_post(ele_prepost_quote_body_col, quote_id);
+	
+	ele_prepost_block.append(ele_prepost_quote_icon_col);
+	ele_prepost_block.append(ele_prepost_quote_body_col);
+
+	return ele_prepost_block;
 }
 
 var split_post_body = function (body) {
-	var chr, quote_id = 0, forward_id = 0;
+	var quote_id = 0;
 	var pos = body.indexOf("<<quote ");
 	if (pos >= 0) {
 		body = body.substring(pos + 8);
@@ -179,24 +208,9 @@ var split_post_body = function (body) {
 		if (pos >= 0) {
 			quote_id = parseInt(body.substring(0, pos));
 			body = body.substring(pos + 2);
-			chr = body.substring(0, 1);
-			if (chr == "\n")
-				body = body.substring(1);
 		}
 	}
-	pos = body.indexOf("<<forward ");
-	if (pos >= 0) {
-		body = body.substring(pos + 10);
-		pos = body.indexOf(">>");
-		if (pos >= 0) {
-			forward_id = parseInt(body.substring(0, pos));
-			body = body.substring(pos + 2);
-			chr = body.substring(0, 1);
-			if (chr == "\n")
-				body = body.substring(1);
-		}
-	}
-	return {body: body, quote_id: quote_id, forward_id: forward_id};
+	return {body: body, quote_id: quote_id};
 }
 
 var ele_post = function (id, body, attachment, posted_by_username, created_utc) {
@@ -204,9 +218,23 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	var body_parts = split_post_body(body);
 	body = body_parts.body;
 
-	var ele_prepost_block = ele_prepost(body_parts.quote_id, body_parts.forward_id, true);
+	const options = {
+		defaultProtocol: 'https',
+		formatHref: {
+			mention: function (href) {
+				if (href.substring(0, 1) == "/") // skip "/"
+					href = href.substring(1);
+				return app_rel_path + user_page_url + "?name=" + href;
+			}
+		}
+	};
+	
+	body = linkifyStr(body, options);
+	
+	var ele_prepost_block = ele_prepost(body_parts.quote_id, true);
 	
 	var ele_header = ele_post_header(id, body, posted_by_username, created_utc);
+	var ele_footer = ele_post_footer(id);
 		
 	var ele_post = ele_post_content(body, attachment);
 
@@ -214,10 +242,10 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 		ele_post.prepend(ele_prepost_block);
 	
 	ele_post.prepend(ele_header);
+	ele_post.append(ele_footer);
 	
 	var ele_post_col = $("<div>", {
 		class : "col",
-		style : "float: left;",
 		append : [
 			ele_post
 		]
@@ -422,11 +450,12 @@ var init_discussion = function () {
 	});
 
 	$('#post_btn').click(function(){
-		var body = $('#new_post').val();
-		if (body.length > 0 || post_quote_id > 0 || attachment_count > 0) {
+		var post = $('#new_post').val();
+		post = $("<div>", {html: post}).text(); // strip html tags
+		if (post.length > 0 || post_quote_id > 0 || attachment_count > 0) {
 			if (post_quote_id > 0)
-				body = "<<quote " + post_quote_id + ">>\n" + body;
-			post_new(discussion_ref, body);
+				post = "<<quote " + post_quote_id + ">>" + post;
+			post_new(discussion_ref, post);
 			post_quote_id = 0;
 			$("#quote_view").empty();
 			attachment_count = 0;
