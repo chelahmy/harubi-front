@@ -1149,7 +1149,7 @@ beat('post', 'attachment', function ($discussion_ref)
 			
 			if (strlen($fn) > 0) {
 
-				$rpath = frepo_path($fn);
+				$rpath = get_frepo_path($fn);
 
 				if ($rpath !== false && strlen($rpath) > 0) {
 
@@ -1198,7 +1198,7 @@ beat('post', 'get_attachment', function ($discussion_ref, $repo)
 	if (strlen($fname) <= 0)
 		return;
 		
-	$path = frepo_path($repo);
+	$path = get_frepo_path($repo);
 	
 	if ($path === false || strlen($path) <= 0)
 		return;
