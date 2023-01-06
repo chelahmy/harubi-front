@@ -9,12 +9,15 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === 'filerepo.php') {
 }
 
 $app_path = dirname(__DIR__);
-$filerepo_path = "../../filerepo";
-$filerepo_root = $app_path . "/" . $filerepo_path;
+$frepo_rel_root = "../../filerepo";
 
-function frepo_path($fn) {
-	global $filerepo_root;
-	$path = $filerepo_root;
+function get_frepo_root() {
+	global $app_path, $frepo_rel_root;
+	return $app_path . "/" . $frepo_rel_root;
+}
+
+function get_frepo_path($fn) {
+	$path = get_frepo_root();
 	for ($i = 0; $i < 32; $i += 2) {
 		$sf = substr($fn, $i, 2);
 		$path .= "/$sf";
@@ -25,15 +28,14 @@ function frepo_path($fn) {
 }
 
 function is_frepo_exist($fn) {
-	$path = frepo_path($fn);
+	$path = get_frepo_path($fn);
 	if ($path === false || strlen($path) <= 0)
 		return false;
 	return true;
 }
 
 function create_frepo($fn) {
-	global $filerepo_root;
-	$path = $filerepo_root;
+	$path = get_frepo_root();
 	for ($i = 0; $i < 32; $i += 2) {
 		$sf = substr($fn, $i, 2);
 		$path .= "/$sf";
@@ -65,14 +67,14 @@ function new_frepo() {
 function write_frepo_metadata($fn, $md) {
 	if (!is_array($md))
 		return false;
-	$path = frepo_path($fn);
+	$path = get_frepo_path($fn);
 	if ($path === false || strlen($path) <= 0)
 		return false;
 	return file_put_contents($path . "/file.md", json_encode($md));
 }
 
 function read_frepo_metadata($fn) {
-	$path = frepo_path($fn);
+	$path = get_frepo_path($fn);
 	if ($path === false || strlen($path) <= 0)
 		return false;
 	$json = file_get_contents($path . "/file.md");

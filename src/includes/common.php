@@ -10,7 +10,7 @@ require_once 'filerepo.php';
 // Application name will be loaded from settings when it is empty.
 // It should be unique for every application that uses this framework.
 // Otherwise, user session may criss-cross among applications.
-$appname = ''; 
+$appname = ''; // leave it empty
 
 session_start();
 
@@ -18,6 +18,9 @@ if (isset($harubi_settings_path) && strlen($harubi_settings_path) > 0)
 	harubi($harubi_settings_path);
 else
 	harubi();
+	
+if (isset($harubi_settings) && isset($harubi_settings["frepo_rel_root"]))
+	$frepo_rel_root = $harubi_settings["frepo_rel_root"];
 	
 define("err_unknown", 0);
 define("err_not_signed_in", 1);
@@ -1049,6 +1052,33 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 	);
 });
 
+beat('post', 'read', function ($id)
+{
+	if (!has_permission('post_read'))
+		return error_pack(err_access_denied);
+	
+	$where = equ('id', $id);
+	$records = read('post', FALSE, $where);
+	$rcnt = count($records);
+
+	if ($rcnt > 0) {
+		foreach ($records as &$r) {
+			unset($r['discussion_id']);
+			$posted_by = $r['posted_by'];
+			unset($r['posted_by']);
+			$r['posted_by_username'] = get_username_by_id($posted_by);
+		}
+	}
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'records' => $records,
+			'count' => $rcnt
+		)
+	);
+});
+
 beat('post', 'new', function ($discussion_ref, $body)
 {
 	if (!has_permission('post_new'))
@@ -1115,27 +1145,22 @@ beat('post', 'attachment', function ($discussion_ref)
 
 			$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-			$valid_ext = array("png", "jpeg", "jpg", "gif", "pdf", "html", "txt", "text", "json", "geojson");
+			$fn = new_frepo();
+			
+			if (strlen($fn) > 0) {
 
-			if (in_array($ext, $valid_ext)) {
+				$rpath = frepo_path($fn);
 
-				$fn = new_frepo();
-				
-				if (strlen($fn) > 0) {
+				if ($rpath !== false && strlen($rpath) > 0) {
 
-					$rpath = frepo_path($fn);
-
-					if ($rpath !== false && strlen($rpath) > 0) {
-
-						if (move_uploaded_file($_FILES['files']['tmp_name'][$index], $rpath . "/file.dt")){
-							$md = array("fname" => $filename, "ext" => $ext, "ref" => $discussion_ref, "ts" => time());
-							if (write_frepo_metadata($fn, $md)) {
-								unset($md["ext"]);
-								unset($md["ref"]);
-								unset($md["ts"]);
-								$md["repo"] = $fn;
-								$uploaded_files[] = $md;
-							}
+					if (move_uploaded_file($_FILES['files']['tmp_name'][$index], $rpath . "/file.dt")){
+						$md = array("fname" => $filename, "ext" => $ext, "ref" => $discussion_ref, "ts" => time());
+						if (write_frepo_metadata($fn, $md)) {
+							unset($md["ext"]);
+							unset($md["ref"]);
+							unset($md["ts"]);
+							$md["repo"] = $fn;
+							$uploaded_files[] = $md;
 						}
 					}
 				}

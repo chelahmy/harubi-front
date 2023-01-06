@@ -1,15 +1,15 @@
 {
 	"appname" : "harubi-front",
 	"language" : "en",
+	"new_user_role" : "member",
+	"page_size" : 25,
+	"frepo_rel_root" : "../../filerepo",
+	"logs" : 0,
 	
 	"session" : {
 		"timeout" : 7200,
 		"max_signins_per_week" : 10
 	},
-	
-	"new_user_role" : "member",
-	"logs" : 0,
-	"page_size" : 25,
 	
     "mysql" : {
         "hostname" : "localhost",
