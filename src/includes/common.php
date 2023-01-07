@@ -1210,27 +1210,49 @@ beat('post', 'get_attachment', function ($discussion_ref, $repo)
 		
 	header('Content-Description: File Transfer');
 	
+	$attachment = false;
+	$video_ext = array("mp4", "webm", "ogg");
 	$image_ext = array("png", "jpeg", "jpg", "gif");
 	$ext = $md['ext'];
+
+	$fname_lwr = strtolower($fname);
 	
-	if (in_array($ext, $image_ext))
+	if ($fname_lwr == "readme" || $fname_lwr == "read.me")
+		$ext = "txt";
+	
+	if (in_array($ext, $video_ext))
+		header('Content-Type: video/' . $ext);
+	else if (in_array($ext, $image_ext))
 		header('Content-Type: image/' . $ext);
 	else if ($ext == 'html')
 		header('Content-Type: text/html');
+	else if ($ext == 'css')
+		header('Content-Type: text/css');
+	else if ($ext == 'js' || $ext == 'javascript')
+		header('Content-Type: text/javascript');
 	else if ($ext == 'txt' || $ext == 'text')
 		header('Content-Type: text/plain');
 	else if ($ext == 'pdf')
 		header('Content-Type: application/pdf');
-	else if ($ext == 'json')
-		header('Content-Type: application/json');
-	else if ($ext == 'geojson')
-		header('Content-Type: application/geo+json');
-	else
-		header('Content-Type: application/octet-stream');
+	else {
+		$attachment = true;
+
+		if ($ext == 'json')
+			header('Content-Type: application/json');
+		else if ($ext == 'geojson')
+			header('Content-Type: application/geo+json');
+		else
+			header('Content-Type: application/octet-stream');
+	}
 		
 	header("Cache-Control: no-cache, must-revalidate");
 	header("Expires: 0");
-	header('Content-Disposition: attachment; filename="' . $fname . '"');
+	
+	if ($attachment)
+		header('Content-Disposition: attachment; filename="' . $fname . '"');
+	else
+		header('Content-Disposition: inline');
+	
 	header('Content-Length: ' . filesize($fd));
 	header('Pragma: public');
 
