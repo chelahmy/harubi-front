@@ -1052,10 +1052,29 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 	);
 });
 
-beat('post', 'read', function ($id)
+beat('post', 'read', function ($discussion_ref, $id)
 {
 	if (!has_permission('post_read'))
 		return error_pack(err_access_denied);
+	
+	// Note:
+	// discussion_ref is required for security since post id is exposed.
+	// Must not allow a post to be read by id only.
+	
+	$discussion_id = 0;
+	$where = equ('ref', $discussion_ref, 'string');
+	$records = read('discussion', FALSE, $where);
+	
+	if (read_failed($records))
+		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+	
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt > 0)
+		$discussion_id = intval($records[0]['id']);
+	
+	if ($discussion_id <= 0)
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 	
 	$where = equ('id', $id);
 	$records = read('post', FALSE, $where);
@@ -1063,6 +1082,9 @@ beat('post', 'read', function ($id)
 
 	if ($rcnt > 0) {
 		foreach ($records as &$r) {
+			if ($r['discussion_id'] != $discussion_id)
+				return error_pack(err_read_failed);
+			
 			unset($r['discussion_id']);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
