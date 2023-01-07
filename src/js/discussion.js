@@ -3,7 +3,7 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 4 January 2023
 
-var attachment_max_file_size = "512k";
+var attachment_max_file_size = "256M";
 var attachment_max_files = 8;
 var attachment_warnings = 0;
 var attachment_count = 0;
@@ -14,6 +14,9 @@ var discussion_ref = '';
 var latest_post_id = 0;
 var ele_since_list = [];
 var load_newer_posts_timer;
+
+var video_player_count = 0;
+var video_player_ids = [];
 
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
@@ -86,18 +89,20 @@ var ele_post_footer = function (id) {
 	return ele_footer;
 }
 
+var ele_post_content = function (id, body, attachment) {
 
-var ele_post_content = function (body, attachment) {
-
+	var ele_video_attachment = $("<div>", {class: "row gy-2"});
 	var ele_image_attachment = $("<div>", {class: "row gy-2"});
 	var ele_file_attachment = $("<div>", {class: "row gy-2"});
 	var ele_body = $("<div>", {class: "row gy-2"});
 	
+	var video_count = 0;
 	var image_count = 0;
 	var file_count = 0;
 	
 	try {
 		var aobj = JSON.parse(attachment);
+		var video_ext = ["mp4", "webm", "ogg"];
 		var image_ext = ["png", "jpeg", "jpg", "gif"];
 		for (var i in aobj) {
 			if (aobj.hasOwnProperty(i)) {
@@ -105,11 +110,52 @@ var ele_post_content = function (body, attachment) {
 				var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + discussion_ref + "&repo=" + attc.repo;
 				var ext = attc.fname.split('.').pop();
 				
-				if (image_ext.includes(ext)) {			
+				if (video_ext.includes(ext)) {
+				
+					var ele_video_notice = $("<p>", {
+						class : "vjs-no-js",
+						append : [
+							$("<span>", {"text" : t("To view this video please enable JavaScript, and consider upgrading to a web browser that @supports_HTML5_video",
+								{"@supports_HTML5_video" : $("<a>", {href : "https://videojs.com/html5-video-support/", target : "_blank",
+									text : t("supports HTML5 video")}).prop('outerHTML')})})
+						]
+					});
+				
+					var ele_video_source = $("<source>", {
+						"src" : src,
+						type : "video/" + ext
+					});
+					
+					var player_id = "video-player-" + id + "-" + video_player_count;
+					
+					var ele_video = $("<video>", {
+						"id" : player_id,
+						class : "video-js img-responsive",
+						style : "max-height: 100%; max-width: 100%;",
+						append : [
+							ele_video_source,
+							ele_video_notice
+						]
+					});
+										
+					video_player_ids.push(player_id);
+					
+					var ele_video_div = $("<div>", {
+						class : "col-lg-4 col-md-6 col-sm-12",
+						append : [
+							ele_video
+						]
+					});
+
+					ele_video_attachment.append(ele_video_div);
+					++video_count;
+					++video_player_count;
+				}
+				else if (image_ext.includes(ext)) {
 					var ele_image = $("<img>", {
 						class : "img-responsive",
 						style : "max-height: 100%; max-width: 100%; cursor: pointer;",
-						src : src
+						"src" : src
 					});
 
 					var ele_image_div = $("<div>", {
@@ -147,6 +193,9 @@ var ele_post_content = function (body, attachment) {
 	var ele_content = $("<div>", {
 		class : "row"
 	});
+	
+	if (video_count > 0)
+		ele_content.append(ele_video_attachment);
 	
 	if (image_count > 0) {
 		new Viewer(ele_image_attachment[0]);
@@ -257,7 +306,7 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	var ele_header = ele_post_header(id, body, posted_by_username, created_utc);
 	var ele_footer = ele_post_footer(id);
 		
-	var ele_post = ele_post_content(body, attachment);
+	var ele_post = ele_post_content(id, body, attachment);
 
 	if (typeof ele_prepost_block !== "undefined")
 		ele_post.prepend(ele_prepost_block);
@@ -283,11 +332,38 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	return ele_post_block;
 }
 
+var apply_video_players = function () {
+	setTimeout(function () {
+		for (var i in video_player_ids) {
+			var id = video_player_ids[i];
+			try {
+				const options = {
+					fluid: true,
+					preload: "auto",
+					autoplay: false,
+					controls: true,
+					//aspectRatio: "16:9",
+					loop: false,
+					// playVideo: false
+				}
+
+				videojs(id, options);
+			}
+			catch (e) {
+				console.log(e);
+			}
+		}
+		
+		video_player_ids = [];
+	}, 100);
+}
+
 var prepend_post = function (id, body, attachment, posted_by_username, created_utc) {
 	
 	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
 
 	$("#posts").prepend(ele);
+	apply_video_players();
 }
 
 var append_post = function (id, body, attachment, posted_by_username, created_utc) {
@@ -295,6 +371,7 @@ var append_post = function (id, body, attachment, posted_by_username, created_ut
 	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
 
 	$("#posts").append(ele);
+	apply_video_players();
 }
 
 var load_ref_post = function (host_ele, id) {
@@ -304,8 +381,9 @@ var load_ref_post = function (host_ele, id) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
 			var body_parts = split_post_body(r.body);
-			var ele = ele_post_content(body_parts.body, r.attachment);
+			var ele = ele_post_content(id, body_parts.body, r.attachment);
 			host_ele.prepend(ele);
+			apply_video_players();
 		}
 	});
 }
