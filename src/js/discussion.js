@@ -10,7 +10,7 @@ var attachment_count = 0;
 
 var post_quote_id = 0;
 
-var discussion_ref = '';
+var this_discussion_ref = '';
 var latest_post_id = 0;
 var ele_since_list = [];
 var load_newer_posts_timer;
@@ -107,7 +107,7 @@ var ele_post_content = function (id, body, attachment) {
 		for (var i in aobj) {
 			if (aobj.hasOwnProperty(i)) {
 				var attc = aobj[i];
-				var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + discussion_ref + "&repo=" + attc.repo;
+				var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + this_discussion_ref + "&repo=" + attc.repo;
 				var ext = attc.fname.split('.').pop();
 				
 				if (video_ext.includes(ext)) {
@@ -240,7 +240,7 @@ var ele_prepost = function (quote_id, hr = false) {
 		ele_prepost_quote_body_col.append($("<hr>", {style : "border-top: 1px dotted"}));
 	
 	// attach quote to post body
-	load_ref_post(ele_prepost_quote_body_col, quote_id);
+	load_ref_post(ele_prepost_quote_body_col, this_discussion_ref, quote_id);
 	
 	ele_prepost_block.append(ele_prepost_quote_icon_col);
 	ele_prepost_block.append(ele_prepost_quote_body_col);
@@ -374,9 +374,9 @@ var append_post = function (id, body, attachment, posted_by_username, created_ut
 	apply_video_players();
 }
 
-var load_ref_post = function (host_ele, id) {
+var load_ref_post = function (host_ele, discussion_ref, id) {
 	qserv(main_server, {model: 'post', action: 'read',
-		id: id}, function (rst, extra) {
+		discussion_ref: discussion_ref, id: id}, function (rst, extra) {
 		
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
@@ -541,11 +541,11 @@ var upload_attachment = function (discussion_ref) {
 var init_discussion = function () {
 
 	$('#load_earlier_btn').click(function(){
-		load_posts(0, discussion_ref);
+		load_posts(0, this_discussion_ref);
 	});
 
 	$('#load_newer_btn').click(function(){
-		load_newer_posts(discussion_ref);
+		load_newer_posts(this_discussion_ref);
 	});
 
 	$('#post_btn').click(function(){
@@ -554,7 +554,7 @@ var init_discussion = function () {
 		if (post.length > 0 || post_quote_id > 0 || attachment_count > 0) {
 			if (post_quote_id > 0)
 				post = "<<quote " + post_quote_id + ">>" + post;
-			post_new(discussion_ref, post);
+			post_new(this_discussion_ref, post);
 			post_quote_id = 0;
 			$("#quote_view").empty();
 			attachment_count = 0;
@@ -577,7 +577,7 @@ var init_discussion = function () {
 
 	// Load new posts every 10 seconds
 	load_newer_posts_timer = setInterval(function () {
-		load_newer_posts(discussion_ref);
+		load_newer_posts(this_discussion_ref);
 	}, 10000);
 	
 	load_preferences("attachment", function (data) {
@@ -628,7 +628,7 @@ var init_discussion = function () {
 	});
 
 	$('#attach_btn').click(function(){
-		upload_attachment(discussion_ref);
+		upload_attachment(this_discussion_ref);
 	});
 }
 
