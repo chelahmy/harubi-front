@@ -16,7 +16,8 @@ var ele_since_list = [];
 var load_newer_posts_timer;
 
 var video_player_count = 0;
-var video_player_ids = [];
+var video_player_dts = [];
+var video_player = false;
 
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
@@ -61,6 +62,7 @@ var ele_post_footer = function (id) {
 		class : "home-icon bi-reply-fill",
 		style : "font-size: 1.5rem; cursor: pointer;",
 		click : function () {
+			dispose_video_player(); // otherwise video won't be quoted
 			post_quote_id = id;
 			$("#quote_view").empty();
 			$("#quote_view").append(ele_prepost(id));
@@ -89,6 +91,105 @@ var ele_post_footer = function (id) {
 	return ele_footer;
 }
 
+// Note: The video player is blocking everything. Very bad coding approach.
+//		 And disposing the player is taxing.
+var dispose_video_player = function () {
+	if (video_player === false)
+		return;
+		
+	var vpid = video_player.id();
+	// disposing video player will destroy its video element
+	// so first get its video ele parent,...
+	var p_ele = $("#" + vpid).parent()[0];
+	// ...then dispose the player,...
+	video_player.dispose();
+	video_player = false;
+	// ...and then recreate its video element back
+	var dt = video_player_dts[vpid];
+	var ele = ele_video_player(dt.id, dt.src, dt.ext, vpid);
+	ele.click(on_video_click);
+	$(p_ele).append(ele);
+}
+
+// See https://github.com/videojs/video.js/issues/7358
+// Note: A video player with unfriendly api. This is just one of it.
+//       It changes your defined id by appending it with string of stupidity.
+var clean_video_player_id = function (id) {
+	var pos = id.indexOf("-vp");
+	
+	if (pos < 0)
+		return id;
+		
+	return id.substring(0, pos + 3);
+}
+
+var on_video_click = function (e) {
+	var player_id = clean_video_player_id(e.target.id);
+	console.log("Hi " + player_id);
+	try {
+		if (video_player !== false) {
+			var vpid = video_player.id();
+			// dispose other player
+			if (vpid != player_id) {
+				dispose_video_player();
+				console.log("disposed");
+			}
+		}
+		
+		if (video_player == false) {	
+			const options = {
+				fluid: true,
+				preload: "auto",
+				autoplay: true,
+				controls: true,
+				loop: false
+			}
+			
+			video_player = videojs(player_id, options);
+		}
+
+		video_player.play();
+	}
+	catch (e) {
+		console.log(e);
+	}
+}
+
+var ele_video_player = function (id, src, ext, pid = 0) {
+	var ele_video_notice = $("<p>", {
+		class : "vjs-no-js",
+		append : [
+			$("<span>", {"text" : t("To view this video please enable JavaScript, and consider upgrading to a web browser that @supports_HTML5_video",
+				{"@supports_HTML5_video" : $("<a>", {href : "https://videojs.com/html5-video-support/", target : "_blank",
+					text : t("supports HTML5 video")}).prop('outerHTML')})})
+		]
+	});
+
+	var ele_video_source = $("<source>", {
+		"src" : src,
+		type : "video/" + ext
+	});
+	
+	var player_id = pid;
+	
+	if (player_id <= 0)
+		player_id = "video-player-" + video_player_count++ + "-vp";
+	
+	var ele_video = $("<video>", {
+		"id" : player_id,
+		class : "video-js img-responsive",
+		style : "max-height: 100%; max-width: 100%; cursor: pointer;",
+		append : [
+			ele_video_source,
+			ele_video_notice
+		]
+	});
+
+	video_player_dts[player_id] = {id: id, src: src, ext: ext};
+	
+	return ele_video;		
+}
+
 var ele_post_content = function (id, body, attachment) {
 
 	var ele_video_attachment = $("<div>", {class: "row gy-2"});
@@ -112,44 +213,15 @@ var ele_post_content = function (id, body, attachment) {
 				
 				if (video_ext.includes(ext)) {
 				
-					var ele_video_notice = $("<p>", {
-						class : "vjs-no-js",
-						append : [
-							$("<span>", {"text" : t("To view this video please enable JavaScript, and consider upgrading to a web browser that @supports_HTML5_video",
-								{"@supports_HTML5_video" : $("<a>", {href : "https://videojs.com/html5-video-support/", target : "_blank",
-									text : t("supports HTML5 video")}).prop('outerHTML')})})
-						]
-					});
-				
-					var ele_video_source = $("<source>", {
-						"src" : src,
-						type : "video/" + ext
-					});
-					
-					var player_id = "video-player-" + id + "-" + video_player_count;
-					
-					var ele_video = $("<video>", {
-						"id" : player_id,
-						class : "video-js img-responsive",
-						style : "max-height: 100%; max-width: 100%;",
-						append : [
-							ele_video_source,
-							ele_video_notice
-						]
-					});
-										
-					video_player_ids.push(player_id);
-					
 					var ele_video_div = $("<div>", {
-						class : "col-lg-4 col-md-6 col-sm-12",
-						append : [
-							ele_video
-						]
+						class : "col-lg-4 col-md-6 col-sm-12"
 					});
 
+					var ele_video = ele_video_player(id, src, ext);
+					ele_video.click(on_video_click);
+					ele_video_div.append(ele_video);
 					ele_video_attachment.append(ele_video_div);
 					++video_count;
-					++video_player_count;
 				}
 				else if (image_ext.includes(ext)) {
 					var ele_image = $("<img>", {
@@ -332,38 +404,11 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	return ele_post_block;
 }
 
-var apply_video_players = function () {
-	setTimeout(function () {
-		for (var i in video_player_ids) {
-			var id = video_player_ids[i];
-			try {
-				const options = {
-					fluid: true,
-					preload: "auto",
-					autoplay: false,
-					controls: true,
-					//aspectRatio: "16:9",
-					loop: false,
-					// playVideo: false
-				}
-
-				videojs(id, options);
-			}
-			catch (e) {
-				console.log(e);
-			}
-		}
-		
-		video_player_ids = [];
-	}, 100);
-}
-
 var prepend_post = function (id, body, attachment, posted_by_username, created_utc) {
 	
 	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
 
 	$("#posts").prepend(ele);
-	apply_video_players();
 }
 
 var append_post = function (id, body, attachment, posted_by_username, created_utc) {
@@ -371,7 +416,6 @@ var append_post = function (id, body, attachment, posted_by_username, created_ut
 	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
 
 	$("#posts").append(ele);
-	apply_video_players();
 }
 
 var load_ref_post = function (host_ele, discussion_ref, id) {
@@ -383,7 +427,6 @@ var load_ref_post = function (host_ele, discussion_ref, id) {
 			var body_parts = split_post_body(r.body);
 			var ele = ele_post_content(id, body_parts.body, r.attachment);
 			host_ele.prepend(ele);
-			apply_video_players();
 		}
 	});
 }
@@ -630,6 +673,10 @@ var init_discussion = function () {
 	$('#attach_btn').click(function(){
 		upload_attachment(this_discussion_ref);
 	});
+
+	$(window).on("unload", function(){
+		dispose_video_player();
+	});		
 }
 
 
