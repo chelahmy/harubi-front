@@ -6,6 +6,7 @@
 
 require_once 'harubi/harubi.php';
 require_once 'filerepo.php';
+require_once 'VideoStream.php';
 
 // Application name will be loaded from settings when it is empty.
 // It should be unique for every application that uses this framework.
@@ -1230,6 +1231,7 @@ beat('post', 'get_attachment', function ($discussion_ref, $repo)
 	if (!file_exists($fd))
 		return;
 		
+	ob_get_clean();
 	header('Content-Description: File Transfer');
 	
 	$attachment = false;
@@ -1242,8 +1244,11 @@ beat('post', 'get_attachment', function ($discussion_ref, $repo)
 	if ($fname_lwr == "readme" || $fname_lwr == "read.me")
 		$ext = "txt";
 	
-	if (in_array($ext, $video_ext))
-		header('Content-Type: video/' . $ext);
+	if (in_array($ext, $video_ext)) {
+		//header('Content-Type: video/' . $ext);
+		$stream = new VideoStream($fd, $ext);
+		$stream->start();
+	}
 	else if (in_array($ext, $image_ext))
 		header('Content-Type: image/' . $ext);
 	else if ($ext == 'html')
@@ -1266,9 +1271,10 @@ beat('post', 'get_attachment', function ($discussion_ref, $repo)
 		else
 			header('Content-Type: application/octet-stream');
 	}
-		
-	header("Cache-Control: no-cache, must-revalidate");
-	header("Expires: 0");
+	
+	// Allow 30 days cache
+    header("Cache-Control: max-age=2592000, public");
+    header("Expires: " . gmdate('D, d M Y H:i:s', time() + 2592000) . ' GMT');
 	
 	if ($attachment)
 		header('Content-Disposition: attachment; filename="' . $fname . '"');
