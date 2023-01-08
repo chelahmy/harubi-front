@@ -18,6 +18,7 @@ var load_newer_posts_timer;
 var video_player_count = 0;
 var video_player_dts = [];
 var video_player = false;
+var video_playing = false;
 
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
@@ -125,18 +126,15 @@ var clean_video_player_id = function (id) {
 
 var on_video_click = function (e) {
 	var player_id = clean_video_player_id(e.target.id);
-	console.log("Hi " + player_id);
 	try {
 		if (video_player !== false) {
 			var vpid = video_player.id();
 			// dispose other player
-			if (vpid != player_id) {
+			if (vpid != player_id)
 				dispose_video_player();
-				console.log("disposed");
-			}
 		}
 		
-		if (video_player == false) {	
+		if (video_player === false) {	
 			const options = {
 				fluid: true,
 				preload: "auto",
@@ -145,10 +143,26 @@ var on_video_click = function (e) {
 				loop: false
 			}
 			
+			// TODO: apply user language
 			video_player = videojs(player_id, options);
+			var close_btn = video_player.controlBar.addChild('button', {}, 0);
+			close_btn.controlText("Close"); // videojs will do its own translation
+			var close_btn_dom = close_btn.el();
+			close_btn_dom.innerHTML = '<span class="vjs-icon-cancel"></span>';
+			close_btn_dom.onclick = function () {
+				dispose_video_player();
+			};
+			video_playing = false;
 		}
 
-		video_player.play();
+		if (!video_playing) {
+			video_player.play();
+			video_playing = true;
+		}
+		else {
+			video_player.pause();
+			video_playing = false;
+		}
 	}
 	catch (e) {
 		console.log(e);
@@ -200,66 +214,70 @@ var ele_post_content = function (id, body, attachment) {
 	var video_count = 0;
 	var image_count = 0;
 	var file_count = 0;
+
+	attachment = attachment.trim();
 	
-	try {
-		var aobj = JSON.parse(attachment);
-		var video_ext = ["mp4", "webm", "ogg"];
-		var image_ext = ["png", "jpeg", "jpg", "gif"];
-		for (var i in aobj) {
-			if (aobj.hasOwnProperty(i)) {
-				var attc = aobj[i];
-				var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + this_discussion_ref + "&repo=" + attc.repo;
-				var ext = attc.fname.split('.').pop();
-				
-				if (video_ext.includes(ext)) {
-				
-					var ele_video_div = $("<div>", {
-						class : "col-lg-4 col-md-6 col-sm-12"
-					});
+	if (attachment.length > 0) {
+		try {
+			var aobj = JSON.parse(attachment);
+			var video_ext = ["mp4", "webm", "ogg"];
+			var image_ext = ["png", "jpeg", "jpg", "gif"];
+			for (var i in aobj) {
+				if (aobj.hasOwnProperty(i)) {
+					var attc = aobj[i];
+					var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + this_discussion_ref + "&repo=" + attc.repo;
+					var ext = attc.fname.split('.').pop();
+					
+					if (video_ext.includes(ext)) {
+					
+						var ele_video_div = $("<div>", {
+							class : "col-lg-4 col-md-6 col-sm-12"
+						});
 
-					var ele_video = ele_video_player(id, src, ext);
-					ele_video.click(on_video_click);
-					ele_video_div.append(ele_video);
-					ele_video_attachment.append(ele_video_div);
-					++video_count;
-				}
-				else if (image_ext.includes(ext)) {
-					var ele_image = $("<img>", {
-						class : "img-responsive",
-						style : "max-height: 100%; max-width: 100%; cursor: pointer;",
-						"src" : src
-					});
+						var ele_video = ele_video_player(id, src, ext);
+						ele_video.click(on_video_click);
+						ele_video_div.append(ele_video);
+						ele_video_attachment.append(ele_video_div);
+						++video_count;
+					}
+					else if (image_ext.includes(ext)) {
+						var ele_image = $("<img>", {
+							class : "img-responsive",
+							style : "max-height: 100%; max-width: 100%; cursor: pointer;",
+							"src" : src
+						});
 
-					var ele_image_div = $("<div>", {
-						class : "col-lg-2 col-md-3 col-sm-4",
-						append : [
-							ele_image
-						]
-					});
+						var ele_image_div = $("<div>", {
+							class : "col-lg-2 col-md-3 col-sm-4",
+							append : [
+								ele_image
+							]
+						});
 
-					ele_image_attachment.append(ele_image_div);
-					++image_count;
-				}
-				else {
-					var ele_link = $("<a>", {
-						href : src,
-						text : attc.fname
-					});
-				
-					var ele_link_p = $("<p>", {
-						append : [
-							ele_link
-						]
-					});
-				
-					ele_file_attachment.append(ele_link_p);
-					++file_count;
+						ele_image_attachment.append(ele_image_div);
+						++image_count;
+					}
+					else {
+						var ele_link = $("<a>", {
+							href : src,
+							text : attc.fname
+						});
+					
+						var ele_link_p = $("<p>", {
+							append : [
+								ele_link
+							]
+						});
+					
+						ele_file_attachment.append(ele_link_p);
+						++file_count;
+					}
 				}
 			}
+			
+		} catch (e) {
+			console.log(e);
 		}
-		
-	} catch (e) {
-		
 	}
 	
 	var ele_content = $("<div>", {
@@ -552,7 +570,6 @@ var upload_attachment = function (discussion_ref) {
 		},
 		
 		success: function (response) {
-			console.log(response);
 			handle_qserv_success(response, function (rst, extra) {
 				if (rst.data.count > 0) {
 					attachment_count = rst.data.count;
