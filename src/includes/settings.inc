@@ -67,6 +67,12 @@
             "created_utc" : "int",
             "updated_utc" : "int"
         },
+        "postreact" : {
+            "id" : "int",
+            "postid" : "int",
+            "userid" : "int",
+            "type" : "int"
+        },
         "role" : {
             "id" : "int",
             "name" : "string",

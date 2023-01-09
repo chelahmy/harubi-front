@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 27, 2022 at 07:44 PM
+-- Generation Time: Jan 09, 2023 at 03:22 PM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -20,6 +20,18 @@ SET time_zone = "+00:00";
 --
 -- Database: `harubi-front`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discussion`
+--
+
+CREATE TABLE `discussion` (
+  `id` bigint NOT NULL,
+  `ref` char(32) NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -80,13 +92,14 @@ CREATE TABLE `post` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `discussion`
+-- Table structure for table `postreact`
 --
 
-CREATE TABLE `discussion` (
+CREATE TABLE `postreact` (
   `id` bigint NOT NULL,
-  `ref` char(32) NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+  `postid` bigint NOT NULL,
+  `userid` bigint NOT NULL,
+  `type` tinyint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -155,6 +168,14 @@ CREATE TABLE `usergroup` (
 --
 
 --
+-- Indexes for table `discussion`
+--
+ALTER TABLE `discussion`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD UNIQUE KEY `ref` (`ref`);
+
+--
 -- Indexes for table `member`
 --
 ALTER TABLE `member`
@@ -182,15 +203,15 @@ ALTER TABLE `permrole`
 --
 ALTER TABLE `post`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `discussion` (`discussion_id`);
+  ADD KEY `discussion` (`discussion_id`) USING BTREE;
 
 --
--- Indexes for table `discussion`
+-- Indexes for table `postreact`
 --
-ALTER TABLE `discussion`
+ALTER TABLE `postreact`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`),
-  ADD UNIQUE KEY `ref` (`ref`);
+  ADD UNIQUE KEY `post_user` (`postid`,`userid`) USING BTREE,
+  ADD KEY `post_type` (`postid`,`type`) USING BTREE;
 
 --
 -- Indexes for table `preference`
@@ -233,6 +254,12 @@ ALTER TABLE `usergroup` ADD FULLTEXT KEY `name` (`name`);
 --
 
 --
+-- AUTO_INCREMENT for table `discussion`
+--
+ALTER TABLE `discussion`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `member`
 --
 ALTER TABLE `member`
@@ -257,9 +284,9 @@ ALTER TABLE `post`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `discussion`
+-- AUTO_INCREMENT for table `postreact`
 --
-ALTER TABLE `discussion`
+ALTER TABLE `postreact`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
