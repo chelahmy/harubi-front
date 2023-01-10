@@ -94,8 +94,15 @@ var show_map = function (geojson, id, height, zoom) {
 		return;
 		
 	try {
-		var gobj = JSON.parse(geojson);
+		var gobj;
+		
+		if (typeof geojson === "object")
+			gobj = geojson;
+		else
+			gobj = JSON.parse(geojson);
+			
 		var bb = get_bounding_box(gobj);
+		
 		if (is_bbox(bb)) {
 			var mx = (bb.x1 + bb.x2) / 2;
 			var my = (bb.y1 + bb.y2) / 2;

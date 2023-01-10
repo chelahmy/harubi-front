@@ -20,6 +20,8 @@ var video_player_dts = [];
 var video_player = false;
 var video_playing = false;
 
+var map_viewer_count = 0;
+
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
 	var ele_posted_by = $("<a>", {
@@ -204,13 +206,36 @@ var ele_video_player = function (id, src, ext, pid = 0) {
 	return ele_video;		
 }
 
+var ele_map_viewer = function (src) {
+	var id = "map_" + map_viewer_count++;
+	
+	var ele_video = $("<div>", {
+		id : id
+	});
+	
+	var ele_div = $("<div>", {
+		class : "col-6",
+		append : [
+			ele_video
+		]
+	});
+	
+	$.getJSON(src, function (data) {
+		show_map(data, id);
+	});
+	
+	return ele_div;
+}
+
 var ele_post_content = function (id, body, attachment) {
 
+	var ele_map_attachment = $("<div>", {class: "row"});
 	var ele_video_attachment = $("<div>", {class: "row gy-2"});
 	var ele_image_attachment = $("<div>", {class: "row gy-2"});
 	var ele_file_attachment = $("<div>", {class: "row gy-2"});
 	var ele_body = $("<div>", {class: "row gy-2"});
 	
+	var map_count = 0;
 	var video_count = 0;
 	var image_count = 0;
 	var file_count = 0;
@@ -226,9 +251,15 @@ var ele_post_content = function (id, body, attachment) {
 				if (aobj.hasOwnProperty(i)) {
 					var attc = aobj[i];
 					var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + this_discussion_ref + "&repo=" + attc.repo;
-					var ext = attc.fname.split('.').pop();
+					var ext = attc.fname.split('.').pop().toLowerCase();
 					
-					if (video_ext.includes(ext)) {
+					if (ext == "geojson") {
+					
+						var ele_map = ele_map_viewer(src);
+						ele_map_attachment.append(ele_map);
+						++map_count;
+					}
+					else if (video_ext.includes(ext)) {
 					
 						var ele_video_div = $("<div>", {
 							class : "col-lg-4 col-md-6 col-sm-12"
@@ -241,6 +272,7 @@ var ele_post_content = function (id, body, attachment) {
 						++video_count;
 					}
 					else if (image_ext.includes(ext)) {
+					
 						var ele_image = $("<img>", {
 							class : "img-responsive",
 							style : "max-height: 100%; max-width: 100%; cursor: pointer;",
@@ -258,6 +290,7 @@ var ele_post_content = function (id, body, attachment) {
 						++image_count;
 					}
 					else {
+					
 						var ele_link = $("<a>", {
 							href : src,
 							text : attc.fname
@@ -283,6 +316,9 @@ var ele_post_content = function (id, body, attachment) {
 	var ele_content = $("<div>", {
 		class : "row"
 	});
+	
+	if (map_count > 0)
+		ele_content.append(ele_map_attachment);
 	
 	if (video_count > 0)
 		ele_content.append(ele_video_attachment);
