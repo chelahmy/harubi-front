@@ -89,7 +89,7 @@ var is_bbox = function (bbox) {
 	return true;
 }
 
-var show_map = function (geojson) {
+var show_map = function (geojson, id, height, zoom) {
 	if (geojson.length <= 0)
 		return;
 		
@@ -100,9 +100,18 @@ var show_map = function (geojson) {
 			var mx = (bb.x1 + bb.x2) / 2;
 			var my = (bb.y1 + bb.y2) / 2;
 
-			$("#" + map_id).height(map_height);
+			if (typeof id === "undefined")
+				id = map_id;
+				
+			if (typeof height === "undefined")
+				height = map_height;
+
+			if (typeof zoom === "undefined")
+				zoom = map_zoom_level;
+
+			$("#" + id).height(height);
 			
-			map = L.map(map_id).setView([my, mx], map_zoom_level);
+			map = L.map(id).setView([my, mx], zoom);
 			
 			map.addControl(new L.Control.Fullscreen());
 
