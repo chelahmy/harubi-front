@@ -3,6 +3,8 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 29 December 2022
 
+user_page_url = "admin/useredit.html";
+
 var load_group = function (ref) {
 	qserv(admin_server, {model: 'usergroup', action: 'read',
 		ref: ref}, function (rst, extra) {
