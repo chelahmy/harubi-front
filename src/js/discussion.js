@@ -209,27 +209,20 @@ var ele_video_player = function (id, src, ext, pid = 0) {
 var ele_map_viewer = function (src) {
 	var id = "map_" + map_viewer_count++;
 	
-	var ele_video = $("<div>", {
+	var ele_map = $("<div>", {
 		id : id
-	});
-	
-	var ele_div = $("<div>", {
-		class : "col-6",
-		append : [
-			ele_video
-		]
 	});
 	
 	$.getJSON(src, function (data) {
 		show_map(data, id);
 	});
 	
-	return ele_div;
+	return ele_map;
 }
 
 var ele_post_content = function (id, body, attachment) {
 
-	var ele_map_attachment = $("<div>", {class: "row"});
+	var ele_map_attachment = $("<div>", {class: "row gy-2"});
 	var ele_video_attachment = $("<div>", {class: "row gy-2"});
 	var ele_image_attachment = $("<div>", {class: "row gy-2"});
 	var ele_file_attachment = $("<div>", {class: "row gy-2"});
@@ -255,8 +248,13 @@ var ele_post_content = function (id, body, attachment) {
 					
 					if (ext == "geojson") {
 					
+						var ele_map_div = $("<div>", {
+							class : "col-lg-6 col-md-6 col-sm-12"
+						});
+
 						var ele_map = ele_map_viewer(src);
-						ele_map_attachment.append(ele_map);
+						ele_map_div.append(ele_map);
+						ele_map_attachment.append(ele_map_div);
 						++map_count;
 					}
 					else if (video_ext.includes(ext)) {
