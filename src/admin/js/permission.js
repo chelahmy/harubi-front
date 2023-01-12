@@ -50,8 +50,8 @@ var load_permissions = function (restart, search = '') {
 				}
 			}
 			
-			if (rst.data.count <= rst.data.limit)
-				$('#load_more_btn').hide();
+			if (rst.data.count < rst.data.limit)
+				$('#load_more_btn').hide();		
 		}
 		else
 			$('#load_more_btn').hide();

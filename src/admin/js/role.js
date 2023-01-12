@@ -44,7 +44,7 @@ var load_roles = function (restart) {
 				}
 			}
 			
-			if (rst.data.count <= rst.data.limit)
+			if (rst.data.count < rst.data.limit)
 				$('#load_more_btn').hide();
 		}
 		else

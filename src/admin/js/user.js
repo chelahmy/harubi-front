@@ -52,7 +52,7 @@ var load_users = function (restart, search = '', premium = 0, order_by = 'name',
 				}
 			}
 			
-			if (rst.data.count <= rst.data.limit)
+			if (rst.data.count < rst.data.limit)
 				$('#load_more_btn').hide();
 		}
 		else

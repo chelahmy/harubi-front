@@ -58,7 +58,7 @@ var load_groups = function (restart, type = 0, search = '', order_by = 'name', s
 				}
 			}
 			
-			if (rst.data.count <= rst.data.limit)
+			if (rst.data.count < rst.data.limit)
 				$('#load_more_btn').hide();
 		}
 		else

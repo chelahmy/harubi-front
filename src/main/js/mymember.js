@@ -61,7 +61,7 @@ var list_members = function (restart, groupref, search = '', order_by = 'created
 				}
 			}
 			
-			if (rst.data.count <= rst.data.limit)
+			if (rst.data.count < rst.data.limit)
 				$('#load_more_btn').hide();
 		}
 		else
