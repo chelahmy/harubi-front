@@ -51,6 +51,9 @@ var load_users = function (restart, search = '', premium = 0, order_by = 'name',
 					append_user(name, email, rolename, created_utc, signins, last_signedin_utc);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

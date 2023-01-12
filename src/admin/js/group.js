@@ -64,6 +64,9 @@ var load_groups = function (restart, search = '', order_by = 'name', sort = 'ASC
 					append_group(name, ref, ownername, created_by_username, created_utc);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

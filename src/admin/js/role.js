@@ -28,6 +28,7 @@ var load_roles = function (restart) {
 	if (restart == 1) {
 		$("#table_items").empty();
 		table_index = 0;
+		$('#load_more_btn').show();
 	}
 
 	qserv(admin_server, {model: 'role', action: 'list',
@@ -42,6 +43,9 @@ var load_roles = function (restart) {
 					append_role(name, premium);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

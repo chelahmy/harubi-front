@@ -76,7 +76,8 @@ beat('user', 'list', function ($restart, $search = '', $premium = 0, $order_by =
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -273,7 +274,8 @@ beat('usergroup', 'list', function ($restart, $search = '', $order_by = 'name', 
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -473,7 +475,8 @@ beat('member', 'list', function ($restart, $groupref, $search = '', $order_by = 
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -728,7 +731,8 @@ beat('role', 'list', function ($restart)
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -918,7 +922,8 @@ beat('permission', 'list', function ($restart, $search = '')
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -1201,7 +1206,8 @@ beat('preference', 'list', function ($restart)
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });

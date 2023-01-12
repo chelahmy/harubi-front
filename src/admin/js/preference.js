@@ -25,11 +25,15 @@ var append_preference = function (name, value) {
 }
 
 var load_preferences = function (restart) {
+	if (restart == 1) {
+		$("#table_items").empty();
+		table_index = 0;
+		$('#load_more_btn').show();
+	}
+
 	qserv(admin_server, {model: 'preference', action: 'list',
 		restart: restart}, function (rst, extra) {
 		if (rst.data.count > 0) {
-			if (restart == 1)
-				table_index = 0;
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
@@ -39,6 +43,9 @@ var load_preferences = function (restart) {
 					append_preference(name, value);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

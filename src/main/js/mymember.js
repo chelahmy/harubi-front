@@ -60,6 +60,9 @@ var list_members = function (restart, groupref, search = '', order_by = 'created
 					append_member(groupref, username, rolename, added_by_username, created_utc);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

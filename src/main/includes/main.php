@@ -188,7 +188,8 @@ beat('usergroup', 'list_own', function ($restart, $type = 0, $search = '', $orde
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });
@@ -405,7 +406,8 @@ beat('member', 'list_own', function ($restart, $groupref, $search = '', $order_b
 		'status' => 1,
 		'data' => array(
 			'records' => $records,
-			'count' => $rcnt
+			'count' => $rcnt,
+			'limit' => $limit
 		)
 	);
 });

@@ -57,6 +57,9 @@ var load_groups = function (restart, type = 0, search = '', order_by = 'name', s
 					append_group(name, ref, ownername, created_utc);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();

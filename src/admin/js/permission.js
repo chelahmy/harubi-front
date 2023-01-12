@@ -34,6 +34,7 @@ var load_permissions = function (restart, search = '') {
 	if (restart == 1) {
 		$("#table_items").empty();
 		table_index = 0;
+		$('#load_more_btn').show();
 	}
 
 	qserv(admin_server, {model: 'permission', action: 'list',
@@ -48,6 +49,9 @@ var load_permissions = function (restart, search = '') {
 					append_permission(name, roles);
 				}
 			}
+			
+			if (rst.data.count <= rst.data.limit)
+				$('#load_more_btn').hide();
 		}
 		else
 			$('#load_more_btn').hide();
