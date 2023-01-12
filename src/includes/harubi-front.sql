@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 09, 2023 at 03:22 PM
+-- Generation Time: Jan 13, 2023 at 05:49 AM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -84,6 +84,8 @@ CREATE TABLE `post` (
   `discussion_id` bigint NOT NULL,
   `body` text NOT NULL,
   `attachment` text NOT NULL,
+  `quote_id` bigint NOT NULL,
+  `quote_discussion_id` bigint NOT NULL,
   `posted_by` bigint NOT NULL,
   `created_utc` bigint NOT NULL,
   `updated_utc` bigint NOT NULL

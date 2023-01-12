@@ -3,6 +3,8 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 4 January 2023
 
+var forward_page_url = "main/forward.html";
+
 var attachment_max_file_size = "256M";
 var attachment_max_files = 8;
 var attachment_warnings = 0;
@@ -68,7 +70,7 @@ var ele_post_footer = function (id) {
 			dispose_video_player(); // otherwise video won't be quoted
 			post_quote_id = id;
 			$("#quote_view").empty();
-			$("#quote_view").append(ele_prepost(id));
+			$("#quote_view").append(ele_quote(id, this_discussion_ref));
 			$('#new_post').focus();
 		}
 	});
@@ -77,7 +79,14 @@ var ele_post_footer = function (id) {
 		class : "home-icon bi-forward-fill",
 		style : "font-size: 1.5rem; cursor: pointer;",
 		click : function () {
+			
+			qserv(main_server, {model: 'post', action: 'forward',
+				discussion_ref: this_discussion_ref, id: id}, function (rst, extra) {
 
+				var url = app_rel_path + forward_page_url;
+				show_url(url);
+				
+			});
 		}
 	});
 	
@@ -335,55 +344,44 @@ var ele_post_content = function (id, body, attachment) {
 	return ele_content;
 }
 
-var ele_prepost = function (quote_id, hr = false) {
+var ele_quote = function (quote_id, quote_discussion_ref = "", hr = false) {
 
 	if (quote_id <= 0)
 		return;
 
-	var ele_prepost_block = $("<div>", {
+	var ele_block = $("<div>", {
 		class : "row"
 	});
 	
-	var ele_prepost_quote_icon = $("<i>", {
+	var ele_quote_icon = $("<i>", {
 		class : "home-icon bi-quote",
 		style : "font-size: 3rem;"
 	});
 	
-	var ele_prepost_quote_icon_col = $("<div>", {
+	var ele_quote_icon_col = $("<div>", {
 		class : "col-1",
 		append : [
-			ele_prepost_quote_icon
+			ele_quote_icon
 		]
 	});
 	
-	var ele_prepost_quote_body_col = $("<div>", {
+	var ele_quote_body_col = $("<div>", {
 		class : "col"
 	});
 
 	if (hr)
-		ele_prepost_quote_body_col.append($("<hr>", {style : "border-top: 1px dotted"}));
+		ele_quote_body_col.append($("<hr>", {style : "border-top: 1px dotted"}));
 	
+	if (quote_discussion_ref.length <= 0)
+		quote_discussion_ref = this_discussion_ref;
+		
 	// attach quote to post body
-	load_ref_post(ele_prepost_quote_body_col, this_discussion_ref, quote_id);
+	load_post_quote(ele_quote_body_col, quote_discussion_ref, quote_id);
 	
-	ele_prepost_block.append(ele_prepost_quote_icon_col);
-	ele_prepost_block.append(ele_prepost_quote_body_col);
+	ele_block.append(ele_quote_icon_col);
+	ele_block.append(ele_quote_body_col);
 
-	return ele_prepost_block;
-}
-
-var split_post_body = function (body) {
-	var quote_id = 0;
-	var pos = body.indexOf("<<quote ");
-	if (pos >= 0) {
-		body = body.substring(pos + 8);
-		pos = body.indexOf(">>");
-		if (pos >= 0) {
-			quote_id = parseInt(body.substring(0, pos));
-			body = body.substring(pos + 2);
-		}
-	}
-	return {body: body, quote_id: quote_id};
+	return ele_block;
 }
 
 var tag_wrap = function (str, wrap, tag) {
@@ -408,11 +406,8 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
-var ele_post = function (id, body, attachment, posted_by_username, created_utc) {
+var ele_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
-	var body_parts = split_post_body(body);
-	body = body_parts.body;
-
 	const options = {
 		defaultProtocol: 'https',
 		formatHref: {
@@ -425,15 +420,15 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	body = tag_wrap(body, "**", "strong");
 	body = tag_wrap(body, "*", "em");
 	
-	var ele_prepost_block = ele_prepost(body_parts.quote_id, true);
+	var ele_quote_block = ele_quote(quote_id, quote_discussion_ref, true);
 	
 	var ele_header = ele_post_header(id, body, posted_by_username, created_utc);
 	var ele_footer = ele_post_footer(id);
 		
 	var ele_post = ele_post_content(id, body, attachment);
 
-	if (typeof ele_prepost_block !== "undefined")
-		ele_post.prepend(ele_prepost_block);
+	if (typeof ele_quote_block !== "undefined")
+		ele_post.prepend(ele_quote_block);
 	
 	ele_post.prepend(ele_header);
 	ele_post.append(ele_footer);
@@ -456,28 +451,27 @@ var ele_post = function (id, body, attachment, posted_by_username, created_utc) 
 	return ele_post_block;
 }
 
-var prepend_post = function (id, body, attachment, posted_by_username, created_utc) {
+var prepend_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
-	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
+	var ele = ele_post(id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
 
 	$("#posts").prepend(ele);
 }
 
-var append_post = function (id, body, attachment, posted_by_username, created_utc) {
+var append_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
-	var ele = ele_post(id, body, attachment, posted_by_username, created_utc);
+	var ele = ele_post(id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
 
 	$("#posts").append(ele);
 }
 
-var load_ref_post = function (host_ele, discussion_ref, id) {
+var load_post_quote = function (host_ele, discussion_ref, id) {
 	qserv(main_server, {model: 'post', action: 'read',
 		discussion_ref: discussion_ref, id: id}, function (rst, extra) {
 		
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
-			var body_parts = split_post_body(r.body);
-			var ele = ele_post_content(id, body_parts.body, r.attachment);
+			var ele = ele_post_content(id, r.body, r.attachment);
 			host_ele.prepend(ele);
 		}
 	});
@@ -496,7 +490,8 @@ var load_posts = function (restart, discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					prepend_post(r[i].id, r[i].body, r[i].attachment, r[i].posted_by_username, r[i].created_utc);
+					prepend_post(r[i].id, r[i].body, r[i].attachment, r[i].quote_id, r[i].quote_discussion_ref,
+						r[i].posted_by_username, r[i].created_utc);
 
 					if (restart && (r[i].id > latest_post_id))
 						latest_post_id = r[i].id;
@@ -521,7 +516,8 @@ var load_newer_posts = function (discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					append_post(r[i].id, r[i].body, r[i].attachment, r[i].posted_by_username, r[i].created_utc);
+					append_post(r[i].id, r[i].body, r[i].attachment, r[i].quote_id, r[i].quote_discussion_ref,
+						r[i].posted_by_username, r[i].created_utc);
 
 					if (r[i].id > latest_post_id)
 						latest_post_id = r[i].id;
@@ -541,9 +537,9 @@ var load_newer_posts = function (discussion_ref) {
 	});
 }
 
-var post_new = function (discussion_ref, body) {
+var post_new = function (discussion_ref, body, quote_discussion_ref, quote_id) {
 	qserv(main_server, {model: 'post', action: 'new',
-		discussion_ref: discussion_ref, body: body}, function (rst, extra) {
+		discussion_ref: discussion_ref, body: body, quote_discussion_ref: quote_discussion_ref, quote_id: quote_id}, function (rst, extra) {
 		
 		$('#new_post').val(''); // empty the post input box
 		
@@ -632,6 +628,18 @@ var upload_attachment = function (discussion_ref) {
 	});
 }
 
+var load_forward_post = function () {
+	qserv(admin_server, {model: 'post', action: 'get_forward'}, function(rst, extra) {
+		var id = rst.data.forward_post_id;
+		this_discussion_ref = rst.data.discussion_ref;
+		dispose_video_player(); // otherwise video won't be quoted
+		post_quote_id = id;
+		$("#quote_view").empty();
+		$("#quote_view").append(ele_quote(id, this_discussion_ref));
+		$('#new_post').focus();
+	});
+}
+
 var init_discussion = function () {
 
 	$('#load_earlier_btn').click(function(){
@@ -646,9 +654,9 @@ var init_discussion = function () {
 		var post = $('#new_post').val();
 		post = $("<div>", {html: post}).text(); // strip html tags
 		if (post.length > 0 || post_quote_id > 0 || attachment_count > 0) {
-			if (post_quote_id > 0)
-				post = "<<quote " + post_quote_id + ">>" + post;
-			post_new(this_discussion_ref, post);
+			//if (post_quote_id > 0)
+			//	post = "<<quote " + post_quote_id + ">>" + post;
+			post_new(this_discussion_ref, post, this_discussion_ref, post_quote_id);
 			post_quote_id = 0;
 			$("#quote_view").empty();
 			attachment_count = 0;

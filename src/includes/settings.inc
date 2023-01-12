@@ -63,6 +63,8 @@
             "discussion_id" : "int",
             "body" : "string",
             "attachment" : "string",
+            "quote_id" : "int",
+            "quote_discussion_id" : "int",
             "posted_by" : "int",
             "created_utc" : "int",
             "updated_utc" : "int"
