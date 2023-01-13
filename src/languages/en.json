@@ -189,7 +189,34 @@
 "role '@role'" : "",
 "superadmin" : "",
 "permission '@permission' -> role '@permrole'" : "",
-"permission '@permission'" : ""
+"permission '@permission'" : "",
+
+
+"Attachment" : "",
+"Attachment has warning." : "",
+"Attachment has warnings." : "",
+"Attachment max file size is @size bytes." : "",
+"Max @files files for attachment." : "",
+"Only 1 attachment file is allowed." : "",
+"To view this video please enable JavaScript, and consider upgrading to a web browser that @supports_HTML5_video" : "",
+"supports HTML5 video" : "",
+
+
+"Attach" : "",
+"Cancel" : "",
+"Forward" : "",
+"Forward To" : "",
+"Forward to Groups" : "",
+"Group View" : "",
+"My Group View" : "",
+"Select" : "",
+"Your statement." : "",
+
+
+"Forwarded to the group @group_name." : "",
+"Not forwading to the same group @group_name." : "",
+"Please select a group or more." : "",
+"You are trying to forward an invalid post." : ""
 
 
 }

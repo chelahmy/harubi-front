@@ -189,7 +189,34 @@
 "role '@role'" : "peranan '@role'",
 "superadmin" : "superadmin",
 "permission '@permission' -> role '@permrole'" : "kebenaran akses '@permission' -> peranan '@permrole'",
-"permission '@permission'" : "kebenaran akses '@permission'"
+"permission '@permission'" : "kebenaran akses '@permission'",
+
+
+"Attachment" : "Lampiran",
+"Attachment has warning." : "Ada amaran pada lampiran.",
+"Attachment has warnings." : "Ada beberapa amaran pada lampiran.",
+"Attachment max file size is @size bytes." : "Saiz max fail lampiran ialah @size byte.",
+"Max @files files for attachment." : "Maks @files fail untuk lampiran.",
+"Only 1 attachment file is allowed." : "Hanya 1 fail lampiran dibenarkan",
+"To view this video please enable JavaScript, and consider upgrading to a web browser that @supports_HTML5_video" : "Untuk melihat video ini sila benarkan Javascript, dan pertimbangkan untuk menaik-taraf ke pelayar web yang @supports_HTML5_video",
+"supports HTML5 video" : "menyokong video HTML5",
+
+
+"Attach" : "Lampir",
+"Cancel" : "Batal",
+"Forward" : "Hantar Kehadapan",
+"Forward To" : "Hantar Kehadapan Ke",
+"Forward to Groups" : "Hantar Kehadapan Ke Kumpulan",
+"Group View" : "Paparan Kumpulan",
+"My Group View" : "Paparan Kumpulan Saya",
+"Select" : "Pilih",
+"Your statement." : "Kenyataan anda.",
+
+
+"Forwarded to the group @group_name." : "Telah dihantar kehadapan ke kumpulan @group_name.",
+"Not forwading to the same group @group_name." : "Tidak menghantar kehadapan ke kumpulan yang sama @group_name.",
+"Please select a group or more." : "Sila pilih satu kumpulan atau lebih.",
+"You are trying to forward an invalid post." : "Anda cuba menghantar kehadapan hantaran yang tidak sah."
 
 
 }
