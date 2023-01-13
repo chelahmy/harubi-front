@@ -638,7 +638,8 @@ var load_home_menu = function (type) {
 				if (typeof mi.m !== "undefined") {
 					if (mi.m.length > 0) {
 						module = true;
-						url = modules_path + mi.m + "/" + type + "/" + mi.u;
+						var mtype = type.indexOf('admin') >= 0 ? 'admin' : 'main';
+						url = modules_path + mi.m + "/" + mtype + "/" + mi.u;
 						load_module_language(mi.m);
 					}
 				}
