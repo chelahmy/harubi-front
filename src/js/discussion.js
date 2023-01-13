@@ -4,6 +4,8 @@
 // 4 January 2023
 
 var forward_page_url = "main/forward.html";
+var forward_post_id = 0;
+var forward_discussion_ref = '';
 
 var attachment_max_file_size = "256M";
 var attachment_max_files = 8;
@@ -54,7 +56,7 @@ var ele_post_header = function (id, body, posted_by_username, created_utc) {
 	return ele_header;
 }
 
-var ele_post_footer = function (id) {
+var ele_post_footer = function (discussion_ref, id) {
 	var ele_like = $("<i>", {
 		class : "home-icon bi-hand-thumbs-up-fill",
 		style : "font-size: 1.25rem; cursor: pointer;",
@@ -70,7 +72,7 @@ var ele_post_footer = function (id) {
 			dispose_video_player(); // otherwise video won't be quoted
 			post_quote_id = id;
 			$("#quote_view").empty();
-			$("#quote_view").append(ele_quote(id, this_discussion_ref));
+			$("#quote_view").append(ele_quote(id, discussion_ref));
 			$('#new_post').focus();
 		}
 	});
@@ -81,7 +83,7 @@ var ele_post_footer = function (id) {
 		click : function () {
 			
 			qserv(main_server, {model: 'post', action: 'forward',
-				discussion_ref: this_discussion_ref, id: id}, function (rst, extra) {
+				discussion_ref: discussion_ref, id: id}, function (rst, extra) {
 
 				var url = app_rel_path + forward_page_url;
 				show_url(url);
@@ -229,7 +231,7 @@ var ele_map_viewer = function (src) {
 	return ele_map;
 }
 
-var ele_post_content = function (id, body, attachment) {
+var ele_post_content = function (discussion_ref, id, body, attachment) {
 
 	var ele_map_attachment = $("<div>", {class: "row gy-2"});
 	var ele_video_attachment = $("<div>", {class: "row gy-2"});
@@ -252,7 +254,7 @@ var ele_post_content = function (id, body, attachment) {
 			for (var i in aobj) {
 				if (aobj.hasOwnProperty(i)) {
 					var attc = aobj[i];
-					var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + this_discussion_ref + "&repo=" + attc.repo;
+					var src = main_server + "?model=post&action=get_attachment&discussion_ref=" + discussion_ref + "&repo=" + attc.repo;
 					var ext = attc.fname.split('.').pop().toLowerCase();
 					
 					if (ext == "geojson") {
@@ -344,7 +346,7 @@ var ele_post_content = function (id, body, attachment) {
 	return ele_content;
 }
 
-var ele_quote = function (quote_id, quote_discussion_ref = "", hr = false) {
+var ele_quote = function (quote_id, quote_discussion_ref, hr = false) {
 
 	if (quote_id <= 0)
 		return;
@@ -372,9 +374,6 @@ var ele_quote = function (quote_id, quote_discussion_ref = "", hr = false) {
 	if (hr)
 		ele_quote_body_col.append($("<hr>", {style : "border-top: 1px dotted"}));
 	
-	if (quote_discussion_ref.length <= 0)
-		quote_discussion_ref = this_discussion_ref;
-		
 	// attach quote to post body
 	load_post_quote(ele_quote_body_col, quote_discussion_ref, quote_id);
 	
@@ -406,7 +405,7 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
-var ele_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
 	const options = {
 		defaultProtocol: 'https',
@@ -423,9 +422,9 @@ var ele_post = function (id, body, attachment, quote_id, quote_discussion_ref, p
 	var ele_quote_block = ele_quote(quote_id, quote_discussion_ref, true);
 	
 	var ele_header = ele_post_header(id, body, posted_by_username, created_utc);
-	var ele_footer = ele_post_footer(id);
+	var ele_footer = ele_post_footer(discussion_ref, id);
 		
-	var ele_post = ele_post_content(id, body, attachment);
+	var ele_post = ele_post_content(discussion_ref, id, body, attachment);
 
 	if (typeof ele_quote_block !== "undefined")
 		ele_post.prepend(ele_quote_block);
@@ -451,27 +450,33 @@ var ele_post = function (id, body, attachment, quote_id, quote_discussion_ref, p
 	return ele_post_block;
 }
 
-var prepend_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
-	var ele = ele_post(id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
 
 	$("#posts").prepend(ele);
 }
 
-var append_post = function (id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
 	
-	var ele = ele_post(id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
 
 	$("#posts").append(ele);
 }
 
 var load_post_quote = function (host_ele, discussion_ref, id) {
+	if (id <= 0)
+		return;
+		
+	if (discussion_ref.length <= 0)
+		discussion_ref = this_discussion_ref;
+		
 	qserv(main_server, {model: 'post', action: 'read',
 		discussion_ref: discussion_ref, id: id}, function (rst, extra) {
 		
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
-			var ele = ele_post_content(id, r.body, r.attachment);
+			var ele = ele_post_content(discussion_ref, id, r.body, r.attachment);
 			host_ele.prepend(ele);
 		}
 	});
@@ -490,7 +495,8 @@ var load_posts = function (restart, discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					prepend_post(r[i].id, r[i].body, r[i].attachment, r[i].quote_id, r[i].quote_discussion_ref,
+					prepend_post(discussion_ref, r[i].id, r[i].body, r[i].attachment,
+						r[i].quote_id, r[i].quote_discussion_ref,
 						r[i].posted_by_username, r[i].created_utc);
 
 					if (restart && (r[i].id > latest_post_id))
@@ -516,7 +522,8 @@ var load_newer_posts = function (discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					append_post(r[i].id, r[i].body, r[i].attachment, r[i].quote_id, r[i].quote_discussion_ref,
+					append_post(discussion_ref, r[i].id, r[i].body, r[i].attachment,
+						r[i].quote_id, r[i].quote_discussion_ref,
 						r[i].posted_by_username, r[i].created_utc);
 
 					if (r[i].id > latest_post_id)
@@ -629,13 +636,12 @@ var upload_attachment = function (discussion_ref) {
 }
 
 var load_forward_post = function () {
-	qserv(admin_server, {model: 'post', action: 'get_forward'}, function(rst, extra) {
-		var id = rst.data.forward_post_id;
-		this_discussion_ref = rst.data.discussion_ref;
-		dispose_video_player(); // otherwise video won't be quoted
-		post_quote_id = id;
+	qserv(main_server, {model: 'post', action: 'get_forward'}, function(rst, extra) {
+		forward_post_id = rst.data.forward_post_id;
+		forward_discussion_ref = rst.data.discussion_ref;
+		dispose_video_player(); // otherwise a running video player will block from showing quoted video
 		$("#quote_view").empty();
-		$("#quote_view").append(ele_quote(id, this_discussion_ref));
+		$("#quote_view").append(ele_quote(forward_post_id, forward_discussion_ref));
 		$('#new_post').focus();
 	});
 }
@@ -652,10 +658,8 @@ var init_discussion = function () {
 
 	$('#post_btn').click(function(){
 		var post = $('#new_post').val();
-		post = $("<div>", {html: post}).text(); // strip html tags
+		post = $("<div>", {html: post}).text(); // strip html tags in post
 		if (post.length > 0 || post_quote_id > 0 || attachment_count > 0) {
-			//if (post_quote_id > 0)
-			//	post = "<<quote " + post_quote_id + ">>" + post;
 			post_new(this_discussion_ref, post, this_discussion_ref, post_quote_id);
 			post_quote_id = 0;
 			$("#quote_view").empty();

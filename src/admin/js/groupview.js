@@ -4,6 +4,7 @@
 // 29 December 2022
 
 user_page_url = "admin/useredit.html";
+forward_page_url = "admin/forward.html";
 
 var load_group = function (ref) {
 	qserv(admin_server, {model: 'usergroup', action: 'read',

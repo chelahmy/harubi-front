@@ -1,7 +1,9 @@
 // mygroupview.js
 // Harubi-Front My Group View
 // By Abdullah Daud, chelahmy@gmail.com
-// 30 December 2022
+// 13 January 2023
+
+forward_page_url = "main/forward.html";
 
 var load_group = function (ref) {
 	qserv(main_server, {model: 'usergroup', action: 'read_own',
