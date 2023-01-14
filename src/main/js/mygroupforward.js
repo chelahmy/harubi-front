@@ -107,7 +107,7 @@ $(window).on('load', function () {
 		load_language(data.signedin_language);
 	});
 	
-	when_allowed("list_usergroups", function () {
+	when_allowed("view_forward_own_usergroups", function () {
 	
 		$(document).on("submit", "form", function(e){
 			e.preventDefault();
