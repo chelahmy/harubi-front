@@ -63,7 +63,8 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 		id : "like_" + id,
 		class : "post-icon bi-hand-thumbs-up-fill",
 		click : function (e) {
-			post_react(discussion_ref, id, react_thumbs_up);
+			if (own_post != 1)
+				post_react(discussion_ref, id, react_thumbs_up);
 		}
 	});
 	
@@ -367,7 +368,10 @@ var ele_post_content = function (discussion_ref, id, body, attachment) {
 	if (file_count > 0)
 		ele_content.append(ele_file_attachment);
 	
-	ele_body.append($("<pre>", {"html" : body}));
+	ele_body.append($("<pre>", {
+		html : body
+	}));
+	
 	ele_content.append(ele_body);
 	
 	return ele_content;
@@ -705,9 +709,7 @@ var load_reacts = function (discussion_ref, id, type) {
 var post_react = function (discussion_ref, id, type) {
 	qserv(main_server, {model: 'post', action: 'react',
 		discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
-		if (rst.data.own == 1)
-			show_alert(t("Should not react to your own post."), "warning");
-		else
+		if (rst.data.own != 1)
 			load_reacts(discussion_ref, id, type);
 	});
 }
@@ -772,8 +774,67 @@ var load_react_list = function (restart, discussion_ref, id, type) {
 	});
 }
 
+var insert_text = function (ele_input, text) {
+	var pos = ele_input.prop('selectionStart');
+	var v = ele_input.val();
+	var t_before = v.substring(0,  pos);
+	var t_after  = v.substring(pos, v.length);
+
+	ele_input.val(t_before + text + t_after);
+}
+
+var add_emoticons = function (index = 0) {
+	var len = 1;
+
+	if (index > 0)
+		len = 16;
+
+	var ele_post = $("#new_post");
+	var ele_emoji_block;
+
+	if ($("#post_emoji").length == 0) {
+		ele_emoji_block = $("<p>", {
+			id : "post_emoji"
+		});
+		
+		ele_emoji_block.insertBefore(ele_post);
+	}
+	else
+		ele_emoji_block = $("#post_emoji");
+	
+	var i, uc = parseInt("1F600", 16);
+	
+	for (i = index; i < (index + len) && i < 80; i++) {
+		var emo = "&#" + (uc + i) + ";";
+		var ele_emo = $("<span>", {
+			style : "margin: 5px; cursor: pointer;",
+			html : emo,
+			click : function (e) {
+				insert_text(ele_post, $(this).text());
+			}
+		});
+		
+		ele_emoji_block.append(ele_emo);
+	}
+	
+	if (i < 80) {
+		var ele_more = $("<span>", {
+			style : "cursor: pointer;",
+			text : "...",
+			click : function (e) {
+				add_emoticons(index + len);
+				$(this).remove();
+			}
+		});
+	
+		ele_emoji_block.append(ele_more);
+	}
+}
+
 var init_discussion = function () {
 
+	add_emoticons();
+	
 	$('#load_earlier_btn').click(function(){
 		load_posts(0, this_discussion_ref);
 	});
