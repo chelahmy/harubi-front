@@ -338,6 +338,28 @@ function get_discussion_ref($discussion_name) {
 	return '';
 }
 
+function get_discussion_id_by_ref($discussion_ref) {
+	$discussion_id = 0;
+	$where = equ('ref', $discussion_ref, 'string');
+	$records = read('discussion', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		$discussion_id = intval($records[0]['id']);
+
+	return $discussion_id;
+}
+
+function get_discussion_ref_by_id($discussion_id) {
+	$discussion_ref = '';
+	$where = equ('id', intval($discussion_id));
+	$records = read('discussion', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		$discussion_ref = $records[0]['ref'];
+
+	return $discussion_ref;
+}
+
 // Get group info:
 // int		'uid'				- signed-in user id.
 // bool		'owner'				- is the signed-in user the group owner.
@@ -954,6 +976,8 @@ beat('post', 'list', function ($restart, $discussion_ref)
 	if (!has_permission('post_list'))
 		return error_pack(err_access_denied);
 	
+	$userid = signedin_uid();
+
 	if (isset($page_size) && $page_size > 0)
 		$limit = $page_size;
 	else
@@ -966,14 +990,9 @@ beat('post', 'list', function ($restart, $discussion_ref)
 		
 	$offset = get_session($ses_table_offset);
 	
-	$where = equ('ref', $discussion_ref, 'string');
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 
-	$discussion_id = 0;
-	$records = read('discussion', FALSE, $where);
-	
-	if (record_cnt($records) > 0)
-		$discussion_id = intval($records[0]['id']);
-	else // record does not exist
+	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 		
 	$where = equ('discussion_id', $discussion_id);
@@ -985,9 +1004,13 @@ beat('post', 'list', function ($restart, $discussion_ref)
 	
 		foreach ($records as &$r) {
 			unset($r['discussion_id']);
+			$quote_discussion_id = intval($r['quote_discussion_id']);
+			unset($r['quote_discussion_id']);
+			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
+			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 		
 		set_session($ses_table_offset, $offset + $limit);
@@ -1012,19 +1035,16 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 	if (!has_permission('post_list_newer'))
 		return error_pack(err_access_denied);
 	
+	$userid = signedin_uid();
+
 	if (isset($page_size) && $page_size > 0)
 		$limit = $page_size;
 	else
 		$limit = 25;
 		
-	$where = equ('ref', $discussion_ref, 'string');
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 
-	$discussion_id = 0;
-	$records = read('discussion', FALSE, $where);
-	
-	if (record_cnt($records) > 0)
-		$discussion_id = intval($records[0]['id']);
-	else // record does not exist
+	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 		
 	$where = equ('discussion_id', $discussion_id);
@@ -1037,9 +1057,13 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 	
 		foreach ($records as &$r) {
 			unset($r['discussion_id']);
+			$quote_discussion_id = intval($r['quote_discussion_id']);
+			unset($r['quote_discussion_id']);
+			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
+			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 	}
 
@@ -1062,21 +1086,11 @@ beat('post', 'read', function ($discussion_ref, $id)
 	// discussion_ref is required for security since post id is exposed.
 	// Must not allow a post to be read by id only.
 	
-	$discussion_id = 0;
-	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
-	
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
+		
 	$where = equ('id', $id);
 	$records = read('post', FALSE, $where);
 	$rcnt = record_cnt($records);
@@ -1087,6 +1101,9 @@ beat('post', 'read', function ($discussion_ref, $id)
 				return error_pack(err_read_failed);
 			
 			unset($r['discussion_id']);
+			$quote_discussion_id = intval($r['quote_discussion_id']);
+			unset($r['quote_discussion_id']);
+			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
 			$r['posted_by_username'] = get_username_by_id($posted_by);
@@ -1102,28 +1119,100 @@ beat('post', 'read', function ($discussion_ref, $id)
 	);
 });
 
-beat('post', 'new', function ($discussion_ref, $body)
+beat('post', 'forward', function ($discussion_ref, $id)
+{
+	if (!has_permission('post_forward'))
+		return error_pack(err_access_denied);
+	
+	// Note:
+	// discussion_ref is required for security since post id is exposed.
+	// Must not allow a post to be forwarded by id only.
+	
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+
+	if ($discussion_id <= 0)
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+		
+	$where = equ('id', $id);
+	$records = read('post', FALSE, $where);
+	$rcnt = record_cnt($records);
+
+	if ($rcnt <= 0 || $records[0]['discussion_id'] != $discussion_id)
+		return error_pack(err_read_failed);
+		
+	set_session("forward_post_id", $id);
+
+	return array(
+		'status' => 1
+	);
+});
+
+beat('post', 'get_forward', function ()
+{
+	if (!has_permission('post_get_forward'))
+		return error_pack(err_access_denied);
+
+	$id = 0;
+	$ses = "forward_post_id";
+	
+	if (isset_session($ses))
+		$id = intval(get_session($ses));
+
+	if ($id <= 0)
+		return error_pack(err_read_failed);
+		
+	$where = equ('id', $id);
+	$records = read('post', FALSE, $where);
+	$rcnt = record_cnt($records);
+
+	if ($rcnt <= 0)
+		return error_pack(err_read_failed);
+	
+	$discussion_id = intval($records[0]['discussion_id']);	
+	$discussion_ref = get_discussion_ref_by_id($discussion_id);
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'forward_post_id' => $id,
+			'discussion_ref' => $discussion_ref
+		)
+	);
+});
+
+beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = "", $quote_id = 0)
 {
 	if (!has_permission('post_new'))
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
-
-	$discussion_id = 0;
-	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
 	
+	$quote_discussion_id = 0;
+	
+	if ($quote_id > 0) {
+		if ($quote_discussion_ref == $discussion_ref || strlen($quote_discussion_ref) <= 0)
+			$quote_discussion_id = $discussion_id;
+		else {
+			$quote_discussion_id = get_discussion_id_by_ref($quote_discussion_ref);
+			
+			if ($quote_discussion_id <= 0)
+				return error_pack(err_record_missing, "quote_discussion_ref: @quote_discussion_ref", array('@quote_discussion_ref' => $quote_discussion_ref));
+		}
+
+		$where = equ('id', $quote_id);
+		$records = read('post', FALSE, $where);
+		$rcnt = record_cnt($records);
+
+		if ($rcnt > 0) {
+			if ($records[0]['discussion_id'] != $quote_discussion_id)
+				return error_pack(err_read_failed, "quote_id: @quote_id", array('@quote_id' => $quote_id));
+		}
+	}
+
 	// get attachment
 	$attachment_json = '';
 	$ses_attachment = "post_attachment_" . $discussion_ref;
@@ -1139,6 +1228,8 @@ beat('post', 'new', function ($discussion_ref, $body)
 		'discussion_id' => $discussion_id,
 		'body' => $body,
 		'attachment' => $attachment_json,
+		'quote_id' => $quote_id,
+		'quote_discussion_id' => $quote_discussion_id,
 		'posted_by' => $userid,
 		'created_utc' => $now,
 		'updated_utc' => $now
@@ -1160,17 +1251,7 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 	$userid = signedin_uid();
 
 	// a post must belong to a discussion
-	$discussion_id = 0;
-	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1183,6 +1264,14 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 	if ($rcnt > 0) {
 		if ($records[0]['discussion_id'] != $discussion_id)
 			return error_pack(err_read_failed);
+			
+		if ($records[0]['posted_by'] == $userid) // policy: cannot react to one's own post
+			return array(
+				'status' => 1,
+				'data' => array(
+					'own' => 1
+				)
+			);		
 	}
 	else
 		return error_pack(err_read_failed);
@@ -1192,7 +1281,20 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
-		if (!update('postreact', array('type' => $type), $where))
+		$nt = 0;		
+		$t = intval($records[0]['type']);
+		$bitvals = array(1, 2, 4, 8, 16, 32, 64, 128);
+		
+		foreach ($bitvals as $bv) {
+			if (($type & $bv) > 0) { // for every selected reacts,
+				if (($t & $bv) == 0) // toggle
+					$nt += $bv;
+			}
+			elseif (($t & $bv) > 0) // keep unselected reacts
+				$nt += $bv;				
+		}
+		
+		if (!update('postreact', array('type' => $nt), $where))
 			return error_pack(err_update_failed);
 	}
 	else {
@@ -1207,7 +1309,10 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 	}
 	
 	return array(
-		'status' => 1
+		'status' => 1,
+		'data' => array(
+			'own' => 0
+		)
 	);
 });
 
@@ -1219,17 +1324,7 @@ beat('post', 'get_react', function ($discussion_ref, $id)
 	$userid = signedin_uid();
 
 	// a post must belong to a discussion
-	$discussion_id = 0;
-	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1272,18 +1367,21 @@ beat('post', 'count_reacts', function ($discussion_ref, $id, $type)
 	if (!has_permission('post_count_reacts'))
 		return error_pack(err_access_denied);
 	
+	$type_mask = 0;
+	$bitvals = array(1, 2, 4, 8, 16, 32, 64, 128);
+	
+	foreach ($bitvals as $bv) {
+		if (($type & $bv) > 0) {
+			$type_mask = $bv;
+			break;
+		}
+	}
+	
+	if ($type_mask <= 0)
+		return error_pack(err_record_missing, "type: @type", array('@type' => $type));
+	
 	// a post must belong to a discussion
-	$discussion_id = 0;
-	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1301,7 +1399,7 @@ beat('post', 'count_reacts', function ($discussion_ref, $id, $type)
 		return error_pack(err_read_failed);
 
 	$count = 0;
-	$where = equ('postid', $id) . " AND " . equ('type', $type);
+	$where = equ('postid', $id) . " AND `type` & $type_mask = $type_mask";
 	$records = read(array('table' => 'postreact', 'where' => $where, 'count' => true));
 	$rcnt = record_cnt($records);
 
@@ -1324,6 +1422,19 @@ beat('post', 'list_reacts', function ($restart, $discussion_ref, $id, $type)
 	
 	$userid = signedin_uid();
 
+	$type_mask = 0;
+	$bitvals = array(1, 2, 4, 8, 16, 32, 64, 128);
+	
+	foreach ($bitvals as $bv) {
+		if (($type & $bv) > 0) {
+			$type_mask = $bv;
+			break;
+		}
+	}
+	
+	if ($type_mask <= 0)
+		return error_pack(err_record_missing, "type: @type", array('@type' => $type));
+	
 	if (isset($page_size) && $page_size > 0)
 		$limit = $page_size;
 	else
@@ -1339,17 +1450,8 @@ beat('post', 'list_reacts', function ($restart, $discussion_ref, $id, $type)
 	$where = equ('ref', $discussion_ref, 'string');
 
 	// a post must belong to a discussion
-	$discussion_id = 0;
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	$where = equ('ref', $discussion_ref, 'string');
-	$records = read('discussion', FALSE, $where);
-	
-	if (read_failed($records))
-		return error_pack(err_read_failed, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
-	
-	$rcnt = record_cnt($records);
-	
-	if ($rcnt > 0)
-		$discussion_id = intval($records[0]['id']);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1377,7 +1479,7 @@ beat('post', 'list_reacts', function ($restart, $discussion_ref, $id, $type)
 	else
 		return error_pack(err_read_failed);
 
-	$where = equ('postid', $id) . " AND " . equ('type', $type);
+	$where = equ('postid', $id) . " AND `type` & $type_mask = $type_mask";
 	$records = read('postreact', FALSE, $where, 'id', 'ASC', $limit, $offset);
 	$rcnt = record_cnt($records);
 

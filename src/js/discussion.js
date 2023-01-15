@@ -26,6 +26,8 @@ var video_playing = false;
 
 var map_viewer_count = 0;
 
+var react_thumbs_up = 1;
+
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
 	var ele_posted_by = $("<a>", {
@@ -56,18 +58,31 @@ var ele_post_header = function (id, body, posted_by_username, created_utc) {
 	return ele_header;
 }
 
-var ele_post_footer = function (discussion_ref, id) {
+var ele_post_footer = function (discussion_ref, id, own_post) {
 	var ele_like = $("<i>", {
-		class : "home-icon bi-hand-thumbs-up-fill",
-		style : "font-size: 1.25rem; cursor: pointer;",
-		click : function () {
-
+		id : "like_" + id,
+		class : "post-icon bi-hand-thumbs-up-fill",
+		click : function (e) {
+			post_react(discussion_ref, id, react_thumbs_up);
+		}
+	});
+	
+	var ele_like_count = $("<small>", {
+		id : "like_count_" + id,
+		style : own_post == 1 ? "cursor: pointer;" : "cursor: default;",
+		text : "", // show nothing on zero count
+		click : function (e) {
+			if (own_post == 1) {
+				if ($("#react_list_" + id).is(':empty'))
+					load_react_list(1, discussion_ref, id, react_thumbs_up);
+				else
+					$("#react_list_" + id).empty();
+			}
 		}
 	});
 	
 	var ele_reply = $("<i>", {
-		class : "home-icon bi-reply-fill",
-		style : "font-size: 1.5rem; cursor: pointer;",
+		class : "post-icon bi-reply-fill",
 		click : function () {
 			dispose_video_player(); // otherwise video won't be quoted
 			post_quote_id = id;
@@ -78,8 +93,7 @@ var ele_post_footer = function (discussion_ref, id) {
 	});
 	
 	var ele_forward = $("<i>", {
-		class : "home-icon bi-forward-fill",
-		style : "font-size: 1.5rem; cursor: pointer;",
+		class : "post-icon bi-forward-fill",
 		click : function () {
 			
 			qserv(main_server, {model: 'post', action: 'forward',
@@ -95,14 +109,27 @@ var ele_post_footer = function (discussion_ref, id) {
 	var ele_footer = $("<p>", {
 		append : [
 			ele_like,
+			$("<span>", {"html" : "&nbsp;"}),
+			ele_like_count,
 			$("<span>", {"html" : "&nbsp;&nbsp;"}),
 			ele_reply,
 			$("<span>", {"html" : "&nbsp;"}),
 			ele_forward
 		]	
 	});
+
+	var ele_react_list = $("<div>", {
+		id : "react_list_" + id
+	});
 	
-	return ele_footer;
+	var ele_footer_div = $("<div>", {
+		append : [
+			ele_footer,
+			ele_react_list
+		]	
+	});
+	
+	return ele_footer_div;
 }
 
 // Note: The video player is blocking everything. Very bad coding approach.
@@ -356,8 +383,7 @@ var ele_quote = function (quote_id, quote_discussion_ref, hr = false) {
 	});
 	
 	var ele_quote_icon = $("<i>", {
-		class : "home-icon bi-quote",
-		style : "font-size: 3rem;"
+		class : "post-icon post-quote bi-quote"
 	});
 	
 	var ele_quote_icon_col = $("<div>", {
@@ -405,7 +431,7 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
-var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
 	
 	const options = {
 		defaultProtocol: 'https',
@@ -422,7 +448,7 @@ var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_d
 	var ele_quote_block = ele_quote(quote_id, quote_discussion_ref, true);
 	
 	var ele_header = ele_post_header(id, body, posted_by_username, created_utc);
-	var ele_footer = ele_post_footer(discussion_ref, id);
+	var ele_footer = ele_post_footer(discussion_ref, id, own_post);
 		
 	var ele_post = ele_post_content(discussion_ref, id, body, attachment);
 
@@ -450,16 +476,16 @@ var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_d
 	return ele_post_block;
 }
 
-var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
 	
-	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc);
 
 	$("#posts").prepend(ele);
 }
 
-var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc) {
+var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
 	
-	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc);
 
 	$("#posts").append(ele);
 }
@@ -495,12 +521,15 @@ var load_posts = function (restart, discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					prepend_post(discussion_ref, r[i].id, r[i].body, r[i].attachment,
+					var id = r[i].id;
+					prepend_post(discussion_ref, id, r[i].body, r[i].attachment,
 						r[i].quote_id, r[i].quote_discussion_ref,
-						r[i].posted_by_username, r[i].created_utc);
+						r[i].posted_by_username, r[i].own_post, r[i].created_utc);
 
-					if (restart && (r[i].id > latest_post_id))
-						latest_post_id = r[i].id;
+					if (restart && (id > latest_post_id))
+						latest_post_id = id;
+					
+					load_reacts(discussion_ref, id, react_thumbs_up);
 				}
 			}
 			
@@ -522,12 +551,15 @@ var load_newer_posts = function (discussion_ref) {
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
-					append_post(discussion_ref, r[i].id, r[i].body, r[i].attachment,
+					var id = r[i].id;
+					append_post(discussion_ref, id, r[i].body, r[i].attachment,
 						r[i].quote_id, r[i].quote_discussion_ref,
-						r[i].posted_by_username, r[i].created_utc);
+						r[i].posted_by_username, r[i].own_post, r[i].created_utc);
 
-					if (r[i].id > latest_post_id)
-						latest_post_id = r[i].id;
+					if (id > latest_post_id)
+						latest_post_id = id;
+
+					load_reacts(discussion_ref, id, react_thumbs_up);
 				}
 			}
 			
@@ -646,6 +678,100 @@ var load_forward_post = function () {
 	});
 }
 
+var load_reacts = function (discussion_ref, id, type) {
+	$("#like_" + id).removeClass("post-icon-select");
+				
+	qserv(main_server, {model: 'post', action: 'count_reacts',
+		discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
+		
+		if (rst.data.count > 0) {
+			$("#like_count_" + id).text(rst.data.count);
+		
+			qserv(main_server, {model: 'post', action: 'get_react',
+				discussion_ref: discussion_ref, id: id}, function(rst2, extra2) {
+				if (rst2.data.count > 0) {
+					var r = rst2.data.records[0];
+
+					if ((r.type & react_thumbs_up) > 0)
+						$("#like_" + id).addClass("post-icon-select");
+				}
+			});
+		}
+		else
+			$("#like_count_" + id).text(""); // show nothing on zero count
+	});
+}
+
+var post_react = function (discussion_ref, id, type) {
+	qserv(main_server, {model: 'post', action: 'react',
+		discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
+		if (rst.data.own == 1)
+			show_alert(t("Should not react to your own post."), "warning");
+		else
+			load_reacts(discussion_ref, id, type);
+	});
+}
+
+var load_react_list = function (restart, discussion_ref, id, type) {
+	var rlid = "#react_list_" + id;
+	var ele_rl = $(rlid);
+	var ele, ele_more;
+	
+	if (restart) {
+		ele_rl.empty();
+	}
+	
+	qserv(main_server, {model: 'post', action: 'list_reacts',
+		restart: restart, discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
+
+		if (rst.data.count > 0) {
+			if (restart)
+				ele_rl.append([$("<div>"), $("<br>")]);
+				
+			ele = ele_rl.find(">:first-child");
+			
+			if (ele.is(':empty')) {
+				// add "load more" icon
+				ele_more = $("<i>", {
+					class : "post-icon bi-three-dots",
+					click : function (e) {
+						load_react_list(0, discussion_ref, id, type);
+					}
+				});
+				
+				ele.append(ele_more);		
+			}
+			else
+				ele_more = ele.find(">:last-child");
+						
+			var r = rst.data.records;
+			
+			for (var i in r) {
+				if (r.hasOwnProperty(i)) {
+					var username = r[i].username;
+
+					var ele_user = $("<a>", {
+						"href" : app_rel_path + user_page_url + "?name=" + username,
+						"text" : username 
+					});
+					
+					ele_user.insertBefore(ele_more);
+					$("<span>", {"html" : "&nbsp;"}).insertAfter(ele_user);
+				}
+			}
+			
+			if (rst.data.count < rst.data.limit)
+				ele_more.remove(); // remove the "load more" icon
+		}
+		else {
+			ele = ele_rl.find(">:first-child");
+			
+			if (!ele.is(':empty'))
+				ele.find(">:last-child").remove(); // remove the "load more" icon
+		}
+	});
+}
+
 var init_discussion = function () {
 
 	$('#load_earlier_btn').click(function(){
@@ -711,9 +837,9 @@ var init_discussion = function () {
 		var totalfiles = this.files.length;
 		if (totalfiles > attachment_max_files) {
 			if (attachment_max_files == 1)
-				show_alert(t('Max attachment is 1 file.'), 'warning');
+				show_alert(t('Only 1 attachment file is allowed.'), 'warning');
 			else
-				show_alert(t('Max attachment is @files files.', {'@files': attachment_max_files}), 'warning');
+				show_alert(t('Max @files files for attachment.', {'@files': attachment_max_files}), 'warning');
 			++attachment_warnings;
 		}
 		else {
