@@ -17,6 +17,7 @@
 	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
 	<meta name="theme-color" content="#7952b3">
 
+	<link href="../libs/bootstrap-icons-1.10.2/bootstrap-icons.css" rel="stylesheet">
 	<link href="css/main.css" rel="stylesheet">
 
 </head>
@@ -48,6 +49,23 @@
 	</nav>
 	<form>
 		<div class="mb-3">
+			<label class="form-label">Avatar</label>
+			<div class="row gy-2" id="avatar_image"></div>
+			<br/>
+			<label for="avatar" class="form-label" style="cursor: pointer; border: 1px solid #ccc; display: inline-block; padding: 6px 12px;">
+				<div class="text-center">
+					<span>Select an Image</span><br/>
+					<i class="bi-camera-fill" style="font-size: 3rem;"></i>
+					<input type="file" accept="image/png, image/jpg, image/gif, image/jpeg" class="form-control" style="display: none;" name="avatar" id="avatar" aria-describedby="avatarHelp">
+					<br/>
+					<p id="avatar_filename"></p>
+					<progress id="upload_progress" style="display: none;"></progress>
+				</div>
+			</label>
+			<div id="avatarHelp" class="form-text">Your avatar.</div>
+		</div>
+		<br/>
+		<div class="mb-3">
 			<label for="name" class="form-label">Name</label>
 			<input type="text" class="form-control" id="name" aria-describedby="nameHelp" readonly>
 			<div id="nameHelp" class="form-text">Your user name. This cannot be changed.</div>
@@ -75,8 +93,9 @@
 		<div class="mb-3">
 			<label class="form-label"><span>Role</span>&nbsp;:&nbsp;<strong id="rolename"></strong></label>
 		</div>
-	</form>	
+	</form>
 	<br />
+	<button class="btn btn-primary d-none" id="view_btn">View</button>
 	<button class="btn btn-primary d-none" id="update_btn">Update</button>
 
 </section>

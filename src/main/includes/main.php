@@ -13,7 +13,7 @@ beat('user', 'view_profile', function ($name)
 		return error_pack(err_access_denied);
 	
 	$where = equ('name', $name, 'string');
-	$records = read('user', array('name', 'created_utc'), $where);
+	$records = read('user', array('avatar', 'name', 'created_utc'), $where);
 	
 	if (read_failed($records))
 		return error_pack(err_read_failed);
@@ -66,14 +66,51 @@ beat('user', 'update_own', function ($password, $email, $language)
 {
 	if (!has_permission('user_update_own'))
 		return error_pack(err_access_denied);
+
+	$uname = signedin_uname();
+	$where = equ('name', $uname, 'string');
+	$records = read('user', FALSE, $where);
 	
-	$name = signedin_uname();
+	if (read_failed($records))
+		return error_pack(err_read_failed);
+	
+	$rcnt = record_cnt($records);
+
+	if ($rcnt <= 0)
+		return error_pack(err_read_failed);
+	
+	$avatar = $records[0]['avatar'];
+	
+	if (isset($_FILES["avatar"]["name"])) {
+		$avatar_fn = $_FILES["avatar"]["name"];
+		$ext = strtolower(pathinfo($avatar_fn, PATHINFO_EXTENSION));
+		$image_ext = array("png", "jpeg", "jpg", "gif");
+		
+		// Only an image file is allowed. 
+		if (in_array($ext, $image_ext) && getimagesize($_FILES["avatar"]["tmp_name"]) !== FALSE) {
+			if (strlen($avatar) <= 0)
+				$avatar = new_frepo();
+				
+			if (strlen($avatar) > 0) {
+				$rpath = get_frepo_path($avatar);
+
+				if ($rpath !== false && strlen($rpath) > 0) {
+
+					if (move_uploaded_file($_FILES['avatar']['tmp_name'], $rpath . "/file.dt")) {
+						$md = array("fname" => $avatar_fn, "ext" => $ext, "user" => $uname, "ts" => time());
+						write_frepo_metadata($avatar, $md);
+					}
+				}
+			}
+		}
+	}
+	
 	$now = time();
-	$where = equ('name', $name, 'string');
 
 	if (strlen($password) > 0) {
 		$hash = password_hash($password, PASSWORD_BCRYPT);
 		if (!update('user', array(
+			'avatar' => $avatar,
 			'password' => $hash,
 			'email' => $email,
 			'language' => $language,
@@ -83,6 +120,7 @@ beat('user', 'update_own', function ($password, $email, $language)
 	}
 	else {
 		if (!update('user', array(
+			'avatar' => $avatar,
 			'email' => $email,
 			'language' => $language,
 			'updated_utc' => $now
@@ -93,8 +131,71 @@ beat('user', 'update_own', function ($password, $email, $language)
 	set_session('language', $language);
 	
 	return array(
-		'status' => 1
+		'status' => 1,
+		'data' => array(
+			'avatar' => $avatar
+		)
 	);
+});
+
+beat('user', 'avatar', function ($name)
+{
+	if (!has_permission('user_avatar'))
+		return;
+
+	$where = equ('name', $name, 'string');
+	$records = read('user', FALSE, $where);
+	
+	if (read_failed($records))
+		return;
+	
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt <= 0)
+		return;
+
+	$avatar = $records[0]['avatar'];
+	
+	if (strlen($avatar) <= 0)
+		return;
+
+	$md = read_frepo_metadata($avatar);
+	
+	if ($md === false || !isset($md['user']) || $md['user'] != $name)
+		return;
+	
+	$image_ext = array("png", "jpeg", "jpg", "gif");
+	$ext = $md['ext'];
+	
+	if (!in_array($ext, $image_ext))
+		return;
+	
+	$path = get_frepo_path($avatar);
+	
+	if ($path === false || strlen($path) <= 0)
+		return;
+		
+	$fd = $path . "/file.dt";
+	
+	if (!file_exists($fd))
+		return;
+		
+	ob_get_clean();
+	header('Content-Description: File Transfer');
+	header('Content-Type: image/' . $ext);
+
+	// Allow 30 days cache
+    header("Cache-Control: max-age=2592000, public");
+    header("Expires: " . gmdate('D, d M Y H:i:s', time() + 2592000) . ' GMT');
+	
+	header('Content-Disposition: inline');
+
+	header('Content-Length: ' . filesize($fd));
+	header('Pragma: public');
+
+	flush();
+
+	readfile($fd);		
 });
 
 beat('usergroup', 'list_own', function ($restart, $type = 0, $search = '', $order_by = 'name', $sort = 'ASC')
