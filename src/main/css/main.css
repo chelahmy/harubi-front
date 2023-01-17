@@ -1,6 +1,5 @@
 body {
-	--bs-bg-opacity: 0.05;
-	background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+	background-color: var(--bs-gray-200);
 }
 
 a:link {
@@ -19,21 +18,31 @@ a:active {
 	text-decoration: underline;
 }
 
+.avatar {
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+}
+
+.avatar-small {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+}
+
 .home-icon {
 	font-size: 6rem;
-	--bs-bg-opacity: 0.75;
-	color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity)) !important;
+	color: var(--bs-blue);
 }
 
 .post-icon {
 	font-size: 1.25rem;
-	--bs-bg-opacity: 0.75;
-	color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity)) !important;
+	color: var(--bs-blue);
 	cursor: pointer;
 }
 
 .post-icon-select {
-	color: rgba(var(--bs-danger-rgb), var(--bs-bg-opacity)) !important;
+	color: var(--bs-red);
 }
 
 .post-quote {
@@ -43,7 +52,6 @@ a:active {
 
 .post-entry {
 	padding: 10px;
-	--bs-bg-opacity: 0.1;
-	background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+	background-color: var(--bs-gray-400);
 }
 
