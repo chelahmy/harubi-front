@@ -47,7 +47,7 @@ $(window).on('load', function () {
 	if (ref.length > 0) {
 		var refval = parseInt(ref);
 		
-		if (refval == 2) // signed out: see admin_signout_user()
+		if (refval == 2) // signed out: see signout_user()
 			signin_params = ''; // do not show the access denied message
 	}
 	
