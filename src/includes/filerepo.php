@@ -47,6 +47,31 @@ function create_frepo($fn) {
 	return true;
 }
 
+function remove_frepo($fn) {
+	$plist = array();
+	$path = get_frepo_root();
+	for ($i = 0; $i < 32; $i += 2) {
+		$sf = substr($fn, $i, 2);
+		$path .= "/$sf";
+		if (!is_dir($path))
+			return false;
+		$plist[intval($i / 2)] = $path;
+	}
+	$status = TRUE;
+	$p = $plist[15];
+	$files = array_diff(scandir($p), array('.', '..'));
+	foreach ($files as $f) {
+		if (!unlink($p . "/" . $f))
+			$status = FALSE;
+	}
+	if ($status)
+		for ($i = 15; $i >= 0; $i--) {
+			if (!rmdir($plist[$i]))
+				$status = FALSE;
+		}
+	return $status;
+}
+
 function new_repofilename() {
 	for ($i = 0; $i < 3; $i++) {
 		$bytes = random_bytes(16);
