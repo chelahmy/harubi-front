@@ -7,9 +7,13 @@ const avatar_max_filesize = 256; // kb
 
 var input_avatar_filename = '';
 var input_avatar_filesize = 0;
-var user = {name:'',email:'',rolename:'',language:''};
+var user = {has_avatar:0,name:'',email:'',rolename:'',language:''};
 
 var input_has_changed = function () {
+
+	if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
+		return true;
+	
 	if (input_avatar_filename.length > 0)
 		return true;
 		
@@ -25,8 +29,37 @@ var input_has_changed = function () {
 	return false;
 }
 
+var set_avatar = function (has_avatar, name) {
+	var src = "../libs/bootstrap-icons-1.10.2/person.svg";
+	var style = "width: 150px; height: 150px;";
+	
+	if (has_avatar > 0) {
+		src = main_server + "?model=user&action=avatar&name=" + name;
+		style = "max-height: 100%; max-width: 100%;"
+		$("#remove_avatar_block").removeClass("d-none");
+	}
+	else
+		$("#remove_avatar_block").addClass("d-none");
+	
+	var ele_avatar = $("<img>", {
+		class : "img-responsive",
+		style : style,
+		src : src
+	});
+	
+	var ele_avatar_div = $("<div>", {
+		class : "col-lg-3 col-md-3 col-sm-4",
+		append : [
+			ele_avatar
+		]
+	});
+	
+	$("#avatar_image").empty();
+	$("#avatar_image").append(ele_avatar_div);
+}
+
 var load_user = function () {
-	user = {name:'',email:'',rolename:''};
+	user = {has_avatar:0,name:'',email:'',rolename:''};
 	qserv(main_server, {model: 'user', action: 'read_own'}, function (rst, extra) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
@@ -36,27 +69,13 @@ var load_user = function () {
 			$("#language").val(r.language);
 			$("#rolename").text(r.rolename);
 			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
+			user.has_avatar = r.has_avatar;
 			user.name = r.name;
 			user.email = r.email;
 			user.rolename = r.rolename;
 			user.language = r.language;
 		
-			if (r.has_avatar > 0) {
-				var ele_avatar = $("<img>", {
-					class : "img-responsive",
-					style : "max-height: 100%; max-width: 100%;",
-					src : main_server + "?model=user&action=avatar&name=" + r.name
-				});
-				
-				var ele_avatar_div = $("<div>", {
-					class : "col-lg-3 col-md-3 col-sm-4",
-					append : [
-						ele_avatar
-					]
-				});
-				
-				ele_avatar_div.appendTo("#avatar_image");
-			}
+			set_avatar(r.has_avatar, r.name);			
 		}
 	});
 }
@@ -72,7 +91,7 @@ var update_user = function (password, email, language) {
 		}); 
 }
 */
-var update_user = function (password, email, language) {
+var update_user = function (password, email, language, remove_avatar) {
 	
 	var form_data = new FormData();
 	
@@ -81,6 +100,7 @@ var update_user = function (password, email, language) {
 	form_data.append("password", password);
 	form_data.append("email", email);
 	form_data.append("language", language);
+	form_data.append("remove_avatar", remove_avatar);
 
 	var file = $("#avatar")[0].files[0];
 	form_data.append("avatar", file);
@@ -113,12 +133,13 @@ var update_user = function (password, email, language) {
 		success: function (response) {
 			handle_qserv_success(response, function (rst, extra) {
 			
-				console.log(rst.data.avatar);
-				
 				if (language != user.language)
 					window.location.reload();
 					
 				alert_after_update(rst, extra);
+
+				if (remove_avatar > 0)
+					set_avatar(0, name);
 
 				$("#upload_progress").hide();
 			});
@@ -170,13 +191,17 @@ $(window).on('load', function () {
 					else {
 						var email = $("#email").val();
 						var language = $("#language").val();
+						var remove_avatar = 0;
 						
+						if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
+							remove_avatar = 1;
+										
 						if (email.length <= 0)
 							show_alert(t("Email cannot be empty."), "warning");
 						else if (language.length <= 0)
 							show_alert(t("Language cannot be empty."), "warning");
 						else
-							update_user(password, email, language);
+							update_user(password, email, language, remove_avatar);
 					}
 				}
 			}

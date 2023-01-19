@@ -153,14 +153,37 @@ beat('user', 'read', function ($name)
 	);
 });
 
-beat('user', 'update', function ($name, $password, $email, $rolename)
+beat('user', 'update', function ($name, $password, $email, $rolename, $remove_avatar = 0)
 {
 	if (!has_permission('user_update'))
 		return error_pack(err_access_denied);
 	
 	$now = time();
+	
+	$fields = array(
+		'email' => $email,
+		'roleid' => get_roleid_by_name($rolename),
+		'updated_utc' => $now
+	);
+	
 	$where = equ('name', $name, 'string');
 
+	if (intval($remove_avatar) > 0) {
+		$records = read('user', FALSE, $where);
+		$rcnt = record_cnt($records);
+
+		if ($rcnt > 0) {
+			$avatar = $records[0]['avatar'];
+			
+			if (strlen($avatar) > 0) {
+				remove_frepo($avatar);
+				$fields['avatar'] = '';
+			}
+		}
+		else
+			return error_pack(err_read_failed);
+	}
+	
 	if (strlen($password) > 0) {
 		$uid = get_userid_by_name($name);
 		if ($uid == 1) { // only superadmin can change his own password
@@ -168,20 +191,12 @@ beat('user', 'update', function ($name, $password, $email, $rolename)
 				return error_pack(err_cannot_change_password);
 		}
 		$hash = password_hash($password, PASSWORD_BCRYPT);
-		if (!update('user', array(
-			'password' => $hash,
-			'email' => $email,
-			'roleid' => get_roleid_by_name($rolename),
-			'updated_utc' => $now
-			), $where))
+		$fields['password'] = $hash;
+		if (!update('user', $fields, $where))
 			return error_pack(err_update_failed);
 	}
 	else {
-		if (!update('user', array(
-			'email' => $email,
-			'roleid' => get_roleid_by_name($rolename),
-			'updated_utc' => $now
-			), $where))
+		if (!update('user', $fields, $where))
 			return error_pack(err_update_failed);
 	}
 	

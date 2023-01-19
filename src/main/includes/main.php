@@ -4,6 +4,8 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 7 December 2022
 
+$default_avatar = "../../libs/bootstrap-icons-1.10.2/person.svg";
+
 $harubi_settings_path = "../../includes/settings.inc";
 require_once '../../includes/common.php';
 
@@ -71,7 +73,7 @@ beat('user', 'read_own', function ()
 	);
 });
 
-beat('user', 'update_own', function ($password, $email, $language)
+beat('user', 'update_own', function ($password, $email, $language, $remove_avatar = 0)
 {
 	if (!has_permission('user_update_own'))
 		return error_pack(err_access_denied);
@@ -113,6 +115,12 @@ beat('user', 'update_own', function ($password, $email, $language)
 			}
 		}
 	}
+	else if (intval($remove_avatar) > 0) {
+		if (strlen($avatar) > 0) {
+			remove_frepo($avatar);
+			$avatar = '';
+		}
+	}
 	
 	$now = time();
 
@@ -149,6 +157,8 @@ beat('user', 'update_own', function ($password, $email, $language)
 
 beat('user', 'avatar', function ($name)
 {
+	global $default_avatar;
+	
 	if (!has_permission('user_avatar'))
 		return;
 
@@ -165,26 +175,30 @@ beat('user', 'avatar', function ($name)
 
 	$avatar = $records[0]['avatar'];
 	
-	if (strlen($avatar) <= 0)
-		return;
+	if (strlen($avatar) <= 0) {
+		$fd = $default_avatar;
+		$ext = 'svg+xml';
+	}
+	else {
 
-	$md = read_frepo_metadata($avatar);
-	
-	if ($md === false || !isset($md['user']) || $md['user'] != $name)
-		return;
-	
-	$image_ext = array("png", "jpeg", "jpg", "gif");
-	$ext = $md['ext'];
-	
-	if (!in_array($ext, $image_ext))
-		return;
-	
-	$path = get_frepo_path($avatar);
-	
-	if ($path === false || strlen($path) <= 0)
-		return;
+		$md = read_frepo_metadata($avatar);
 		
-	$fd = $path . "/file.dt";
+		if ($md === false || !isset($md['user']) || $md['user'] != $name)
+			return;
+		
+		$image_ext = array("png", "jpeg", "jpg", "gif");
+		$ext = $md['ext'];
+		
+		if (!in_array($ext, $image_ext))
+			return;
+		
+		$path = get_frepo_path($avatar);
+		
+		if ($path === false || strlen($path) <= 0)
+			return;
+			
+		$fd = $path . "/file.dt";
+	}
 	
 	if (!file_exists($fd))
 		return;

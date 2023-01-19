@@ -7,6 +7,26 @@ var roles_loaded = false;
 var roles = [];
 var user = {has_avatar:0,name:'',email:'',rolename:''};
 
+var input_has_changed = function () {
+
+	if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
+		return true;
+	
+	if ($("#name").val() != user.name)
+		return true;
+
+	if ($("#email").val() != user.email)
+		return true;
+
+	if (get_selected_role() != user.rolename)
+		return true;
+		
+	if ($("#password").val().length > 0)
+		return true;
+		
+	return false;
+}
+
 var get_selected_role = function () {
 	for (var i in roles) {
 		var name = roles[i];
@@ -42,6 +62,35 @@ var append_role = function (name) {
 	$("#roles").append(ele_role);
 }
 
+var set_avatar = function (has_avatar, name) {
+	var src = "../libs/bootstrap-icons-1.10.2/person.svg";
+	var style = "width: 150px; height: 150px;";
+	
+	if (has_avatar > 0) {
+		src = main_server + "?model=user&action=avatar&name=" + name;
+		style = "max-height: 100%; max-width: 100%;"
+		$("#remove_avatar_block").removeClass("d-none");
+	}
+	else
+		$("#remove_avatar_block").addClass("d-none");
+	
+	var ele_avatar = $("<img>", {
+		class : "img-responsive",
+		style : style,
+		src : src
+	});
+	
+	var ele_avatar_div = $("<div>", {
+		class : "col-lg-3 col-md-3 col-sm-4",
+		append : [
+			ele_avatar
+		]
+	});
+	
+	$("#avatar_image").empty();
+	$("#avatar_image").append(ele_avatar_div);
+}
+
 var load_roles = function () {
 	roles = [];
 	qserv(admin_server, {model: 'role', action: 'listall'}, function (rst, extra) {
@@ -61,26 +110,6 @@ var load_roles = function () {
 	});
 }
 
-var input_has_changed = function () {
-
-	if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
-		return true;
-	
-	if ($("#name").val() != user.name)
-		return true;
-
-	if ($("#email").val() != user.email)
-		return true;
-
-	if (get_selected_role() != user.rolename)
-		return true;
-		
-	if ($("#password").val().length > 0)
-		return true;
-		
-	return false;
-}
-
 var load_user = function (name) {
 	user = {has_avatar:0,name:'',email:'',rolename:''};
 	qserv(admin_server, {model: 'user', action: 'read',
@@ -97,29 +126,7 @@ var load_user = function (name) {
 			user.email = r.email;
 			user.rolename = r.rolename;
 
-			var src = "../libs/bootstrap-icons-1.10.2/person.svg";
-			var style = "width: 150px; height: 150px;";
-			
-			if (r.has_avatar > 0) {
-				src = main_server + "?model=user&action=avatar&name=" + r.name;
-				style = "max-height: 100%; max-width: 100%;"
-				$("#remove_avatar_block").removeClass("d-none");
-			}
-			
-			var ele_avatar = $("<img>", {
-				class : "img-responsive",
-				style : style,
-				src : src
-			});
-			
-			var ele_avatar_div = $("<div>", {
-				class : "col-lg-3 col-md-3 col-sm-4",
-				append : [
-					ele_avatar
-				]
-			});
-			
-			ele_avatar_div.appendTo("#avatar_image");
+			set_avatar(r.has_avatar, r.name);
 		}
 	});
 }
@@ -129,9 +136,14 @@ var create_user = function (name, password, email, rolename) {
 		name: name, password: password, email:email, rolename: rolename}, alert_after_create);
 }
 
-var update_user = function (name, password, email, rolename) {
+var update_user = function (name, password, email, rolename, remove_avatar) { // alert_after_update
 	qserv(admin_server, {model: 'user', action: 'update',
-		name: name, password: password, email:email, rolename: rolename}, alert_after_update);
+		name: name, password: password, email:email, rolename: rolename, remove_avatar: remove_avatar}, function (rst, extra) {
+		alert_after_update(rst, extra);
+		
+		if (remove_avatar > 0)
+			set_avatar(0, name);
+	});
 }
 
 var delete_user = function (name) {
@@ -185,13 +197,17 @@ $(window).on('load', function () {
 					var password = $("#password").val();
 					var email = $("#email").val();
 					var rolename = get_selected_role();
+					var remove_avatar = 0;
+					
+					if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
+						remove_avatar = 1;
 					
 					if (email.length <= 0)
 						show_alert(t("Email cannot be empty."), "warning");
 					else if (rolename.length <= 0)
 						show_alert(t("Please select a role."), "warning");
 					else {
-						update_user(name, password, email, rolename);
+						update_user(name, password, email, rolename, remove_avatar);
 					}			
 				}
 				else
@@ -211,7 +227,7 @@ $(window).on('load', function () {
 		}
 		else {
 			// new user
-			$('#user_scripts').hide();
+			$("#avatar_block").hide();
 			show_create_button();
 			
 			$('#create_btn').click(function(){
