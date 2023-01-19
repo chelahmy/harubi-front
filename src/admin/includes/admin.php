@@ -55,12 +55,15 @@ beat('user', 'list', function ($restart, $search = '', $premium = 0, $order_by =
 	$sort = clean($sort, 'string');
 	
 	$records = read('user', FALSE, $where, $order_by, $sort, $limit, $offset);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
 		foreach ($records as &$r) {
 			unset($r['id']);
+			$avatar = $r['avatar'];
+			unset($r['avatar']);
+			$r['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
 			unset($r['password']);
 			$roleid = intval($r['roleid']);
 			unset($r['roleid']);
@@ -96,6 +99,7 @@ beat('user', 'create', function ($name, $password, $email, $rolename)
 		$now = time();
 		$hash = password_hash($password, PASSWORD_BCRYPT);
 		$id = create('user', array(
+			'avatar' => '',
 			'name' => $name,
 			'password' => $hash,
 			'email' => $email,
@@ -125,11 +129,14 @@ beat('user', 'read', function ($name)
 	
 	$where = equ('name', $name, 'string');
 	$records = read('user', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
 			unset($r['id']);
+			$avatar = $r['avatar'];
+			unset($r['avatar']);
+			$r['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
 			unset($r['password']);
 			$roleid = intval($r['roleid']);
 			unset($r['roleid']);
@@ -193,7 +200,7 @@ beat('user', 'delete', function ($name)
 	$rid = 0;
 	$records = read('user', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$rid = intval($records[0]['id']);
 	else // record does not exist or already deleted
 		return array(
@@ -206,14 +213,17 @@ beat('user', 'delete', function ($name)
 	if (!delete('user', $where))
 		return error_pack(err_delete_failed);
 
+	$avatar = $records[0]['avatar'];
+	
 	// Try to read back the record
 	$records = read('user', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_delete_failed);
 		
 	if ($rid > 0) {
 		// TODO: delete all records that refer to this user
+		remove_frepo($avatar);
 	}
 	
 	return array(
@@ -251,7 +261,7 @@ beat('usergroup', 'list', function ($restart, $search = '', $order_by = 'name', 
 	$sort = clean($sort, 'string');
 	
 	$records = read('usergroup', FALSE, $where, $order_by, $sort, $limit, $offset);
-	$rcnt = $records === FALSE && !is_array($records) ? 0 : count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -323,7 +333,7 @@ beat('usergroup', 'read', function ($ref)
 	
 	$where = equ('ref', $ref, 'string');
 	$records = read('usergroup', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {	
 
@@ -432,7 +442,7 @@ beat('member', 'list', function ($restart, $groupref, $search = '', $order_by = 
 	$usergroupid = 0;
 	$records = read('usergroup', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$usergroupid = intval($records[0]['id']);
 	else // record does not exist
 		return error_pack(err_record_missing, "groupref: @groupref", array('@groupref' => $groupref));
@@ -448,7 +458,7 @@ beat('member', 'list', function ($restart, $groupref, $search = '', $order_by = 
 	$sort = clean($sort, 'string');
 	
 	$records = read('member', FALSE, $where, $order_by, $sort, $limit, $offset);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -714,7 +724,7 @@ beat('role', 'list', function ($restart)
 	$offset = get_session($ses_table_offset);
 	
 	$records = read('role', FALSE, FALSE, 'name', FALSE, $limit, $offset);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -743,7 +753,7 @@ beat('role', 'listall', function ()
 		return error_pack(err_access_denied);
 	
 	$records = read('role', FALSE, FALSE, 'name');
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -769,7 +779,7 @@ beat('role', 'create', function ($name, $premium)
 	$where = equ('name', $name, 'string');
 	$records = read('role', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_record_already_exists);
 	else {
 		$id = create('role', array(
@@ -793,7 +803,7 @@ beat('role', 'read', function ($name)
 	
 	$where = equ('name', $name, 'string');
 	$records = read('role', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
@@ -835,7 +845,7 @@ beat('role', 'delete', function ($name)
 	$rid = 0;
 	$records = read('role', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$rid = $records[0]['id'];
 	else // record does not exist or already deleted
 		return array(
@@ -848,7 +858,7 @@ beat('role', 'delete', function ($name)
 	// Try to read back the record
 	$records = read('role', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_delete_failed);
 		
 	if ($rid > 0) {
@@ -887,7 +897,7 @@ beat('permission', 'list', function ($restart, $search = '')
 		$where = FALSE;
 	
 	$records = read('permission', FALSE, $where, 'name', FALSE, $limit, $offset);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -959,7 +969,7 @@ beat('permission', 'read', function ($name)
 	
 	$where = equ('name', $name, 'string');
 	$records = read('permission', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
@@ -1001,7 +1011,7 @@ beat('permission', 'delete', function ($name)
 	$rid = 0;
 	$records = read('permission', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$rid = $records[0]['id'];
 	else // record does not exist or already deleted
 		return array(
@@ -1014,7 +1024,7 @@ beat('permission', 'delete', function ($name)
 	// Try to read back the record
 	$records = read('permission', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_delete_failed);
 		
 	if ($rid > 0) {
@@ -1042,7 +1052,7 @@ beat('permrole', 'listall', function ($permname)
 	$where = equ('name', $permname, 'string');
 	$records = read('permission', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$permid = $records[0]['id'];
 	else // record does not exist or already deleted
 		return array(
@@ -1056,7 +1066,7 @@ beat('permrole', 'listall', function ($permname)
 	$role_records = array();
 	$where = equ('permissionid', $permid);
 	$records = read('permrole', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -1090,7 +1100,7 @@ beat('permrole', 'add', function ($permname, $rolename)
 	$where = equ('name', $permname, 'string');
 	$records = read('permission', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$permid = $records[0]['id'];
 	else // record does not exist
 		return array(
@@ -1101,7 +1111,7 @@ beat('permrole', 'add', function ($permname, $rolename)
 	$where = equ('name', $rolename, 'string');
 	$records = read('role', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$roleid = $records[0]['id'];
 	else // record does not exist
 		return array(
@@ -1111,7 +1121,7 @@ beat('permrole', 'add', function ($permname, $rolename)
 	$where = equ('permissionid', $permid) . ' AND ' . equ('roleid', $roleid);
 	$records = read('permrole', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return array(
 			'status' => 1
 		);	
@@ -1138,7 +1148,7 @@ beat('permrole', 'remove', function ($permname, $rolename)
 	$where = equ('name', $permname, 'string');
 	$records = read('permission', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$permid = $records[0]['id'];
 	else // record does not exist
 		return array(
@@ -1149,7 +1159,7 @@ beat('permrole', 'remove', function ($permname, $rolename)
 	$where = equ('name', $rolename, 'string');
 	$records = read('role', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$roleid = $records[0]['id'];
 	else // record does not exist
 		return array(
@@ -1159,7 +1169,7 @@ beat('permrole', 'remove', function ($permname, $rolename)
 	$where = equ('permissionid', $permid) . ' AND ' . equ('roleid', $roleid);
 	$records = read('permrole', FALSE, $where);
 	
-	if (count($records) > 0) {
+	if (record_cnt($records) > 0) {
 		if (!delete('permrole', $where))
 			return error_pack(err_delete_failed);	
 	}
@@ -1189,7 +1199,7 @@ beat('preference', 'list', function ($restart)
 	$offset = get_session($ses_table_offset);
 	
 	$records = read('preference', FALSE, FALSE, 'name', FALSE, $limit, $offset);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
 	
@@ -1220,7 +1230,7 @@ beat('preference', 'create', function ($name, $value)
 	$where = equ('name', $name, 'string');
 	$records = read('preference', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_record_already_exists);
 	else {
 		$id = create('preference', array(
@@ -1244,7 +1254,7 @@ beat('preference', 'read', function ($name)
 	
 	$where = equ('name', $name, 'string');
 	$records = read('preference', FALSE, $where);
-	$rcnt = count($records);
+	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
@@ -1286,7 +1296,7 @@ beat('preference', 'delete', function ($name)
 	$rid = 0;
 	$records = read('preference', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		$rid = $records[0]['id'];
 	else // record does not exist or already deleted
 		return array(
@@ -1299,7 +1309,7 @@ beat('preference', 'delete', function ($name)
 	// Try to read back the record
 	$records = read('preference', FALSE, $where);
 	
-	if (count($records) > 0)
+	if (record_cnt($records) > 0)
 		return error_pack(err_delete_failed);
 		
 	if ($rid > 0) {

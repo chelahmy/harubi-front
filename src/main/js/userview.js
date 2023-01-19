@@ -11,7 +11,7 @@ var load_user_profile = function (name) {
 			$('#username').text(r.name);
 			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
 			
-			if (r.avatar.length > 0) {
+			if (r.has_avatar > 0) {
 				$("#avatar").prop("src", main_server + "?model=user&action=avatar&name=" + r.name);
 			}
 		}

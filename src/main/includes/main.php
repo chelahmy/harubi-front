@@ -19,6 +19,12 @@ beat('user', 'view_profile', function ($name)
 		return error_pack(err_read_failed);
 	
 	$rcnt = record_cnt($records);
+	
+	if ($rcnt > 0) {
+		$avatar = $records[0]['avatar'];
+		unset($records[0]['avatar']);
+		$records[0]['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
+	}
 
 	return array(
 		'status' => 1,
@@ -46,6 +52,9 @@ beat('user', 'read_own', function ()
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
 			unset($r['id']);
+			$avatar = $r['avatar'];
+			unset($r['avatar']);
+			$r['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
 			unset($r['password']);
 			$roleid = intval($r['roleid']);
 			unset($r['roleid']);

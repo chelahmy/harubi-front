@@ -5,7 +5,7 @@
 
 var roles_loaded = false;
 var roles = [];
-var user = {name:'',email:'',rolename:''};
+var user = {has_avatar:0,name:'',email:'',rolename:''};
 
 var get_selected_role = function () {
 	for (var i in roles) {
@@ -62,6 +62,10 @@ var load_roles = function () {
 }
 
 var input_has_changed = function () {
+
+	if (user.has_avatar > 0 && $("#remove_avatar").prop('checked'))
+		return true;
+	
 	if ($("#name").val() != user.name)
 		return true;
 
@@ -78,7 +82,7 @@ var input_has_changed = function () {
 }
 
 var load_user = function (name) {
-	user = {name:'',email:'',rolename:''};
+	user = {has_avatar:0,name:'',email:'',rolename:''};
 	qserv(admin_server, {model: 'user', action: 'read',
 		name: name}, function (rst, extra) {
 		if (rst.data.count > 0) {
@@ -88,9 +92,34 @@ var load_user = function (name) {
 			$("#email").val(r.email);
 			$("#role_" + r.rolename).prop('checked', true);
 			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
+			user.has_avatar = r.has_avatar;
 			user.name = r.name;
 			user.email = r.email;
 			user.rolename = r.rolename;
+
+			var src = "../libs/bootstrap-icons-1.10.2/person.svg";
+			var style = "width: 150px; height: 150px;";
+			
+			if (r.has_avatar > 0) {
+				src = main_server + "?model=user&action=avatar&name=" + r.name;
+				style = "max-height: 100%; max-width: 100%;"
+				$("#remove_avatar_block").removeClass("d-none");
+			}
+			
+			var ele_avatar = $("<img>", {
+				class : "img-responsive",
+				style : style,
+				src : src
+			});
+			
+			var ele_avatar_div = $("<div>", {
+				class : "col-lg-3 col-md-3 col-sm-4",
+				append : [
+					ele_avatar
+				]
+			});
+			
+			ele_avatar_div.appendTo("#avatar_image");
 		}
 	});
 }
@@ -137,6 +166,7 @@ $(window).on('load', function () {
 		
 		if (username.length > 0) {
 		
+			show_view_button();
 			show_update_button();
 			show_delete_button();
 			$('#name').prop('readonly', true);
@@ -144,6 +174,10 @@ $(window).on('load', function () {
 			$('#password_help_extra').text(t('Leave this field empty to keep the existing password.'));
 			
 			load_user_after_roles(username);
+
+			$('#view_btn').click(function(){
+				show_url("../main/userview.html?name=" + username);
+			});
 
 			$('#update_btn').click(function(){
 				if (input_has_changed()) {

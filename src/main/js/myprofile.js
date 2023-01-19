@@ -41,7 +41,7 @@ var load_user = function () {
 			user.rolename = r.rolename;
 			user.language = r.language;
 		
-			if (r.avatar.length > 0) {
+			if (r.has_avatar > 0) {
 				var ele_avatar = $("<img>", {
 					class : "img-responsive",
 					style : "max-height: 100%; max-width: 100%;",
