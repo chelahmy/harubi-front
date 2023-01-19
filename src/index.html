@@ -30,7 +30,7 @@
 		<h1 class="display-5 fw-bold" id="site-title">Harubi Front</h1>
 		<h2 class="display-5">Welcome</h2>
 		<p><a href="admin/index.html">Administration</a></p>
-		<p><a href="main/home.html">Main</a></p>
+		<p><a href="main/home.html?ref=2">Main</a></p>
 	</div>
 </section>
 
@@ -45,7 +45,7 @@ $(window).on('load', function () {
 
 	load_logo();
 
-	load_preferences('site', function (data) {
+	load_site_info(function (data) {
 		if (data.count > 0) {
 			var r = data.records;
 			for (var i in r) {

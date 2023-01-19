@@ -46,7 +46,7 @@ $(window).on('load', function () {
 
 	load_logo();
 
-	load_preferences('site', function (data) {
+	load_site_info(function (data) {
 		if (data.count > 0) {
 			var r = data.records;
 			for (var i in r) {

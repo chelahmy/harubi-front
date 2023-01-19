@@ -786,6 +786,7 @@ beat('user', 'signup', function ($name, $password, $email)
 		$hash = password_hash($password, PASSWORD_BCRYPT);
 		$id = create('user', array(
 			'name' => $name,
+			'avatar' => '',
 			'password' => $hash,
 			'email' => $email,
 			'roleid' => get_new_user_roleid(),
@@ -914,6 +915,29 @@ beat('user', 'signout', function ()
 				
 	return array(
 		'status' => 1,
+	);
+});
+
+beat('preference', 'read_site', function ()
+{
+	// Note: No access control for public data
+	
+	$where = "name LIKE 'site%'";
+	$records = read('preference', FALSE, $where, 'name', 'ASC');
+	$rcnt = record_cnt($records);
+
+	if ($rcnt > 0) {	
+		foreach ($records as &$r) {
+			unset($r['id']);
+		}
+	}
+
+	return array(
+		'status' => 1,
+		'data' => array(
+			'records' => $records,
+			'count' => $rcnt
+		)
 	);
 });
 

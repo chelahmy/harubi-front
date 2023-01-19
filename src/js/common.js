@@ -697,6 +697,16 @@ var new_home_menu_item = function (type, icon, title, description, module, url) 
 	});
 }
 
+// Load preferences with name starts with *site*.
+// And call on_ready(data) when the data is ready.
+var load_site_info = function (on_ready) {
+	if (typeof on_ready === 'function')
+		qserv(main_server, {model: 'preference', action: 'read_site',
+			}, function(rst, extra) {
+			on_ready(rst.data);
+		});
+}
+
 // Load preferences with name starts with *name*.
 // And call on_ready(data) when the data is ready.
 var load_preferences = function (name, on_ready) {
