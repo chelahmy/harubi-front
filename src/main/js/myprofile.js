@@ -30,25 +30,23 @@ var input_has_changed = function () {
 }
 
 var set_avatar = function (has_avatar, name) {
-	var src = "../libs/bootstrap-icons-1.10.2/person.svg";
-	var style = "width: 150px; height: 150px;";
+	var src = app_rel_path + default_avatar;
 	
 	if (has_avatar > 0) {
 		src = main_server + "?model=user&action=avatar&name=" + name;
-		style = "max-height: 100%; max-width: 100%;"
 		$("#remove_avatar_block").removeClass("d-none");
 	}
 	else
 		$("#remove_avatar_block").addClass("d-none");
 	
 	var ele_avatar = $("<img>", {
-		class : "img-responsive",
-		style : style,
+		class : "img-fluid",
+		style : "height: auto; width: 100%;",
 		src : src
 	});
 	
 	var ele_avatar_div = $("<div>", {
-		class : "col-lg-3 col-md-3 col-sm-4",
+		class : "col col-lg-3 col-md-3 col-sm-4",
 		append : [
 			ele_avatar
 		]
