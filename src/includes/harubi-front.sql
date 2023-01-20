@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 13, 2023 at 05:49 AM
+-- Generation Time: Jan 20, 2023 at 12:58 PM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `discussion` (
-  `id` bigint NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
   `ref` char(32) NOT NULL,
   `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -40,14 +40,14 @@ CREATE TABLE `discussion` (
 --
 
 CREATE TABLE `member` (
-  `id` bigint NOT NULL,
-  `userid` bigint NOT NULL,
-  `usergroupid` bigint NOT NULL,
-  `roleid` int NOT NULL,
-  `unread` int NOT NULL,
-  `added_by` bigint NOT NULL,
-  `created_utc` bigint NOT NULL,
-  `updated_utc` bigint NOT NULL
+  `id` bigint UNSIGNED NOT NULL,
+  `userid` bigint UNSIGNED NOT NULL,
+  `usergroupid` bigint UNSIGNED NOT NULL,
+  `roleid` int UNSIGNED NOT NULL,
+  `unread` int UNSIGNED NOT NULL,
+  `added_by` bigint UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL,
+  `updated_utc` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -57,7 +57,7 @@ CREATE TABLE `member` (
 --
 
 CREATE TABLE `permission` (
-  `id` int NOT NULL,
+  `id` int UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -68,9 +68,9 @@ CREATE TABLE `permission` (
 --
 
 CREATE TABLE `permrole` (
-  `id` int NOT NULL,
-  `permissionid` int NOT NULL,
-  `roleid` int NOT NULL
+  `id` int UNSIGNED NOT NULL,
+  `permissionid` int UNSIGNED NOT NULL,
+  `roleid` int UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -80,15 +80,15 @@ CREATE TABLE `permrole` (
 --
 
 CREATE TABLE `post` (
-  `id` bigint NOT NULL,
-  `discussion_id` bigint NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `discussion_id` bigint UNSIGNED NOT NULL,
   `body` text NOT NULL,
   `attachment` text NOT NULL,
-  `quote_id` bigint NOT NULL,
-  `quote_discussion_id` bigint NOT NULL,
-  `posted_by` bigint NOT NULL,
-  `created_utc` bigint NOT NULL,
-  `updated_utc` bigint NOT NULL
+  `quote_id` bigint UNSIGNED NOT NULL,
+  `quote_discussion_id` bigint UNSIGNED NOT NULL,
+  `posted_by` bigint UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL,
+  `updated_utc` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -98,10 +98,10 @@ CREATE TABLE `post` (
 --
 
 CREATE TABLE `postreact` (
-  `id` bigint NOT NULL,
-  `postid` bigint NOT NULL,
-  `userid` bigint NOT NULL,
-  `type` tinyint NOT NULL
+  `id` bigint UNSIGNED NOT NULL,
+  `postid` bigint UNSIGNED NOT NULL,
+  `userid` bigint UNSIGNED NOT NULL,
+  `type` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -111,7 +111,7 @@ CREATE TABLE `postreact` (
 --
 
 CREATE TABLE `preference` (
-  `id` int NOT NULL,
+  `id` int UNSIGNED NOT NULL,
   `name` varchar(64) NOT NULL,
   `value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -123,9 +123,9 @@ CREATE TABLE `preference` (
 --
 
 CREATE TABLE `role` (
-  `id` int NOT NULL,
+  `id` int UNSIGNED NOT NULL,
   `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `premium` tinyint NOT NULL
+  `premium` tinyint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -135,18 +135,18 @@ CREATE TABLE `role` (
 --
 
 CREATE TABLE `user` (
-  `id` bigint NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
   `name` varchar(16) NOT NULL,
   `password` varchar(60) NOT NULL,
   `email` varchar(80) NOT NULL,
-  `roleid` int NOT NULL,
+  `roleid` int UNSIGNED NOT NULL,
   `language` varchar(8) NOT NULL,
-  `valid_thru` bigint NOT NULL,
-  `signins` int NOT NULL,
-  `last_signedin_utc` bigint NOT NULL,
-  `signin_note` int NOT NULL,
-  `created_utc` bigint NOT NULL,
-  `updated_utc` bigint NOT NULL
+  `valid_thru` bigint UNSIGNED NOT NULL,
+  `signins` int UNSIGNED NOT NULL,
+  `last_signedin_utc` bigint UNSIGNED NOT NULL,
+  `signin_note` int UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL,
+  `updated_utc` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
@@ -156,13 +156,13 @@ CREATE TABLE `user` (
 --
 
 CREATE TABLE `usergroup` (
-  `id` bigint NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL,
   `ref` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `owneruserid` bigint NOT NULL,
-  `created_by` bigint NOT NULL,
-  `created_utc` bigint NOT NULL,
-  `updated_utc` bigint NOT NULL
+  `owneruserid` bigint UNSIGNED NOT NULL,
+  `created_by` bigint UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL,
+  `updated_utc` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -259,61 +259,61 @@ ALTER TABLE `usergroup` ADD FULLTEXT KEY `name` (`name`);
 -- AUTO_INCREMENT for table `discussion`
 --
 ALTER TABLE `discussion`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `member`
 --
 ALTER TABLE `member`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `permission`
 --
 ALTER TABLE `permission`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `permrole`
 --
 ALTER TABLE `permrole`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `postreact`
 --
 ALTER TABLE `postreact`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `preference`
 --
 ALTER TABLE `preference`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `role`
 --
 ALTER TABLE `role`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `usergroup`
 --
 ALTER TABLE `usergroup`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
