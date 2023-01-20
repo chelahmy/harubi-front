@@ -4,6 +4,7 @@
 // 13 November 2022
 
 var app_rel_path = "./";
+var default_avatar = "libs/bootstrap-icons-1.10.2/person.svg";
 var main_server = app_rel_path + "main/includes/main.php";
 var loading_logo_path = app_rel_path + "logo/logo.png";
 var page_logo_path = app_rel_path + "logo/logo.png";
