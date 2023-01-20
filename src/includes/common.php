@@ -1326,19 +1326,20 @@ beat('post', 'react', function ($discussion_ref, $id, $type, $style = 'toggle')
 				'status' => 1,
 				'data' => array(
 					'own' => 1,
-					'type' => 0
+					'changes' => 0
 				)
 			);		
 	}
 	else
 		return error_pack(err_read_failed);
 
-	$nt = 0;		
+	$changes = 0;
 	$where = equ('postid', $id) . " AND " . equ('userid', $userid);
 	$records = read('postreact', FALSE, $where);
 	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
+		$nt = 0;		
 		$t = intval($records[0]['type']);
 		$bitvals = array(1, 2, 4, 8, 16, 32, 64, 128);
 		
@@ -1347,8 +1348,11 @@ beat('post', 'react', function ($discussion_ref, $id, $type, $style = 'toggle')
 				if ($style == 'toggle') {
 					if (($t & $bv) == 0) // toggle
 						$nt += $bv;
+					++$changes;
 				}
 				else if ($style == 'trigger') {
+					if (($t & $bv) == 0)
+						++$changes;
 					$nt += $bv;
 				}
 			}
@@ -1374,7 +1378,7 @@ beat('post', 'react', function ($discussion_ref, $id, $type, $style = 'toggle')
 		'status' => 1,
 		'data' => array(
 			'own' => 0,
-			'type' => $nt
+			'changes' => $changes
 		)
 	);
 });

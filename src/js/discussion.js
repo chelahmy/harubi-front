@@ -779,7 +779,7 @@ var load_reacts = function (discussion_ref, id, type) {
 var post_react = function (discussion_ref, id, type, style = 'toggle') {
 	qserv(main_server, {model: 'post', action: 'react',
 		discussion_ref: discussion_ref, id: id, type: type, style: style}, function(rst, extra) {
-		if (rst.data.own != 1) {
+		if (rst.data.own != 1 && rst.data.changes > 0) {
 			load_reacts(discussion_ref, id, type);
 			
 			if (type == react_repost) {
