@@ -1234,6 +1234,14 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
+	
+	if (strlen($discussion_ref) <= 0) { // post to the signed-in user discussion (see userview.html)
+		$name = signedin_uname();
+		
+		if (strlen($name) > 0)
+			$discussion_ref = get_discussion_ref('table_user_' . $name);
+	}
+	
 	$discussion_id = get_discussion_id_by_ref($discussion_ref);
 	
 	if ($discussion_id <= 0)
@@ -1291,7 +1299,7 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 	);
 });
 
-beat('post', 'react', function ($discussion_ref, $id, $type)
+beat('post', 'react', function ($discussion_ref, $id, $type, $style = 'toggle')
 {
 	if (!has_permission('post_react'))
 		return error_pack(err_access_denied);
@@ -1317,26 +1325,32 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 			return array(
 				'status' => 1,
 				'data' => array(
-					'own' => 1
+					'own' => 1,
+					'type' => 0
 				)
 			);		
 	}
 	else
 		return error_pack(err_read_failed);
 
+	$nt = 0;		
 	$where = equ('postid', $id) . " AND " . equ('userid', $userid);
 	$records = read('postreact', FALSE, $where);
 	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
-		$nt = 0;		
 		$t = intval($records[0]['type']);
 		$bitvals = array(1, 2, 4, 8, 16, 32, 64, 128);
 		
 		foreach ($bitvals as $bv) {
 			if (($type & $bv) > 0) { // for every selected reacts,
-				if (($t & $bv) == 0) // toggle
+				if ($style == 'toggle') {
+					if (($t & $bv) == 0) // toggle
+						$nt += $bv;
+				}
+				else if ($style == 'trigger') {
 					$nt += $bv;
+				}
 			}
 			elseif (($t & $bv) > 0) // keep unselected reacts
 				$nt += $bv;				
@@ -1359,7 +1373,8 @@ beat('post', 'react', function ($discussion_ref, $id, $type)
 	return array(
 		'status' => 1,
 		'data' => array(
-			'own' => 0
+			'own' => 0,
+			'type' => $nt
 		)
 	);
 });

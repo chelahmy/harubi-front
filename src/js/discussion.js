@@ -3,8 +3,6 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 4 January 2023
 
-var default_avatar = "libs/bootstrap-icons-1.10.2/person.svg";
-
 var forward_page_url = "main/forward.html";
 var forward_post_id = 0;
 var forward_discussion_ref = '';
@@ -29,6 +27,7 @@ var video_playing = false;
 var map_viewer_count = 0;
 
 var react_thumbs_up = 1;
+var react_repost = 2;
 
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
@@ -64,6 +63,7 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 	var ele_like = $("<i>", {
 		id : "like_" + id,
 		class : "post-icon bi-hand-thumbs-up-fill",
+		style : own_post != 1 ? "cursor: pointer;" : "cursor: default;",
 		click : function (e) {
 			if (own_post != 1)
 				post_react(discussion_ref, id, react_thumbs_up);
@@ -78,6 +78,30 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 			if (own_post == 1) {
 				if ($("#react_list_" + id).is(':empty'))
 					load_react_list(1, discussion_ref, id, react_thumbs_up);
+				else
+					$("#react_list_" + id).empty();
+			}
+		}
+	});
+	
+	var ele_repost = $("<i>", {
+		id : "repost_" + id,
+		class : "post-icon bi-repeat",
+		style : own_post != 1 ? "cursor: pointer;" : "cursor: default;",
+		click : function (e) {
+			if (own_post != 1)
+				post_react(discussion_ref, id, react_repost, 'trigger');
+		}
+	});
+	
+	var ele_repost_count = $("<small>", {
+		id : "repost_count_" + id,
+		style : own_post == 1 ? "cursor: pointer;" : "cursor: default;",
+		text : "", // show nothing on zero count
+		click : function (e) {
+			if (own_post == 1) {
+				if ($("#react_list_" + id).is(':empty'))
+					load_react_list(1, discussion_ref, id, react_repost);
 				else
 					$("#react_list_" + id).empty();
 			}
@@ -114,6 +138,10 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 			ele_like,
 			$("<span>", {"html" : "&nbsp;"}),
 			ele_like_count,
+			$("<span>", {"html" : "&nbsp;&nbsp;"}),
+			ele_repost,
+			$("<span>", {"html" : "&nbsp;"}),
+			ele_repost_count,
 			$("<span>", {"html" : "&nbsp;&nbsp;"}),
 			ele_reply,
 			$("<span>", {"html" : "&nbsp;"}),
@@ -568,6 +596,7 @@ var load_posts = function (restart, discussion_ref) {
 						latest_post_id = id;
 					
 					load_reacts(discussion_ref, id, react_thumbs_up);
+					load_reacts(discussion_ref, id, react_repost);
 				}
 			}
 			
@@ -598,6 +627,7 @@ var load_newer_posts = function (discussion_ref) {
 						latest_post_id = id;
 
 					load_reacts(discussion_ref, id, react_thumbs_up);
+					load_reacts(discussion_ref, id, react_repost);
 				}
 			}
 			
@@ -717,13 +747,19 @@ var load_forward_post = function () {
 }
 
 var load_reacts = function (discussion_ref, id, type) {
-	$("#like_" + id).removeClass("post-icon-select");
+
+	var rname = 'like';
+	
+	if (type == react_repost)
+		rname = 'repost';
+		
+	$("#" + rname + "_" + id).removeClass("post-icon-select");
 				
 	qserv(main_server, {model: 'post', action: 'count_reacts',
 		discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
 		
 		if (rst.data.count > 0) {
-			$("#like_count_" + id).text(rst.data.count);
+			$("#" + rname + "_count_" + id).text(rst.data.count);
 		
 			qserv(main_server, {model: 'post', action: 'get_react',
 				discussion_ref: discussion_ref, id: id}, function(rst2, extra2) {
@@ -731,20 +767,28 @@ var load_reacts = function (discussion_ref, id, type) {
 					var r = rst2.data.records[0];
 
 					if ((r.type & react_thumbs_up) > 0)
-						$("#like_" + id).addClass("post-icon-select");
+						$("#" + rname + "_" + id).addClass("post-icon-select");
 				}
 			});
 		}
 		else
-			$("#like_count_" + id).text(""); // show nothing on zero count
+			$("#" + rname + "_count_" + id).text(""); // show nothing on zero count
 	});
 }
 
-var post_react = function (discussion_ref, id, type) {
+var post_react = function (discussion_ref, id, type, style = 'toggle') {
 	qserv(main_server, {model: 'post', action: 'react',
-		discussion_ref: discussion_ref, id: id, type: type}, function(rst, extra) {
-		if (rst.data.own != 1)
+		discussion_ref: discussion_ref, id: id, type: type, style: style}, function(rst, extra) {
+		if (rst.data.own != 1) {
 			load_reacts(discussion_ref, id, type);
+			
+			if (type == react_repost) {
+				qserv(main_server, {model: 'post', action: 'new',
+					discussion_ref: '', body: '', quote_discussion_ref: discussion_ref, quote_id: id}, function (rst, extra) {
+					show_alert(t("Reposted to your discussion."), "success");
+				});
+			}
+		}
 	});
 }
 
