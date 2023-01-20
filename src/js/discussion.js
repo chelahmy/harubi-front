@@ -3,6 +3,8 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 4 January 2023
 
+var default_avatar = "libs/bootstrap-icons-1.10.2/person.svg";
+
 var forward_page_url = "main/forward.html";
 var forward_post_id = 0;
 var forward_discussion_ref = '';
@@ -299,7 +301,7 @@ var ele_post_content = function (discussion_ref, id, body, attachment) {
 					else if (video_ext.includes(ext)) {
 					
 						var ele_video_div = $("<div>", {
-							class : "col-lg-4 col-md-6 col-sm-12"
+							class : "col-lg-6 col-md-6 col-sm-12"
 						});
 
 						var ele_video = ele_video_player(id, src, ext);
@@ -317,7 +319,7 @@ var ele_post_content = function (discussion_ref, id, body, attachment) {
 						});
 
 						var ele_image_div = $("<div>", {
-							class : "col-lg-2 col-md-3 col-sm-4",
+							class : "col-lg-3 col-md-3 col-sm-4",
 							append : [
 								ele_image
 							]
@@ -435,7 +437,29 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
-var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
+var ele_avatar = function (has_avatar, name) {
+	var src = app_rel_path + default_avatar;
+	
+	if (has_avatar > 0)
+		src = main_server + "?model=user&action=avatar&name=" + name;
+	
+	var ele_avatar = $("<img>", {
+		class : "img-fluid",
+		style : "height: auto; width: 100%; border-radius: 50%;",
+		src : src
+	});
+	
+	var ele_avatar_link = $("<a>", {
+		"href" : app_rel_path + user_page_url + "?name=" + name,
+		append : [
+			ele_avatar
+		]
+	});
+	
+	return ele_avatar_link;
+}
+
+var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc) {
 	
 	const options = {
 		defaultProtocol: 'https',
@@ -463,15 +487,25 @@ var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_d
 	ele_post.append(ele_footer);
 	
 	var ele_post_col = $("<div>", {
-		class : "col",
+		class : "col-11",
 		append : [
 			ele_post
+		]
+	});
+	
+	var ele_post_avatar = ele_avatar(posted_by_has_avatar, posted_by_username);
+	
+	var ele_post_avatar_col = $("<div>", {
+		class : "col-1",
+		append : [
+			ele_post_avatar
 		]
 	});
 	
 	var ele_post_block = $("<div>", {
 		class : "row",
 		append : [
+			ele_post_avatar_col,
 			ele_post_col,
 			$("<hr>")
 		]
@@ -480,16 +514,16 @@ var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_d
 	return ele_post_block;
 }
 
-var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
+var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc) {
 	
-	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc);
 
 	$("#posts").prepend(ele);
 }
 
-var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc) {
+var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc) {
 	
-	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, own_post, created_utc);
+	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc);
 
 	$("#posts").append(ele);
 }
@@ -528,7 +562,7 @@ var load_posts = function (restart, discussion_ref) {
 					var id = r[i].id;
 					prepend_post(discussion_ref, id, r[i].body, r[i].attachment,
 						r[i].quote_id, r[i].quote_discussion_ref,
-						r[i].posted_by_username, r[i].own_post, r[i].created_utc);
+						r[i].posted_by_username, r[i].posted_by_has_avatar, r[i].own_post, r[i].created_utc);
 
 					if (restart && (id > latest_post_id))
 						latest_post_id = id;
@@ -558,7 +592,7 @@ var load_newer_posts = function (discussion_ref) {
 					var id = r[i].id;
 					append_post(discussion_ref, id, r[i].body, r[i].attachment,
 						r[i].quote_id, r[i].quote_discussion_ref,
-						r[i].posted_by_username, r[i].own_post, r[i].created_utc);
+						r[i].posted_by_username, r[i].posted_by_has_avatar, r[i].own_post, r[i].created_utc);
 
 					if (id > latest_post_id)
 						latest_post_id = id;

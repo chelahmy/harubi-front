@@ -232,6 +232,24 @@ function get_username_by_id($userid) {
 	return '';
 }
 
+function get_username_and_avatar($userid) {
+	if ($userid <= 0)
+		return FALSE;
+		
+	$where = equ('id', $userid);
+	$records = read('user', FALSE, $where);
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt > 0) {
+		return array(
+			'avatar' => $records[0]['avatar'],
+			'name' => $records[0]['name']
+		);
+	}
+	
+	return FALSE;
+}
+
 function inc_user_signins($userid, $signins) {
 	$now = time();
 	$where = equ('id', $userid);
@@ -1033,7 +1051,9 @@ beat('post', 'list', function ($restart, $discussion_ref)
 			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
-			$r['posted_by_username'] = get_username_by_id($posted_by);
+			$unava = get_username_and_avatar($posted_by);
+			$r['posted_by_has_avatar'] = $unava !== FALSE && strlen($unava['avatar']) > 0 ? 1 : 0;
+			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 		
@@ -1086,7 +1106,9 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
-			$r['posted_by_username'] = get_username_by_id($posted_by);
+			$unava = get_username_and_avatar($posted_by);
+			$r['posted_by_has_avatar'] = $unava !== FALSE && strlen($unava['avatar']) > 0 ? 1 : 0;
+			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 	}
@@ -1130,7 +1152,9 @@ beat('post', 'read', function ($discussion_ref, $id)
 			$r['quote_discussion_ref'] = get_discussion_ref_by_id($quote_discussion_id);
 			$posted_by = $r['posted_by'];
 			unset($r['posted_by']);
-			$r['posted_by_username'] = get_username_by_id($posted_by);
+			$unava = get_username_and_avatar($posted_by);
+			$r['posted_by_has_avatar'] = $unava !== FALSE && strlen($unava['avatar']) > 0 ? 1 : 0;
+			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
 		}
 	}
 
