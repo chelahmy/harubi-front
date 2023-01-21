@@ -64,6 +64,9 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 		id : "like_" + id,
 		class : "post-icon bi-hand-thumbs-up-fill",
 		style : own_post != 1 ? "cursor: pointer;" : "cursor: default;",
+		'data-bs-toggle' : "tooltip",
+		'data-bs-placement' : "top",
+		'data-bs-title' : t("Like"),
 		click : function (e) {
 			if (own_post != 1)
 				post_react(discussion_ref, id, react_thumbs_up);
@@ -88,6 +91,9 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 		id : "repost_" + id,
 		class : "post-icon bi-repeat",
 		style : own_post != 1 ? "cursor: pointer;" : "cursor: default;",
+		'data-bs-toggle' : "tooltip",
+		'data-bs-placement' : "top",
+		'data-bs-title' : t("Repost"),
 		click : function (e) {
 			if (own_post != 1)
 				post_react(discussion_ref, id, react_repost, 'trigger');
@@ -110,6 +116,9 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 	
 	var ele_reply = $("<i>", {
 		class : "post-icon bi-reply-fill",
+		'data-bs-toggle' : "tooltip",
+		'data-bs-placement' : "top",
+		'data-bs-title' : t("Reply"),
 		click : function () {
 			dispose_video_player(); // otherwise video won't be quoted
 			post_quote_id = id;
@@ -121,6 +130,9 @@ var ele_post_footer = function (discussion_ref, id, own_post) {
 	
 	var ele_forward = $("<i>", {
 		class : "post-icon bi-forward-fill",
+		'data-bs-toggle' : "tooltip",
+		'data-bs-placement' : "top",
+		'data-bs-title' : t("Forward"),
 		click : function () {
 			
 			qserv(main_server, {model: 'post', action: 'forward',
@@ -465,6 +477,34 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
+var wrap_emoticons_with_tooltips = function (str) {
+	var tstr = "";
+	var uc = parseInt("1F600", 16);
+	for (var i = 0; i < str.length; i++) {
+		var cp = str.codePointAt(i);
+		if ((typeof cp !== "undefined") && cp >= uc && cp < uc + 80) {
+
+			var emo = "&#" + cp + ";";
+			var ele_emo_tooltip = $("<h1>", {
+				html : emo,
+			});
+			var ele_emo = $("<span>", {
+				style : "cursor: default;",
+				html : emo,
+				'data-bs-toggle' : "tooltip",
+				'data-bs-html' : "true",
+				'data-bs-title' : ele_emo_tooltip.prop("outerHTML")
+			});
+			
+			tstr += ele_emo.prop("outerHTML");
+			++i; // an emoticon has a serrogate pair
+		}
+		else
+			tstr += str.substring(i, i + 1);
+	}
+	return tstr;
+}
+
 var ele_avatar = function (has_avatar, name) {
 	var src = app_rel_path + default_avatar;
 	
@@ -500,6 +540,7 @@ var ele_post = function (discussion_ref, id, body, attachment, quote_id, quote_d
 	body = linkifyStr(body, options);
 	body = tag_wrap(body, "**", "strong");
 	body = tag_wrap(body, "*", "em");
+	body = wrap_emoticons_with_tooltips(body);
 	
 	var ele_quote_block = ele_quote(quote_id, quote_discussion_ref, true);
 	
@@ -547,6 +588,9 @@ var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quo
 	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc);
 
 	$("#posts").prepend(ele);
+
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 }
 
 var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc) {
@@ -554,6 +598,9 @@ var append_post = function (discussion_ref, id, body, attachment, quote_id, quot
 	var ele = ele_post(discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc);
 
 	$("#posts").append(ele);
+
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 }
 
 var load_post_quote = function (host_ele, discussion_ref, id) {
@@ -884,9 +931,15 @@ var add_emoticons = function (index = 0) {
 	
 	for (i = index; i < (index + len) && i < 80; i++) {
 		var emo = "&#" + (uc + i) + ";";
+		var ele_emo_tooltip = $("<h1>", {
+			html : emo,
+		});
 		var ele_emo = $("<span>", {
 			style : "margin: 5px; cursor: pointer;",
 			html : emo,
+			'data-bs-toggle' : "tooltip",
+			'data-bs-html' : "true",
+			'data-bs-title' : ele_emo_tooltip.prop("outerHTML"),
 			click : function (e) {
 				insert_text(ele_post, $(this).text());
 			}
@@ -894,6 +947,9 @@ var add_emoticons = function (index = 0) {
 		
 		ele_emoji_block.append(ele_emo);
 	}
+	
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 	
 	if (i < 80) {
 		var ele_more = $("<span>", {
