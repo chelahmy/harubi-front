@@ -26,6 +26,7 @@ beat('user', 'view_profile', function ($name)
 		$avatar = $records[0]['avatar'];
 		unset($records[0]['avatar']);
 		$records[0]['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
+		$records[0]['discussion_ref'] = get_discussion_ref('table:user:' . $name);
 	}
 
 	return array(
@@ -366,7 +367,7 @@ beat('usergroup', 'read_own', function ($ref)
 
 	if ($rcnt > 0) {	
 
-		$discussion_ref = get_discussion_ref('table_usergroup_' . $ref);
+		$discussion_ref = get_discussion_ref('table:usergroup:' . $ref);
 		
 		foreach ($records as &$r) {
 			unset($r['id']);

@@ -69,6 +69,14 @@
             "created_utc" : "int",
             "updated_utc" : "int"
         },
+        "postread" : {
+            "id" : "int",
+            "userid" : "int",
+            "discussion_id" : "int",
+            "lastread_postid" : "int",
+            "created_utc" : "int",
+            "updated_utc" : "int"
+        },
         "postreact" : {
             "id" : "int",
             "postid" : "int",

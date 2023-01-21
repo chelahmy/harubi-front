@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 20, 2023 at 12:58 PM
+-- Generation Time: Jan 22, 2023 at 02:07 AM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -102,6 +102,21 @@ CREATE TABLE `postreact` (
   `postid` bigint UNSIGNED NOT NULL,
   `userid` bigint UNSIGNED NOT NULL,
   `type` bigint UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `postread`
+--
+
+CREATE TABLE `postread` (
+  `id` bigint UNSIGNED NOT NULL,
+  `userid` bigint UNSIGNED NOT NULL,
+  `discussion_id` bigint UNSIGNED NOT NULL,
+  `lastread_postid` bigint UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL,
+  `updated_utc` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -216,6 +231,13 @@ ALTER TABLE `postreact`
   ADD KEY `post_type` (`postid`,`type`) USING BTREE;
 
 --
+-- Indexes for table `postread`
+--
+ALTER TABLE `postread`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_discussion` (`userid`,`discussion_id`);
+
+--
 -- Indexes for table `preference`
 --
 ALTER TABLE `preference`
@@ -289,6 +311,12 @@ ALTER TABLE `post`
 -- AUTO_INCREMENT for table `postreact`
 --
 ALTER TABLE `postreact`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `postread`
+--
+ALTER TABLE `postread`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --

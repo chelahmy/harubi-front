@@ -352,7 +352,7 @@ beat('usergroup', 'read', function ($ref)
 
 	if ($rcnt > 0) {	
 
-		$discussion_ref = get_discussion_ref('table_usergroup_' . $ref);
+		$discussion_ref = get_discussion_ref('table:usergroup:' . $ref);
 		
 		foreach ($records as &$r) {
 			unset($r['id']);

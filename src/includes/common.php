@@ -378,6 +378,38 @@ function get_discussion_ref_by_id($discussion_id) {
 	return $discussion_ref;
 }
 
+function update_postread($userid, $discussion_id, $lastread_postid) {
+	$now = time();
+	$lastread_postid = intval($lastread_postid);
+	$where = equ('userid', intval($userid)) . " AND " . equ('discussion_id', intval($discussion_id));
+	$records = read('postread', FALSE, $where);
+
+	if (record_cnt($records) > 0) {
+		$lrpostid = intval($records[0]['lastread_postid']);
+		
+		if ($lrpostid < $lastread_postid) {
+			if (!update('postread', array('lastread_postid' => $lastread_postid, 'updated_utc' => $now), $where))
+				return FALSE;
+		}
+		
+		return intval($records[0]['id']);
+	}
+	else {
+		$id = create('postread', array(
+			'userid' => $userid,
+			'discussion_id' => $discussion_id,
+			'lastread_postid' => $lastread_postid,
+			'created_utc' => $now,
+			'updated_utc' => $now
+		));
+		
+		if ($id > 0)
+			return $id;
+	}
+	
+	return FALSE;
+}
+
 // Get group info:
 // int		'uid'				- signed-in user id.
 // bool		'owner'				- is the signed-in user the group owner.
@@ -1044,7 +1076,14 @@ beat('post', 'list', function ($restart, $discussion_ref)
 
 	if ($rcnt > 0) {
 	
+		$postid = 0;
+		
 		foreach ($records as &$r) {
+			$id = intval($r['id']);
+			
+			if ($postid < $id)
+				$postid = $id;
+				 
 			unset($r['discussion_id']);
 			$quote_discussion_id = intval($r['quote_discussion_id']);
 			unset($r['quote_discussion_id']);
@@ -1056,6 +1095,8 @@ beat('post', 'list', function ($restart, $discussion_ref)
 			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
+		
+		update_postread($userid, $discussion_id, $postid);
 		
 		set_session($ses_table_offset, $offset + $limit);
 	}
@@ -1099,7 +1140,14 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 
 	if ($rcnt > 0) {
 	
+		$postid = 0;
+		
 		foreach ($records as &$r) {
+			$id = intval($r['id']);
+			
+			if ($postid < $id)
+				$postid = $id;
+				 
 			unset($r['discussion_id']);
 			$quote_discussion_id = intval($r['quote_discussion_id']);
 			unset($r['quote_discussion_id']);
@@ -1111,6 +1159,8 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
+
+		update_postread($userid, $discussion_id, $postid);		
 	}
 
 	return array(
@@ -1128,6 +1178,8 @@ beat('post', 'read', function ($discussion_ref, $id)
 	if (!has_permission('post_read'))
 		return error_pack(err_access_denied);
 	
+	$userid = signedin_uid();
+
 	// Note:
 	// discussion_ref is required for security since post id is exposed.
 	// Must not allow a post to be read by id only.
@@ -1142,10 +1194,17 @@ beat('post', 'read', function ($discussion_ref, $id)
 	$rcnt = record_cnt($records);
 
 	if ($rcnt > 0) {
+		$postid = 0;
+		
 		foreach ($records as &$r) {
-			if ($r['discussion_id'] != $discussion_id)
+			if (intval($r['discussion_id']) != $discussion_id)
 				return error_pack(err_read_failed);
 			
+			$id = intval($r['id']);
+			
+			if ($postid < $id)
+				$postid = $id;
+				 
 			unset($r['discussion_id']);
 			$quote_discussion_id = intval($r['quote_discussion_id']);
 			unset($r['quote_discussion_id']);
@@ -1155,7 +1214,10 @@ beat('post', 'read', function ($discussion_ref, $id)
 			$unava = get_username_and_avatar($posted_by);
 			$r['posted_by_has_avatar'] = $unava !== FALSE && strlen($unava['avatar']) > 0 ? 1 : 0;
 			$r['posted_by_username'] = $unava !== FALSE ? $unava['name'] : '';
+			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
+
+		update_postread($userid, $discussion_id, $postid);		
 	}
 
 	return array(
@@ -1239,7 +1301,7 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 		$name = signedin_uname();
 		
 		if (strlen($name) > 0)
-			$discussion_ref = get_discussion_ref('table_user_' . $name);
+			$discussion_ref = get_discussion_ref('table:user:' . $name);
 	}
 	
 	$discussion_id = get_discussion_id_by_ref($discussion_ref);
@@ -1294,6 +1356,8 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 	if ($id <= 0)
 		return error_pack(err_create_failed);
 	
+	update_postread($userid, $discussion_id, $id);		
+
 	return array(
 		'status' => 1
 	);
