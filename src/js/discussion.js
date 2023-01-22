@@ -29,6 +29,11 @@ var map_viewer_count = 0;
 var react_thumbs_up = 1;
 var react_repost = 2;
 
+var init_tooltips = function () {
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
+
 var ele_post_header = function (id, body, posted_by_username, created_utc) {
 
 	var ele_posted_by = $("<a>", {
@@ -477,12 +482,33 @@ var tag_wrap = function (str, wrap, tag) {
 	return tstr;
 }
 
+var emoticons = function () {
+	var etop = [ // emoji rank 2019-2021
+		0x1F602,0x2764,0x1F923,0x1F44D,0x1F62D,0x1F64F,0x1F618,0x1F970,0x1F60D,0x1F60A,
+		0x1F389,0x1F601,0x1F495,0x1F97A,0x1F605,0x1F525,0x1F926,0x1F937,0x1F644,0x1F606,
+		0x1F917,0x1F609,0x1F382,0x1F914,0x1F44F,0x1F642,0x1F633,0x1F973,0x1F60E,0x1F44C,
+		0x1F49C,0x1F614,0x1F4AA,0x2728,0x1F496,0x1F440,0x1F60B,0x1F60F,0x1F622,0x1F449,
+		0x1F497,0x1F629,0x1F4AF,0x1F339,0x1F49E,0x1F388,0x1F499,0x1F603,0x1F621,0x1F490,
+		0x1F61C,0x1F648,0x1F91E,0x1F604,0x1F924,0x1F64C,0x1F92A,0x2763,0x1F600,0x1F48B,
+		0x1F480,0x1F447,0x1F494,0x1F60C,0x1F493,0x1F929,0x1F643,0x1F62C,0x1F631,0x1F634,
+		0x1F92D,0x1F610,0x1F31E,0x1F612,0x1F607,0x1F338,0x1F608,0x1F3B6,0x270C,0x1F38A];
+	var extra = [0x1F446,0x1F448];
+	var elist = etop.concat(extra);
+	
+	for (var i = 0x1F600; i <= 0x1F64F; i++) {
+		if (!elist.includes(i))
+			elist.push(i);
+	}
+	
+	return elist;
+}
+
 var wrap_emoticons_with_tooltips = function (str) {
 	var tstr = "";
-	var uc = parseInt("1F600", 16);
+	var el = emoticons();
 	for (var i = 0; i < str.length; i++) {
 		var cp = str.codePointAt(i);
-		if ((typeof cp !== "undefined") && cp >= uc && cp < uc + 80) {
+		if (el.includes(cp)) {
 
 			var emo = "&#" + cp + ";";
 			var ele_emo_tooltip = $("<h1>", {
@@ -589,8 +615,7 @@ var prepend_post = function (discussion_ref, id, body, attachment, quote_id, quo
 
 	$("#posts").prepend(ele);
 
-	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	init_tooltips();
 }
 
 var append_post = function (discussion_ref, id, body, attachment, quote_id, quote_discussion_ref, posted_by_username, posted_by_has_avatar, own_post, created_utc) {
@@ -599,8 +624,7 @@ var append_post = function (discussion_ref, id, body, attachment, quote_id, quot
 
 	$("#posts").append(ele);
 
-	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	init_tooltips();
 }
 
 var load_post_quote = function (host_ele, discussion_ref, id) {
@@ -928,9 +952,10 @@ var add_emoticons = function (index = 0) {
 		ele_emoji_block = $("#post_emoji");
 	
 	var i, uc = parseInt("1F600", 16);
+	var el = emoticons();
 	
-	for (i = index; i < (index + len) && i < 80; i++) {
-		var emo = "&#" + (uc + i) + ";";
+	for (i = index; i < (index + len) && i < el.length; i++) {
+		var emo = "&#" + el[i] + ";";
 		var ele_emo_tooltip = $("<h1>", {
 			html : emo,
 		});
@@ -948,10 +973,9 @@ var add_emoticons = function (index = 0) {
 		ele_emoji_block.append(ele_emo);
 	}
 	
-	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	init_tooltips();
 	
-	if (i < 80) {
+	if (i < el.length) {
 		var ele_more = $("<span>", {
 			style : "cursor: pointer;",
 			text : "...",
