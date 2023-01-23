@@ -10,7 +10,17 @@ var load_user_profile = function (name) {
 		name: name}, function (rst, extra) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
-			$('#username').text(r.name);
+			var uname = r.name;
+			
+			if (r.own_profile) {
+				var ele_uname = $("<a>", {
+					"href" : "myprofile.html",
+					"text" : uname 
+				});
+				uname = ele_uname.prop("outerHTML");
+			}
+			
+			$('#username').html(uname);
 			$("#membership").text(t("Member since @ago", {'@ago' : since_phrase(r.created_utc)}));
 			
 			if (r.has_avatar > 0) {

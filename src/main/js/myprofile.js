@@ -61,7 +61,13 @@ var load_user = function () {
 	qserv(main_server, {model: 'user', action: 'read_own'}, function (rst, extra) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
-			$("#username").text(r.name);
+			
+			var ele_uname = $("<a>", {
+				"href" : "userview.html?name=" + r.name,
+				"text" : r.name 
+			});
+			
+			$('#username').html(ele_uname.prop("outerHTML"));
 			$("#name").val(r.name);
 			$("#email").val(r.email);
 			$("#language").val(r.language);

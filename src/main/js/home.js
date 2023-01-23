@@ -39,6 +39,14 @@ $(window).on('load', function () {
 		load_language(data.signedin_language);
 		is_signedin = data.is_signedin;
 		signedin_uname = data.signedin_uname;
+
+		if (is_signedin) {
+			var ele_uname = $("<a>", {
+				"href" : "userview.html?name=" + signedin_uname,
+				"text" : signedin_uname 
+			});
+			$('#username').html(ele_uname.prop("outerHTML"));
+		}
 	});
 	
 	var signin_params = '?ref=1'; // with message: access denied
@@ -54,9 +62,6 @@ $(window).on('load', function () {
 	when_allowed("view_main", function () {
 	
 		show_page();
-
-		if (is_signedin)
-			$('#username').text(signedin_uname);
 	
 		load_home_menu('main');
 
