@@ -35,6 +35,12 @@ a:active {
 	color: var(--bs-blue);
 }
 
+.home-icon-counter {
+	font-size: 1rem;
+	color: var(--bs-red);
+	font-weight: bold;
+}
+
 .post-icon {
 	font-size: 1.25rem;
 	color: var(--bs-blue);

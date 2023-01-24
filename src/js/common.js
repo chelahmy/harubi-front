@@ -579,10 +579,21 @@ var sortables = function (table_id, selected_column, sort, on_click) {
 
 // Add a home iconic menu item on the home page.
 // The icon is based on boostrap-icons.
-var add_home_menu_item = function (icon, title, description, url) {
+var add_home_menu_item = function (name, icon, title, description, url) {
+
+	var ele_counter = $("<div>", {
+		class : "home-icon-counter",
+		style : "position: absolute; top: 0; right: 0; z-index: 10;",
+		id : "home-menu-" + name + "-counter",
+		text : ""
+	});
 
 	var ele_icon = $("<i>", {
-		class : "home-icon bi-" + icon
+		class : "home-icon bi-" + icon,
+		style : "position: relative;",
+		append : [
+			ele_counter
+		]
 	});
 
 	var ele_icon_url = $("<a>", {
@@ -602,6 +613,7 @@ var add_home_menu_item = function (icon, title, description, url) {
 
 	var ele_col = $("<div>", {
 		class : "feature col",
+		id : "home-menu-" + name,
 		append : [
 			ele_icon_url,
 			ele_title,
@@ -614,11 +626,11 @@ var add_home_menu_item = function (icon, title, description, url) {
 
 // Load home menu from preferences.
 // Standard *type* are *admin* and *main*.
-var load_home_menu = function (type) {
+var load_home_menu = function (type, on_ready) {
 	var name = "home_" + type + "_menu_item_";
 	qserv(main_server, {model: 'preference', action: 'read_starts_with',
 		name: name}, function(rst, extra) {
-			var items = [];
+			var mnames = [], items = [];
 			var r = rst.data.records;
 			for (var i in r) {
 				if (r.hasOwnProperty(i)) {
@@ -636,6 +648,11 @@ var load_home_menu = function (type) {
 			});
 			items.forEach(function(mi){
 				var url = mi.u, module = false;
+				var re = /(?:\.([^.]+))?$/; // regular expression to find file extension
+				var mname = url, ext = re.exec(url)[1];
+				if (typeof ext !== "undefined")
+					mname = url.substring(0, url.indexOf("." + ext));
+				mnames.push(mname);
 				if (typeof mi.m !== "undefined") {
 					if (mi.m.length > 0) {
 						module = true;
@@ -645,15 +662,17 @@ var load_home_menu = function (type) {
 					}
 				}
 				if (!module)
-					add_home_menu_item(mi.i, t(mi.t), t(mi.d), url);
+					add_home_menu_item(mname, mi.i, t(mi.t), t(mi.d), url);
 				else {
 					// Wait for the module language to be loaded,
 					// mostly from the browser cache. It should be fast.
 					setTimeout(function() {
-						add_home_menu_item(mi.i, t(mi.t), t(mi.d), url); 
-					}, 200);				
+						add_home_menu_item(mname, mi.i, t(mi.t), t(mi.d), url); 
+					}, 200);
 				}
 			})
+			if (typeof on_ready === "function")
+				on_ready(mnames);			
 	});
 }
 
