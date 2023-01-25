@@ -14,6 +14,7 @@ beat('user', 'view_profile', function ($name)
 	if (!has_permission('user_view_profile'))
 		return error_pack(err_access_denied);
 	
+	$uname = signedin_uname();
 	$where = equ('name', $name, 'string');
 	$records = read('user', array('avatar', 'name', 'created_utc'), $where);
 	
@@ -27,6 +28,7 @@ beat('user', 'view_profile', function ($name)
 		unset($records[0]['avatar']);
 		$records[0]['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
 		$records[0]['discussion_ref'] = get_discussion_ref('table:user:' . $name);
+		$records[0]['own_profile'] = $uname == $name ? 1 : 0;
 	}
 
 	return array(
