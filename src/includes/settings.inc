@@ -53,10 +53,23 @@
             "created_utc" : "int",
             "updated_utc" : "int"
         },
+        "discussion_type" : {
+            "id" : "int",
+            "name" : "string",
+            "autofollow" : "int"
+        },
         "discussion" : {
             "id" : "int",
             "ref" : "string",
-            "name" : "string"
+            "name" : "string",
+            "discussion_type_id" : "int",
+            "autofollow" : "int"
+        },
+        "discussion_follower" : {
+            "id" : "int",
+            "discussion_id" : "int",
+            "userid" : "int",
+            "created_utc" : "int"
         },
         "post" : {
             "id" : "int",
@@ -73,6 +86,7 @@
             "id" : "int",
             "userid" : "int",
             "discussion_id" : "int",
+            "discussion_type_id" : "int",
             "lastread_postid" : "int",
             "created_utc" : "int",
             "updated_utc" : "int"

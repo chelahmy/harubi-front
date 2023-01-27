@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 22, 2023 at 02:07 AM
+-- Generation Time: Jan 28, 2023 at 06:26 AM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -30,7 +30,34 @@ SET time_zone = "+00:00";
 CREATE TABLE `discussion` (
   `id` bigint UNSIGNED NOT NULL,
   `ref` char(32) NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `discussion_type_id` bigint UNSIGNED NOT NULL,
+  `autofollow` tinyint UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discussion_follower`
+--
+
+CREATE TABLE `discussion_follower` (
+  `id` bigint UNSIGNED NOT NULL,
+  `discussion_id` bigint UNSIGNED NOT NULL,
+  `userid` bigint UNSIGNED NOT NULL,
+  `created_utc` bigint UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discussion_type`
+--
+
+CREATE TABLE `discussion_type` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `autofollow` tinyint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -114,6 +141,7 @@ CREATE TABLE `postread` (
   `id` bigint UNSIGNED NOT NULL,
   `userid` bigint UNSIGNED NOT NULL,
   `discussion_id` bigint UNSIGNED NOT NULL,
+  `discussion_type_id` bigint UNSIGNED NOT NULL,
   `lastread_postid` bigint UNSIGNED NOT NULL,
   `created_utc` bigint UNSIGNED NOT NULL,
   `updated_utc` bigint UNSIGNED NOT NULL
@@ -193,6 +221,21 @@ ALTER TABLE `discussion`
   ADD UNIQUE KEY `ref` (`ref`);
 
 --
+-- Indexes for table `discussion_follower`
+--
+ALTER TABLE `discussion_follower`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `discussion_user` (`discussion_id`,`userid`),
+  ADD KEY `discussion` (`id`);
+
+--
+-- Indexes for table `discussion_type`
+--
+ALTER TABLE `discussion_type`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
 -- Indexes for table `member`
 --
 ALTER TABLE `member`
@@ -235,7 +278,8 @@ ALTER TABLE `postreact`
 --
 ALTER TABLE `postread`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_discussion` (`userid`,`discussion_id`);
+  ADD UNIQUE KEY `user_discussion` (`userid`,`discussion_id`),
+  ADD KEY `user_discussion_type` (`userid`,`discussion_type_id`);
 
 --
 -- Indexes for table `preference`
@@ -281,6 +325,18 @@ ALTER TABLE `usergroup` ADD FULLTEXT KEY `name` (`name`);
 -- AUTO_INCREMENT for table `discussion`
 --
 ALTER TABLE `discussion`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `discussion_follower`
+--
+ALTER TABLE `discussion_follower`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `discussion_type`
+--
+ALTER TABLE `discussion_type`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --

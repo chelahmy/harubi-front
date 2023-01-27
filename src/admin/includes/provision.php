@@ -26,10 +26,14 @@ $preferences = array(
 	'home_admin_menu_item_3' => '{"w":30,"i":"incognito","t":"Roles","d":"Users roles including administrative and management roles.","u":"role.html"}',
 	'home_admin_menu_item_4' => '{"w":40,"i":"card-heading","t":"Permissions","d":"Access control by roles.","u":"permission.html"}',
 	'home_admin_menu_item_5' => '{"w":50,"i":"gear","t":"Preferences","d":"System preferences.","u":"preference.html"}',
-	'home_main_menu_item_1' => '{"w":10,"i":"person","t":"Profile","d":"My profile.","u":"myprofile.html"}',
+	'home_main_menu_item_1' => '{"w":10,"i":"file-earmark-person","t":"Profile","d":"My profile.","u":"myprofile.html"}',
 	'home_main_menu_item_2' => '{"w":20,"i":"people","t":"Groups","d":"My private user groups.","u":"mygroup.html"}',
 	'home_forward_admin_menu_item_1' => '{"w":10,"i":"people","t":"Groups","d":"Private user groups.","u":"groupforward.html"}',
 	'home_forward_main_menu_item_2' => '{"w":20,"i":"people","t":"Groups","d":"My private user groups.","u":"mygroupforward.html"}',
+	'discussion_table:user' => '{"autofollow":0}',
+	'discussion_table:usergroup' => '{"autofollow":1}',
+	'discussion_typeref_myprofile' => 'table:user',
+	'discussion_typeref_mygroup' => 'table:usergroup',
 );
 
 $roles = array(

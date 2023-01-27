@@ -331,6 +331,43 @@ function get_perm_roleids($permname) {
 	return $roleids;
 }
 
+function get_discussion_type($discussion_name) {
+	$parts = explode(":", $discussion_name);
+
+	if (!is_array($parts) || count($parts) < 2)
+		return 0;
+
+	$name = $parts[0] . ":" . $parts[1];	
+	$where = equ('name', $name, 'string');
+
+	$records = read('discussion_type', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		return $records[0];
+	
+	$autofollow = 0;
+	$pref = get_preference("discussion_" . $name);
+	
+	if (strlen($pref) > 0) {
+		$prop = json_decode($pref, TRUE);
+		
+		if (is_array($prop)) {
+			if (isset($prop['autofollow']))
+				$autofollow = intval($prop['autofollow']);
+		}
+	}
+	
+	$id = create('discussion_type', array(
+			'name' => $name,
+			'autofollow' => $autofollow
+		));
+		
+	if ($id > 0)
+		return array('id' => $id, 'name' => $name, 'autofollow' => $autofollow);
+		
+	return FALSE;
+}
+
 // Get discussion ref, or create one.
 function get_discussion_ref($discussion_name) {
 	$where = equ('name', $discussion_name, 'string');
@@ -339,21 +376,41 @@ function get_discussion_ref($discussion_name) {
 	
 	if (record_cnt($records) > 0)
 		return $records[0]['ref'];
-	else {
-		$ref = new_table_row_ref('discussion');
+	
+	$ref = new_table_row_ref('discussion');
+	
+	if (strlen($ref) > 0) {
+		$autofollow = 0;
+		$discussion_type_id = 0;
+		$discussion_type = get_discussion_type($discussion_name);
 		
-		if (strlen($ref) > 0) {
-			$id = create('discussion', array(
-				'name' => $discussion_name,
-				'ref' => $ref
-			));
-			
-			if ($id > 0)
-				return $ref;
+		if ($discussion_type !== FALSE && is_array($discussion_type)) {
+			$discussion_type_id = intval($discussion_type['id']);
+			$autofollow = intval($discussion_type['autofollow']);
 		}
+		
+		$id = create('discussion', array(
+			'ref' => $ref,
+			'name' => $discussion_name,
+			'discussion_type_id' => $discussion_type_id,
+			'autofollow' => $autofollow
+		));
+		
+		if ($id > 0)
+			return $ref;
 	}
 		
 	return '';
+}
+
+function get_discussion_by_ref($discussion_ref) {
+	$where = equ('ref', $discussion_ref, 'string');
+	$records = read('discussion', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		return $records[0];
+
+	return FALSE;
 }
 
 function get_discussion_id_by_ref($discussion_ref) {
@@ -378,7 +435,57 @@ function get_discussion_ref_by_id($discussion_id) {
 	return $discussion_ref;
 }
 
-function update_postread($userid, $discussion_id, $lastread_postid) {
+function follow_discussion($discussion_id, $follow) {
+	$discussion_id = intval($discussion_id);
+	
+	if ($discussion_id <= 0)
+		return FALSE;
+		
+	$userid = signedin_uid();
+	
+	if ($userid <= 0)
+		return FALSE;
+		
+	$where = equ('discussion_id', intval($discussion_id)) . " AND " . equ("userid", $userid);
+	$records = read('discussion_follower', FALSE, $where);
+	
+	if (record_cnt($records) > 0) {
+		if ($follow == 0)
+			if (!delete('discussion_follower', $where))
+				return FALSE;
+	}
+	else if ($follow == 1) {
+		$now = time();
+		$id = create('discussion_follower', array(
+			'discussion_id' => $discussion_id,
+			'userid' => $userid,
+			'created_utc' => $now,
+		));
+		
+		if ($id <= 0)
+			return FALSE;
+	}
+	
+	return TRUE;
+}
+
+// Check if the current user is following a discussion.
+function is_following_discussion($discussion_id) {
+	$userid = signedin_uid();
+	
+	if ($userid <= 0)
+		return FALSE;
+		
+	$where = equ('discussion_id', intval($discussion_id)) . " AND " . equ("userid", $userid);
+	$records = read('discussion_follower', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		return TRUE;
+	
+	return FALSE;
+}
+
+function update_postread($userid, $discussion_id, $discussion_type_id, $lastread_postid) {
 	$now = time();
 	$lastread_postid = intval($lastread_postid);
 	$where = equ('userid', intval($userid)) . " AND " . equ('discussion_id', intval($discussion_id));
@@ -398,6 +505,7 @@ function update_postread($userid, $discussion_id, $lastread_postid) {
 		$id = create('postread', array(
 			'userid' => $userid,
 			'discussion_id' => $discussion_id,
+			'discussion_type_id' => $discussion_type_id,
 			'lastread_postid' => $lastread_postid,
 			'created_utc' => $now,
 			'updated_utc' => $now
@@ -452,12 +560,21 @@ function get_group_info($groupref) {
 }
 
 function get_preference($name, $default = '') {
+	// Try to get it from session
+	$ses_preference = "preference_" . $name;
+	
+	if (isset_session($ses_preference))
+		return get_session($ses_preference);
+
+	// Otherwise, get it from the database
 	$where = equ('name', $name, 'string');
 	$records = read('preference', FALSE, $where);
 	$rcnt = record_cnt($records);
 	
 	if ($rcnt > 0) {
-		return $records[0]['value'];
+		$pref = $records[0]['value'];
+		set_session($ses_preference, $pref);
+		return $pref;
 	}
 	
 	return $default;
@@ -483,6 +600,9 @@ function set_preference($name, $value) {
 		));
 	}
 
+	$ses_preference = "preference_" . $name;
+	set_session($ses_preference, $value);
+	
 	return $id;	
 }
 
@@ -506,25 +626,37 @@ function get_language() {
 }
 
 function get_page_size() {
-	// Try to get it from preference
+	// Try to get it from session
+	$ses_page_size = "preference_page_size";
+	
+	if (isset_session($ses_page_size)) {
+		$ps = intval(get_session($ses_page_size));
+		
+		if ($ps > 0)
+			return $ps;
+	}
+
+	// Or, try to get it from preference
 	$ps = intval(get_preference('page_size'));
 	
-	if ($ps > 0)
+	if ($ps > 0) {
+		set_session($ses_page_size, $ps);
 		return $ps;
+	}
 		
 	// Otherwise, get it from settings
 	if (isset($harubi_settings)) {
 		if (isset($harubi_settings['page_size'])) {
-			$psz = intval($harubi_settings['page_size']);
-			if ($psz > 0)
-				return $psz;
+			$ps = intval($harubi_settings['page_size']);
+			if ($ps > 0) {
+				set_session($ses_page_size, $ps);
+				return $ps;
+			}
 		}
 	}
 	
 	return 25; // default
 }
-
-$page_size = get_page_size();
 
 function get_new_user_roleid() {
 	global $harubi_settings;
@@ -1045,17 +1177,11 @@ beat('preference', 'write', function ($name, $value)
 
 beat('post', 'list', function ($restart, $discussion_ref)
 {
-	global $page_size;
-	
 	if (!has_permission('post_list'))
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
-
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
+	$limit = get_page_size();
 		
 	$ses_table_offset = 'post_list_offset_' . $discussion_ref;
 	
@@ -1064,7 +1190,12 @@ beat('post', 'list', function ($restart, $discussion_ref)
 		
 	$offset = get_session($ses_table_offset);
 	
-	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+	$discussion = get_discussion_by_ref($discussion_ref);
+	
+	if ($discussion === FALSE || !is_array($discussion))
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+	
+	$discussion_id = intval($discussion['id']);
 
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1096,7 +1227,8 @@ beat('post', 'list', function ($restart, $discussion_ref)
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 		
-		update_postread($userid, $discussion_id, $postid);
+		if (intval($discussion['autofollow']) > 0 || is_following_discussion($discussion_id))
+			update_postread($userid, $discussion_id, $discussion['discussion_type_id'], $postid);
 		
 		set_session($ses_table_offset, $offset + $limit);
 	}
@@ -1115,19 +1247,18 @@ beat('post', 'list', function ($restart, $discussion_ref)
 
 beat('post', 'list_newer', function ($discussion_ref, $last_id)
 {
-	global $page_size;
-	
 	if (!has_permission('post_list_newer'))
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
-
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
+	$limit = get_page_size();
 		
-	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+	$discussion = get_discussion_by_ref($discussion_ref);
+	
+	if ($discussion === FALSE || !is_array($discussion))
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+	
+	$discussion_id = intval($discussion['id']);
 
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1160,7 +1291,8 @@ beat('post', 'list_newer', function ($discussion_ref, $last_id)
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 
-		update_postread($userid, $discussion_id, $postid);		
+		if (intval($discussion['autofollow']) > 0 || is_following_discussion($discussion_id))
+			update_postread($userid, $discussion_id, $discussion['discussion_type_id'], $postid);		
 	}
 
 	return array(
@@ -1184,7 +1316,12 @@ beat('post', 'read', function ($discussion_ref, $id)
 	// discussion_ref is required for security since post id is exposed.
 	// Must not allow a post to be read by id only.
 	
-	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+	$discussion = get_discussion_by_ref($discussion_ref);
+	
+	if ($discussion === FALSE || !is_array($discussion))
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+	
+	$discussion_id = intval($discussion['id']);
 
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1217,7 +1354,8 @@ beat('post', 'read', function ($discussion_ref, $id)
 			$r['own_post'] = $posted_by == $userid ? 1 : 0;
 		}
 
-		update_postread($userid, $discussion_id, $postid);		
+		if (intval($discussion['autofollow']) > 0 || is_following_discussion($discussion_id))
+			update_postread($userid, $discussion_id, $discussion['discussion_type_id'], $postid);		
 	}
 
 	return array(
@@ -1304,7 +1442,12 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 			$discussion_ref = get_discussion_ref('table:user:' . $name);
 	}
 	
-	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+	$discussion = get_discussion_by_ref($discussion_ref);
+	
+	if ($discussion === FALSE || !is_array($discussion))
+		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
+	
+	$discussion_id = intval($discussion['id']);
 	
 	if ($discussion_id <= 0)
 		return error_pack(err_record_missing, "discussion_ref: @discussion_ref", array('@discussion_ref' => $discussion_ref));
@@ -1356,10 +1499,106 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 	if ($id <= 0)
 		return error_pack(err_create_failed);
 	
-	update_postread($userid, $discussion_id, $id);		
+	if (intval($discussion['autofollow']) > 0 || is_following_discussion($discussion_id))
+		update_postread($userid, $discussion_id, $discussion['discussion_type_id'], $id);		
 
 	return array(
 		'status' => 1
+	);
+});
+
+beat('post', 'count_unread', function ($restart, $discussion_typeref)
+{
+	if (!has_permission('post_count_unread'))
+		return error_pack(err_access_denied);
+	
+	$userid = signedin_uid();
+	$unread_count = 0;
+	$discussion_type_id = 0;
+
+	if ($discussion_typeref != "all") { // a specific type of discussions
+		$ses_discussion_typeref = "post_count_unread_discussion_typeref_" . $discussion_typeref;
+	 
+	 	if (isset_session($ses_discussion_typeref)) // lookup the cache first
+	 		$discussion_type_id = get_session($ses_discussion_typeref);
+	 	else {
+			$discussion_type = get_preference("discussion_typeref_" . $discussion_typeref);
+			
+			if (strlen($discussion_type) > 0) {
+				$discussion_type = get_discussion_type($discussion_type);
+				
+				if ($discussion_type !== FALSE && is_array($discussion_type))
+					$discussion_type_id = intval($discussion_type['id']);
+			}
+				
+			if ($discussion_type_id <= 0) // silently ignore unknown $discussion_typeref
+				return array(
+					'status' => 1,
+					'data' => array(
+						'unread_count' => 0,
+						'count' => 0,
+						'limit' => 1
+					)
+				);
+				
+			set_session($ses_discussion_typeref, $discussion_type_id);
+		}
+	}
+
+	$limit = get_page_size();
+	$ses_table_offset = 'post_count_unread_' . $discussion_typeref;
+	
+	if ($restart == 1)
+		set_session($ses_table_offset, 0);
+		
+	$offset = get_session($ses_table_offset);
+
+	if ($discussion_type_id == 0) // all discussions
+		$where = equ('userid', $userid);
+	else
+		$where = equ('userid', $userid) . " AND " . equ('discussion_type_id', $discussion_type_id);
+		
+	$records = read('postread', FALSE, $where, 'updated_utc', 'DESC', $limit, $offset);
+	$rcnt = record_cnt($records);
+
+	if ($rcnt > 0) {
+		$ses_unread_count_limit = "unread_count_limit";
+		
+		if (isset_session($ses_unread_count_limit)) // lookup the cache first
+			$unread_count_limit = intval(get_session($ses_unread_count_limit));
+		else {
+			$unread_count_limit = intval(get_preference("unread_count_limit", 100));
+			set_session($ses_unread_count_limit, $unread_count_limit);
+		}
+		
+		foreach ($records as &$r) {
+			$discussion_id = intval($r['discussion_id']);
+			$lastread_postid = intval($r['lastread_postid']);
+
+			$where = equ('discussion_id', $discussion_id) . " AND `id` > " . $lastread_postid;
+			$post_records = read(array('table' => 'post', 'where' => $where, 'count' => true));
+			$post_rcnt = record_cnt($post_records);
+
+			if ($post_rcnt > 0) {
+				$unread_count += intval($post_records[0]['count']);
+				
+				if ($unread_count >= $unread_count_limit) // limit the counting to maintain performance
+					break;
+			}
+		}
+		
+		set_session($ses_table_offset, $offset + $limit);
+	}
+	else
+		set_session($ses_table_offset, 0);
+	
+	return array(
+		'status' => 1,
+		'data' => array(
+			'unread_count' => $unread_count,
+			'count' => $rcnt,
+			'limit' => $limit
+		)
 	);
 });
 
@@ -1566,11 +1805,7 @@ beat('post', 'list_reacts', function ($restart, $discussion_ref, $id, $type)
 	if ($type_mask <= 0)
 		return error_pack(err_record_missing, "type: @type", array('@type' => $type));
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
+	$limit = get_page_size();
 	$ses_table_offset = 'post_list_reacts_' . $discussion_ref . '_' . $id . '_' . $type;
 	
 	if ($restart == 1)

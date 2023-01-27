@@ -29,6 +29,11 @@ beat('user', 'view_profile', function ($name)
 		$records[0]['has_avatar'] = strlen($avatar) > 0 ? 1 : 0;
 		$records[0]['discussion_ref'] = get_discussion_ref('table:user:' . $name);
 		$records[0]['own_profile'] = $uname == $name ? 1 : 0;
+		
+		if ($records[0]['own_profile'] == 1) {
+			$discussion_id = get_discussion_id_by_ref($records[0]['discussion_ref']);
+			follow_discussion($discussion_id, 1); // autofollow own discussion
+		}
 	}
 
 	return array(
@@ -226,16 +231,9 @@ beat('user', 'avatar', function ($name)
 
 beat('usergroup', 'list_own', function ($restart, $type = 0, $search = '', $order_by = 'name', $sort = 'ASC')
 {
-	global $page_size;
-	
 	if (!has_permission('usergroup_list_own'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
 	$ses_table_offset = 'usergroup_list_own_offset';
 	
 	if ($restart == 1)
@@ -248,6 +246,7 @@ beat('usergroup', 'list_own', function ($restart, $type = 0, $search = '', $orde
 	$uid = signedin_uid();
 	$order_by = clean($order_by, 'string');
 	$sort = clean($sort, 'string');
+	$limit = get_page_size();
 		
 	if ($type == 0) {
 		$where = equ('owneruserid', $uid);
@@ -465,8 +464,6 @@ beat('usergroup', 'delete_own', function ($ref)
 
 beat('member', 'list_own', function ($restart, $groupref, $search = '', $order_by = 'created_utc', $sort = 'ASC')
 {
-	global $page_size;
-	
 	if (!has_permission('member_list_own'))
 		return error_pack(err_access_denied);
 	
@@ -475,11 +472,6 @@ beat('member', 'list_own', function ($restart, $groupref, $search = '', $order_b
 	if (!$ginfo['owner'] && !$ginfo['member'])
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
 	$ses_table_offset = 'member_list_offset';
 	
 	if ($restart == 1)
@@ -504,6 +496,7 @@ beat('member', 'list_own', function ($restart, $groupref, $search = '', $order_b
 		
 	$order_by = clean($order_by, 'string');
 	$sort = clean($sort, 'string');
+	$limit = get_page_size();
 	
 	$records = read('member', FALSE, $where, $order_by, $sort, $limit, $offset);
 	$rcnt = record_cnt($records);

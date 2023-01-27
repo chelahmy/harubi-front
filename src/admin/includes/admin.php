@@ -9,16 +9,9 @@ require_once "../../includes/common.php";
 
 beat('user', 'list', function ($restart, $search = '', $premium = 0, $order_by = 'name', $sort = 'ASC')
 {
-	global $page_size;
-	
 	if (!has_permission('user_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
 	$ses_table_offset = 'user_list_offset';
 	
 	if ($restart == 1)
@@ -53,6 +46,7 @@ beat('user', 'list', function ($restart, $search = '', $premium = 0, $order_by =
 	
 	$order_by = clean($order_by, 'string');
 	$sort = clean($sort, 'string');
+	$limit = get_page_size();
 	
 	$records = read('user', FALSE, $where, $order_by, $sort, $limit, $offset);
 	$rcnt = record_cnt($records);
@@ -248,16 +242,9 @@ beat('user', 'delete', function ($name)
 
 beat('usergroup', 'list', function ($restart, $search = '', $order_by = 'name', $sort = 'ASC')
 {
-	global $page_size;
-	
 	if (!has_permission('usergroup_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
 	$ses_table_offset = 'usergroup_list_offset';
 	
 	if ($restart == 1)
@@ -274,6 +261,7 @@ beat('usergroup', 'list', function ($restart, $search = '', $order_by = 'name', 
 		
 	$order_by = clean($order_by, 'string');
 	$sort = clean($sort, 'string');
+	$limit = get_page_size();
 	
 	$records = read('usergroup', FALSE, $where, $order_by, $sort, $limit, $offset);
 	$rcnt = record_cnt($records);
@@ -435,16 +423,9 @@ beat('usergroup', 'delete', function ($ref)
 
 beat('member', 'list', function ($restart, $groupref, $search = '', $order_by = 'created_utc', $sort = 'ASC')
 {
-	global $page_size;
-	
 	if (!has_permission('member_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
 	$ses_table_offset = 'member_list_offset';
 	
 	if ($restart == 1)
@@ -471,6 +452,7 @@ beat('member', 'list', function ($restart, $groupref, $search = '', $order_by = 
 		
 	$order_by = clean($order_by, 'string');
 	$sort = clean($sort, 'string');
+	$limit = get_page_size();
 	
 	$records = read('member', FALSE, $where, $order_by, $sort, $limit, $offset);
 	$rcnt = record_cnt($records);
@@ -721,16 +703,10 @@ beat('member', 'remove', function ($groupref, $username)
 
 beat('role', 'list', function ($restart)
 {
-	global $page_size;
-	
 	if (!has_permission('role_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
+	$limit = get_page_size();
 	$ses_table_offset = 'role_list_offset';
 	
 	if ($restart == 1)
@@ -887,16 +863,10 @@ beat('role', 'delete', function ($name)
 
 beat('permission', 'list', function ($restart, $search = '')
 {
-	global $page_size;
-	
 	if (!has_permission('permission_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
+	$limit = get_page_size();
 	$ses_table_offset = 'permission_list_offset';
 	
 	if ($restart == 1)
@@ -1196,16 +1166,10 @@ beat('permrole', 'remove', function ($permname, $rolename)
 
 beat('preference', 'list', function ($restart)
 {
-	global $page_size;
-	
 	if (!has_permission('preference_list'))
 		return error_pack(err_access_denied);
 	
-	if (isset($page_size) && $page_size > 0)
-		$limit = $page_size;
-	else
-		$limit = 25;
-		
+	$limit = get_page_size();
 	$ses_table_offset = 'preference_list_offset';
 	
 	if ($restart == 1)
