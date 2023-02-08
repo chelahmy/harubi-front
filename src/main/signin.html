@@ -1,33 +1,22 @@
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Sign-in">
-	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
-	<title>Sign-in</title>    
-
-	<link rel="shortcut icon" href="../favicon.ico">
-	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-	<link rel="manifest" href="../site.webmanifest">
-
-	<!-- Bootstrap core CSS -->
-	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
-	<meta name="theme-color" content="#7952b3">
-
+<?php
+	$rpath = "../";
+	$title = "Sign-in";
+	$description = "Sign-in";
+	$noloading = TRUE;
+	$main = FALSE;
+	
+	include $rpath . "includes/parts/top.inc";
+?>
 	<link href="css/main.css" rel="stylesheet">
 	<link href="css/signin.css" rel="stylesheet">
 
-</head>
-<body class="text-center">
-    
+<?php include $rpath . "includes/parts/middle-top.inc"; ?>
+
 <main class="form-signin w-100 m-auto">
 
-<section id="page">
+<section class="text-center" id="page">
 	<div class="px-4 py-3 my-3">
-		<img class="mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<img class="mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
 		<h1 class="display-5 fw-bold">Sign in</h1>
 	</div>
 	<div id="alerts"></div>
@@ -47,11 +36,9 @@
 
 </main>
 
-<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
-<script src="../libs/jquery-3.6.1.min.js"></script>
-<script src="../js/common.js" type="text/javascript" ></script>
-<script src="js/common.js" type="text/javascript" ></script>
+<?php include $rpath . "includes/parts/middle-bottom.inc"; ?>
+
 <script src="js/signin.js" type="text/javascript" ></script>
 
-</body>
-</html>
+<?php include $rpath . "includes/parts/bottom.inc"; ?>
+

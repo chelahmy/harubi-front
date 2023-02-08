@@ -1,44 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Forward to my user groups">
-	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
-	<title>Forward to My Groups</title>    
-
-	<link rel="shortcut icon" href="../favicon.ico">
-	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-	<link rel="manifest" href="../site.webmanifest">
-
-	<!-- Bootstrap core CSS -->
-	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
-	<meta name="theme-color" content="#7952b3">
-
-	<link href="../libs/bootstrap-icons-1.10.2/bootstrap-icons.css" rel="stylesheet">
-	<link href="../libs/viewerjs-1.11.2/dist/viewer.css" rel="stylesheet">
-	<link href="../libs/video-js-7.20.3/video-js.min.css" rel="stylesheet">
-	<link href="../libs/leaflet/leaflet.css" rel="stylesheet" />
-	<link href="../libs/Leaflet.fullscreen-1.0.2/dist/leaflet.fullscreen.css" rel="stylesheet" />
+<?php
+	$rpath = "../";
+	$title = "Forward to My Groups";
+	$description = "Forward to my user groups";
+	$has_discussion = TRUE;
+	$discussion_forward = TRUE;
+	
+	include $rpath . "includes/parts/top.inc";
+?>
 	<link href="css/main.css" rel="stylesheet">
 
-</head>
-<body>
-    
-<main>
-
-<section class="py-5 container" id="loading">
-	<div class="px-4 py-5 my-5 text-center">
-		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="loading_logo">
-		<h2 class="display-5">Loading...</h2>
-	</div>
-</section>
+<?php include $rpath . "includes/parts/middle-top.inc"; ?>
 
 <section class="py-5 container d-none" id="page">
 	<div class="px-4 text-center">
-		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<img class="d-block mx-auto mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
 		<h1 class="display-5 fw-bold">Forward to My Groups</h1>
 	</div>
 	<div id="alerts"></div>
@@ -71,41 +46,12 @@
 		<button type="button" class="btn btn-primary" id="load_more_btn">Load more</button>
 	</div>
 	<br/>
-	<!-- Discussion -->
-	<div id="discussion">
-		<div class="post-entry">
-			<div id="quote_view"></div>
-			<form>
-				<div class="mb-3">
-					<textarea class="form-control" rows="3" id="new_post" aria-describedby="new_postHelp"></textarea>
-					<div id="new_postHelp" class="form-text">Your statement.</div>
-				</div>
-			</form>
-			<div id="attachment_files"></div>
-			<progress id="attachment_progress" style="display: none;"></progress><br/>
-			<button class="btn btn-primary" id="forward_btn">Forward</button>
-		</div>		
-	</div>
-	<!-- End of Discussion -->
+<?php include $rpath . "includes/parts/discussion.inc"; ?>
 </section>
 
-</main>
+<?php include $rpath . "includes/parts/middle-bottom.inc"; ?>
 
-<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
-<script src="../libs/jquery-3.6.1.min.js"></script>
-<script src="../libs/linkifyjs/linkify.min.js"></script>
-<script src="../libs/linkifyjs/linkify-string.min.js"></script>
-<script src="../libs/linkifyjs/linkify-plugin-mention.min.js"></script>
-<script src="../libs/linkifyjs/linkify-plugin-hashtag.min.js"></script>
-<script src="../libs/viewerjs-1.11.2/dist/viewer.js"></script>
-<script src="../libs/video-js-7.20.3/video.min.js"></script>
-<script src="../libs/leaflet/leaflet.js"></script>
-<script src="../libs/Leaflet.fullscreen-1.0.2/dist/Leaflet.fullscreen.js"></script>
-<script src="../js/common.js" type="text/javascript"></script>
-<script src="../js/simplemap.js" type="text/javascript"></script>
-<script src="../js/discussion.js" type="text/javascript"></script>
-<script src="js/common.js" type="text/javascript" ></script>
 <script src="js/mygroupforward.js" type="text/javascript" ></script>
 
-</body>
-</html>
+<?php include $rpath . "includes/parts/bottom.inc"; ?>
+

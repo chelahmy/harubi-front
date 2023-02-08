@@ -1,40 +1,17 @@
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Forward post to other discussions">
-	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
-	<title>Forward To</title>    
-
-	<link rel="shortcut icon" href="../favicon.ico">
-	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-	<link rel="manifest" href="../site.webmanifest">
-
-	<!-- Bootstrap core CSS -->
-	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
-	<meta name="theme-color" content="#7952b3">
-
-	<link href="../libs/bootstrap-icons-1.10.2/bootstrap-icons.css" rel="stylesheet">
+<?php
+	$rpath = "../";
+	$title = "Forward To";
+	$description = "Forward post to other discussions";
+	
+	include $rpath . "includes/parts/top.inc";
+?>
 	<link href="css/main.css" rel="stylesheet">
 
-</head>
-<body>
-    
-<main>
-
-<section class="py-5 container" id="loading">
-	<div class="px-4 py-5 my-5 text-center">
-		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="loading_logo">
-		<h2 class="display-5">Loading...</h2>
-	</div>
-</section>
+<?php include $rpath . "includes/parts/middle-top.inc"; ?>
 
 <section class="py-5 container d-none" id="page">
 	<div class="px-4 text-center">
-		<img class="mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<img class="mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
 		<h1 class="display-5 fw-bold">Forward To</h1>
 		<p><a href="home.html">Home</a></p>
 	</div>
@@ -44,14 +21,9 @@
 	</div>
 </section>
 
-</main>
+<?php include $rpath . "includes/parts/middle-bottom.inc"; ?>
 
-<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
-<script src="../libs/jquery-3.6.1.min.js"></script>
-<script src="../js/common.js" type="text/javascript" ></script>
-<script src="js/common.js" type="text/javascript" ></script>
 <script src="js/forward.js" type="text/javascript" ></script>
 	
-</body>
-</html>
+<?php include $rpath . "includes/parts/bottom.inc"; ?>
 

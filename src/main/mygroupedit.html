@@ -1,39 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Own group edit">
-	<meta name="author" content="Abdullah Daud, chelahmy@gmail.com">
-	<title>My Group Edit</title>    
-
-	<link rel="shortcut icon" href="../favicon.ico">
-	<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-	<link rel="manifest" href="../site.webmanifest">
-
-	<!-- Bootstrap core CSS -->
-	<link href="../libs/bootstrap-5.2.2-dist/css/bootstrap.min.css" rel="stylesheet">
-	<meta name="theme-color" content="#7952b3">
-
+<?php
+	$rpath = "../";
+	$title = "My Group Edit";
+	$description = "Own group edit";
+	$confirm_delete_title = "Confirm Delete";
+	$confirm_delete_message = "Are you sure you want to delete the following record?";
+	
+	include $rpath . "includes/parts/top.inc";
+?>
 	<link href="css/main.css" rel="stylesheet">
 
-</head>
-<body>
-    
-<main>
-
-<section class="py-5 container" id="loading">
-	<div class="px-4 py-5 my-5 text-center">
-		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="loading_logo">
-		<h2 class="display-5">Loading...</h2>
-	</div>
-</section>
+<?php include $rpath . "includes/parts/middle-top.inc"; ?>
 
 <section class="py-5 container d-none" id="page">
 	<div class="px-4 text-center">
-		<img class="d-block mx-auto mb-4" src="../logo/logo.png" alt="logo" id="page_logo">
+		<img class="d-block mx-auto mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
 		<h1 class="display-5 fw-bold">My Group Edit</h1>
 	</div>
 	<div id="alerts"></div>
@@ -56,35 +36,13 @@
 	<button class="btn btn-primary d-none" id="create_btn">Create</button>
 	<button class="btn btn-secondary d-none" id="delete_btn" data-bs-toggle="modal" data-bs-target="#confirm_delete">Delete</button>
 
-	<!-- Modal Confirm Delete -->
-	<div class="modal fade" id="confirm_delete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Delete</h1>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-				<div class="modal-body">
-					<p>Are you sure you want to delete the following record?</p>
-					<p><span id="delete_type"></span>&nbsp;&ndash;&nbsp;<strong id="delete_details"></strong><p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" id="confirmed_delete_btn" data-bs-dismiss="modal">Yes</button>
-					<button type="button" class="btn btn-primary" data-bs-dismiss="modal">No</button>
-				</div>
-			</div>
-		</div>
-	</div>
+<?php include $rpath . "includes/parts/confirm-delete.inc"; ?>
 
 </section>
 
-</main>
+<?php include $rpath . "includes/parts/middle-bottom.inc"; ?>
 
-<script src="../libs/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js"></script>
-<script src="../libs/jquery-3.6.1.min.js"></script>
-<script src="../js/common.js" type="text/javascript" ></script>
-<script src="js/common.js" type="text/javascript" ></script>
 <script src="js/mygroupedit.js" type="text/javascript" ></script>
 
-</body>
-</html>
+<?php include $rpath . "includes/parts/bottom.inc"; ?>
+
