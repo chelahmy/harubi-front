@@ -33,7 +33,7 @@ $(window).on('load', function () {
 
 		load_home_menu('admin');
 		
-		$('#signout_btn').click(function(){
+		$('#signout_btn').click(function () {
 			signout_user();
 		})
 

@@ -694,6 +694,9 @@ beat('member', 'remove', function ($groupref, $username)
 		
 	if ($rid > 0) {
 		// TODO: delete all records that refer to this member
+
+		// Delete the postread entry for the discussion the user was in.
+		delete_postread($userid, $groupref);
 	}
 	
 	return array(

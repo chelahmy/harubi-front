@@ -80,6 +80,7 @@ $permissions = array(
 	'permrole_remove' => array('administrator'),
 	'post_attachment' => array('administrator', 'member'),
 	'post_count_reacts' => array('administrator', 'member'),
+	'post_count_unread' => array('administrator', 'member'),
 	'post_forward' => array('administrator', 'member'),
 	'post_get_attachment' => array('administrator', 'member'),
 	'post_get_forward' => array('administrator', 'member'),

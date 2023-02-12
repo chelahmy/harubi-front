@@ -5,11 +5,41 @@
 
 var is_signedin = false;
 var signedin_uname = '';
+var dtyperef = {};
 
 var signout_user = function () {
 	qserv(main_server, {model: 'user', action: 'signout'}, function (rst, extra) {
 		show_url("home.html?ref=2");
 	});
+}
+
+var count_unread_post_resp = function (rst, discussion_typeref) {
+	if (rst.data.count > 0) {
+		var count = 0;
+		
+		if (dtyperef.hasOwnProperty(discussion_typeref))
+			count = dtyperef[discussion_typeref];
+			
+		count += rst.data.unread_count;
+		dtyperef[discussion_typeref] = count;
+
+		if (count >= rst.data.unread_count_limit)
+			count = count.toString() + "+";
+		else if (rst.data.count >= rst.data.limit)
+			count_unread_post(0, discussion_typeref); // recursive
+		
+		if (count !== 0) {
+			var counter_id = "home-menu-" + discussion_typeref + "-counter";
+			$("#" + counter_id).text(count);
+		}
+		
+		console.log(discussion_typeref + ":" + count);
+	}
+}
+
+var count_unread_post = function (restart, discussion_typeref) {
+	qserv(main_server, {model: 'post', action: 'count_unread',
+		restart: restart, discussion_typeref: discussion_typeref}, count_unread_post_resp, discussion_typeref);
 }
 
 $(window).on('load', function () {
@@ -63,7 +93,16 @@ $(window).on('load', function () {
 	
 		show_page();
 	
-		load_home_menu('main');
+		load_home_menu('main', function (mnames) {
+			setTimeout(function() { // waiting for modules to load menus
+				for (var i in mnames) {
+					//console.log(i + " => " + mnames[i]);
+					//var counter_id = "home-menu-" + mnames[i] + "-counter";
+					//$("#" + counter_id).text(i);
+					count_unread_post(1, mnames[i]);
+				}
+			}, 300);
+		});
 
 		$('#signout_btn').click(function(){
 			signout_user();

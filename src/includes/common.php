@@ -518,6 +518,19 @@ function update_postread($userid, $discussion_id, $discussion_type_id, $lastread
 	return FALSE;
 }
 
+function delete_postread($userid, $groupref) {
+	$discussion_ref = get_discussion_ref('table:usergroup:' . $groupref);
+	$discussion_id = get_discussion_id_by_ref($discussion_ref);
+	
+	if ($discussion_id > 0) {
+		$where = equ('userid', $userid) . ' AND ' . equ('discussion_id', $discussion_id);
+		if (!delete('postread', $where))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 // Get group info:
 // int		'uid'				- signed-in user id.
 // bool		'owner'				- is the signed-in user the group owner.
@@ -1507,6 +1520,12 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 	);
 });
 
+// Count current user unread post.
+// This function must be called in series so that not to block the server.
+// The caller must stop calling this function when 'unread_count_limit' is reached.
+// $discussion_typeref can be 'myprofile', 'mygroup, etc; which has an entry in preference that
+// starts with 'discussion_typeref_' such as 'discussion_typeref_myprofile', etc.
+// When $discussion_typeref is unknown then the returned 'unread_count_limit' will be set to zero.
 beat('post', 'count_unread', function ($restart, $discussion_typeref)
 {
 	if (!has_permission('post_count_unread'))
@@ -1536,6 +1555,7 @@ beat('post', 'count_unread', function ($restart, $discussion_typeref)
 					'status' => 1,
 					'data' => array(
 						'unread_count' => 0,
+						'unread_count_limit' => 0,
 						'count' => 0,
 						'limit' => 1
 					)
@@ -1596,6 +1616,7 @@ beat('post', 'count_unread', function ($restart, $discussion_typeref)
 		'status' => 1,
 		'data' => array(
 			'unread_count' => $unread_count,
+			'unread_count_limit' => $unread_count_limit,
 			'count' => $rcnt,
 			'limit' => $limit
 		)
