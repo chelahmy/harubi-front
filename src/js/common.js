@@ -16,6 +16,8 @@ var user_page_url = "main/userview.html";
 var language = 'en';
 var language_strings = {};
 
+var unread_post_counts = {};
+
 // Server error codes
 const serr_unknown = 0;
 const serr_not_signed_in = 1;
@@ -737,4 +739,33 @@ var load_preferences = function (name, on_ready) {
 		});
 }
 
+var count_unread_post_resp = function (rst, extra) {
+	if (rst.data.count > 0) {
+		var count = 0;
+		
+		if (unread_post_counts.hasOwnProperty(extra.discussion_typeref))
+			count = unread_post_counts[extra.discussion_typeref];
+			
+		count += rst.data.unread_count;
+		unread_post_counts[extra.discussion_typeref] = count;
+
+		if (count >= rst.data.unread_count_limit)
+			count = count.toString() + "+";
+		else if (rst.data.count >= rst.data.limit)
+			count_unread_post(0, extra.discussion_typeref, extra.count_handler); // recursive
+		
+		if (count !== 0 && (typeof extra.count_handler === "function")) {
+			extra.count_handler(extra.discussion_typeref, count);
+		}
+	}
+}
+
+var count_unread_post = function (restart, discussion_typeref, count_handler) {
+	if (restart == 1)
+		unread_post_counts[discussion_typeref] = 0;
+		
+	qserv(main_server, {model: 'post', action: 'count_unread',
+		restart: restart, discussion_typeref: discussion_typeref},
+		count_unread_post_resp, {count_handler: count_handler, discussion_typeref: discussion_typeref});
+}
 
