@@ -171,6 +171,10 @@ $(window).on('load', function () {
 		
 		load_user();
 		
+		count_unread_post(1, "myprofile", function (discussion_typeref, count) {
+			$("#username-counter").text(count);
+		});
+
 		$("#avatar").on("change", function (e) {
 			input_avatar_filename = this.files[0].name;
 			input_avatar_filesize = this.files[0].size;

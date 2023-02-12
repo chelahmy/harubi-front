@@ -30,6 +30,13 @@ a:active {
 	border-radius: 50%;
 }
 
+.counter {
+    vertical-align: super;
+ 	font-size: 1rem;
+	color: var(--bs-red);
+	font-weight: bold;
+}
+
 .home-icon {
 	font-size: 6rem;
 	color: var(--bs-blue);

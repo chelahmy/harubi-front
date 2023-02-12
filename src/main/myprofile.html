@@ -7,13 +7,11 @@
 ?>
 	<link href="css/main.css" rel="stylesheet">
 
-<?php include $rpath . "includes/parts/middle-top.inc"; ?>
-
 <section class="py-5 container d-none" id="page">
 	<div class="px-4 text-center">
 		<img class="d-block mx-auto mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
 		<h1 class="display-5 fw-bold"><?= $title ?></h1>
-		<h2 class="display-5" id="username"></h2>
+		<h2 class="display-5"><span id="username"></span><sup class="counter" id="username-counter"></sup></h2>
 		<p class="lead" id="membership"></p>
 		<br/>
 	</div>
