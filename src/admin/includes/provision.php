@@ -32,7 +32,7 @@ $preferences = array(
 	'home_forward_main_menu_item_2' => '{"w":20,"i":"people","t":"Groups","d":"My private user groups.","u":"mygroupforward.html"}',
 	'discussion_table:user' => '{"autofollow":0}',
 	'discussion_table:usergroup' => '{"autofollow":1}',
-	'discussion_typeref_myprofile' => 'table:user',
+	'discussion_typeref_myprofile' => 'table:user:*username*',
 	'discussion_typeref_mygroup' => 'table:usergroup',
 );
 

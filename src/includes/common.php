@@ -135,6 +135,15 @@ function unset_session($name) {
 		unset($_SESSION[$an][$name]);
 }
 
+function unset_session_all() {
+	$an = get_appname();
+
+	if (!isset($_SESSION[$an]))
+		return;
+		
+	unset($_SESSION[$an]);
+}
+
 function isset_session($name) {
 	$an = get_appname();
 
@@ -335,7 +344,7 @@ function get_discussion_type($discussion_name) {
 	$parts = explode(":", $discussion_name);
 
 	if (!is_array($parts) || count($parts) < 2)
-		return 0;
+		return FALSE;
 
 	$name = $parts[0] . ":" . $parts[1];	
 	$where = equ('name', $name, 'string');
@@ -411,6 +420,17 @@ function get_discussion_by_ref($discussion_ref) {
 		return $records[0];
 
 	return FALSE;
+}
+
+function get_discussion_id_by_name($discussion_name) {
+	$discussion_id = 0;
+	$where = equ('name', $discussion_name, 'string');
+	$records = read('discussion', FALSE, $where);
+	
+	if (record_cnt($records) > 0)
+		$discussion_id = intval($records[0]['id']);
+
+	return $discussion_id;
 }
 
 function get_discussion_id_by_ref($discussion_ref) {
@@ -715,6 +735,8 @@ function sign_out() {
 	unset_session('uroleid');
 	unset_session('last_accessed');
 	unset_session('language');
+	
+	unset_session_all();
 }
 
 function is_signedin($uid = 0)
@@ -1522,47 +1544,93 @@ beat('post', 'new', function ($discussion_ref, $body, $quote_discussion_ref = ""
 
 // Count current user unread post.
 // This function must be called in series so that not to block the server.
-// The caller must stop calling this function when 'unread_count_limit' is reached.
-// $discussion_typeref can be 'myprofile', 'mygroup, etc; which has an entry in preference that
-// starts with 'discussion_typeref_' such as 'discussion_typeref_myprofile', etc.
+// The caller must stop calling this function when 'unread_count_limit' is reached since it is no
+// point hitting the server for a higher count; It will only reduce the server performance.
+// $discussion_typeref can be 'myprofile', 'mygroup', etc; which has an entry in preference that
+// starts with 'discussion_typeref_' such as 'discussion_typeref_myprofile', etc; which refers to
+// a discussion_type such as 'table:user', 'table:usergroup', etc.
+// Or, $discussion_typeref can be set to a specific discussion_type, discussion_name or discussion_ref.
+// Or, $discussion_typeref can be set to "all".
 // When $discussion_typeref is unknown then the returned 'unread_count_limit' will be set to zero.
-beat('post', 'count_unread', function ($restart, $discussion_typeref)
+// NOTE:
+// This function depends on the postread log. An orphan entry in the postread log may cause incorrect
+// counting. I.e. whenever a user is removed from a discussion then his entry in the postread log
+// must also be removed.
+beat('post', 'count_unread', function ($restart, $discussion_typeref = "all")
 {
 	if (!has_permission('post_count_unread'))
 		return error_pack(err_access_denied);
 	
 	$userid = signedin_uid();
 	$unread_count = 0;
+	$discussion_id = 0;
 	$discussion_type_id = 0;
 
 	if ($discussion_typeref != "all") { // a specific type of discussions
-		$ses_discussion_typeref = "post_count_unread_discussion_typeref_" . $discussion_typeref;
-	 
-	 	if (isset_session($ses_discussion_typeref)) // lookup the cache first
-	 		$discussion_type_id = get_session($ses_discussion_typeref);
+		// First, assuming a discussion...
+		$ses_discussion_id = "post_count_unread_discussion_id_" . $discussion_typeref;
+
+	 	if (isset_session($ses_discussion_id)) // lookup the cache first
+	 		$discussion_id = get_session($ses_discussion_id);
 	 	else {
-			$discussion_type = get_preference("discussion_typeref_" . $discussion_typeref);
+			$discussion_id = get_discussion_id_by_name($discussion_typeref);
 			
-			if (strlen($discussion_type) > 0) {
-				$discussion_type = get_discussion_type($discussion_type);
+			if ($discussion_id <= 0)
+				$discussion_id = get_discussion_id_by_ref($discussion_typeref);
 				
-				if ($discussion_type !== FALSE && is_array($discussion_type))
-					$discussion_type_id = intval($discussion_type['id']);
-			}
-				
-			if ($discussion_type_id <= 0) // silently ignore unknown $discussion_typeref
-				return array(
-					'status' => 1,
-					'data' => array(
-						'unread_count' => 0,
-						'unread_count_limit' => 0,
-						'count' => 0,
-						'limit' => 1
-					)
-				);
-				
-			set_session($ses_discussion_typeref, $discussion_type_id);
+			set_session($ses_discussion_id, $discussion_id);
 		}
+		
+		if ($discussion_id <= 0) {
+			$ses_discussion_type_id = "post_count_unread_discussion_type_id_" . $discussion_typeref;
+		 
+		 	if (isset_session($ses_discussion_type_id)) // lookup the cache first
+		 		$discussion_type_id = get_session($ses_discussion_type_id);
+		 	else {
+		 		// Next, assuming a discussion_type...
+				$discussion_type_rec = get_discussion_type($discussion_typeref);
+				
+				if ($discussion_type_rec !== FALSE && is_array($discussion_type_rec))
+					$discussion_type_id = intval($discussion_type_rec['id']);
+		 		
+		 		if ($discussion_type_id <= 0) {
+		 			// Now, assuming a discussion_typeref...
+					$discussion_type = get_preference("discussion_typeref_" . $discussion_typeref);
+					
+					if (strlen($discussion_type) > 0) {
+					
+						// Check for a specific user discussion
+						$pos = strpos($discussion_type, "*username*");
+						
+						if ($pos !== FALSE) { // It is a specific user discussion
+							$uname = signedin_uname();
+							$discussion_name = str_replace("*username*", $uname, $discussion_type);
+							$discussion_id = get_discussion_id_by_name($discussion_name);
+							set_session($ses_discussion_id, $discussion_id);
+						}
+						else {
+							$discussion_type_rec = get_discussion_type($discussion_type);
+							
+							if ($discussion_type_rec !== FALSE && is_array($discussion_type_rec))
+								$discussion_type_id = intval($discussion_type_rec['id']);
+						}
+					}
+				}
+
+				set_session($ses_discussion_type_id, $discussion_type_id);
+			}
+		}
+					
+		if ($discussion_id <= 0 && $discussion_type_id <= 0) // silently ignore unknown $discussion_typeref
+			return array(
+				'status' => 1,
+				'data' => array(
+					'unread_count' => 0,
+					'unread_count_limit' => 0,
+					'count' => 0,
+					'limit' => 1
+				)
+			);					
 	}
 
 	$limit = get_page_size();
@@ -1573,10 +1641,12 @@ beat('post', 'count_unread', function ($restart, $discussion_typeref)
 		
 	$offset = get_session($ses_table_offset);
 
-	if ($discussion_type_id == 0) // all discussions
-		$where = equ('userid', $userid);
-	else
+	if ($discussion_id > 0)
+		$where = equ('userid', $userid) . " AND " . equ('discussion_id', $discussion_id);
+	elseif ($discussion_type_id > 0)
 		$where = equ('userid', $userid) . " AND " . equ('discussion_type_id', $discussion_type_id);
+	else
+		$where = equ('userid', $userid); // all discussions
 		
 	$records = read('postread', FALSE, $where, 'updated_utc', 'DESC', $limit, $offset);
 	$rcnt = record_cnt($records);
