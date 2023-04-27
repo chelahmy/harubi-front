@@ -1,0 +1,58 @@
+<?php
+	$rpath = "../";
+	$title = "Sign up";
+	$description = "Sign up";
+	$noloading = TRUE;
+	$main = FALSE;
+	
+	include $rpath . "includes/parts/top.inc";
+?>
+	<link href="css/main.css" rel="stylesheet">
+	<link href="css/signin.css" rel="stylesheet">
+
+<?php include $rpath . "includes/parts/middle-top.inc"; ?>
+
+<main class="form-signin w-100 m-auto">
+
+<section class="text-center" id="page">
+	<div class="px-4 my-3">
+		<img class="mb-4" src="<?= $rpath ?>logo/logo.png" alt="logo" id="page_logo">
+		<h1 class="display-5 fw-bold"><?= $title ?></h1>
+	</div>
+	<div id="alerts"></div>
+	<form>
+		<div class="form-floating mb-2">
+			<input type="text" class="form-control" id="name" placeholder="User name">
+			<label for="name" class="form-label">User name</label>
+		</div>
+		<div class="form-floating mb-2">
+			<input type="password" class="form-control" id="password" placeholder="Password">
+			<label for="password" class="form-label">Password</label>
+		</div>
+		<div class="form-floating mb-2 d-none" id="confirm-password-input">
+			<input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
+			<label for="confirm-password" class="form-label">Confirm password</label>
+		</div>
+		<div class="form-floating mb-2">
+			<input type="email" class="form-control" id="email" placeholder="name@example.com">
+			<label for="email" class="form-label">Email address</label>
+		</div>
+		<div class="form-check form-check-inline mb-3">
+			<input class="form-check-input" type="checkbox" id="remember-me" value="option1">
+			<label class="form-check-label" for="remember-me">Remember me</label>
+		</div>
+		<button class="w-100 btn btn-lg btn-primary" id="signup_btn">Sign up</button>
+		<hr class="my-4">
+		<small class="text-body-secondary">By clicking Sign up, you agree to the terms of use.</small>
+	</form>	
+
+</section>
+
+</main>
+
+<?php include $rpath . "includes/parts/middle-bottom.inc"; ?>
+
+<script src="js/signup.js" type="text/javascript" ></script>
+
+<?php include $rpath . "includes/parts/bottom.inc"; ?>
+

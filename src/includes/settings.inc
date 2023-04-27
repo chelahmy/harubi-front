@@ -22,6 +22,7 @@
     "tables" : {
         "user" : {
             "id" : "int",
+            "avatar" : "string",
             "name" : "string",
             "password" : "string",
             "email" : "string",

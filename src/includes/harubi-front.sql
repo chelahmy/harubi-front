@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 28, 2023 at 06:26 AM
--- Server version: 8.0.31
+-- Generation Time: Apr 27, 2023 at 05:58 PM
+-- Server version: 8.0.32
 -- PHP Version: 7.4.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -179,6 +179,7 @@ CREATE TABLE `role` (
 
 CREATE TABLE `user` (
   `id` bigint UNSIGNED NOT NULL,
+  `avatar` char(32) NOT NULL,
   `name` varchar(16) NOT NULL,
   `password` varchar(60) NOT NULL,
   `email` varchar(80) NOT NULL,
