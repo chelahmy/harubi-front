@@ -46,6 +46,8 @@ $(window).on('load', function () {
 				"text" : signedin_uname 
 			});
 			$('#username').html(ele_uname.prop("outerHTML"));
+			if (data.is_signedin_admin)
+				$("#admin_link").removeClass("d-none");
 		}
 	});
 	
