@@ -1001,13 +1001,15 @@ beat('user', 'signup', function ($name, $password, $email)
 	{
 		$now = time();
 		$hash = password_hash($password, PASSWORD_BCRYPT);
+		$uroleid = get_new_user_roleid();
+		$ulang = get_language();
 		$id = create('user', array(
 			'name' => $name,
 			'avatar' => '',
 			'password' => $hash,
 			'email' => $email,
-			'roleid' => get_new_user_roleid(),
-			'language' => get_language(),
+			'roleid' => $uroleid,
+			'language' => $ulang,
 			'valid_thru' => 0,
 			'signins' => 0,
 			'last_signedin_utc' => 0,
@@ -1019,7 +1021,15 @@ beat('user', 'signup', function ($name, $password, $email)
 		if ($id > 0)
 		{
 			set_session('last_reg', $now);
-				
+			
+			// sign in the new user
+			inc_user_signins($uid, 0);
+			set_session('uid', $id);
+			set_session('uname', $name);
+			set_session('uroleid', $uroleid);
+			set_session('last_accessed', $now);
+			set_session('language', $ulang);
+
 			return array(
 				'status' => 1
 			);
