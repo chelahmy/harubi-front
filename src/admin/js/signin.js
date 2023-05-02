@@ -3,9 +3,9 @@
 // By Abdullah Daud, chelahmy@gmail.com
 // 18 November 2022
 
-var signin_user = function (name, password) {
+var signin_user = function (name, password, remember_me) {
 	$.post(admin_server, {model: 'user', action: 'signin',
-		name: name, password: password}, function (rst, extra) {
+		name: name, password: password, remember_me: remember_me}, function (rst, extra) {
 		show_url("home.html");
 	});
 }
@@ -35,9 +35,10 @@ $(window).on('load', function () {
 	$('#signin_btn').click(function(){
 		var name = $("#name").val();
 		var password = $("#password").val();
+		var remember_me = $("#remember-me").is(':checked');
 		
 		if (name.length > 0 && password.length > 0)
-			signin_user(name, password);
+			signin_user(name, password, remember_me);
 		else
 			show_alert(t("Both name and password are required."), "warning");
 	});

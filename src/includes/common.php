@@ -723,6 +723,144 @@ function get_session_timeout() {
 	return 0; // no timeout
 }
 
+function remember_me_days() {
+	global $harubi_settings;
+	
+	$rmd = get_preference('session_remember_me_days');
+	
+	if (strlen($rmd) <= 0) {
+		if (!isset($harubi_settings) || !isset($harubi_settings['session']) || 
+			!isset($harubi_settings['session']['remember_me_days']))
+			return 0;
+
+		return intval($harubi_settings['session']['remember_me_days']);
+	}
+
+	return intval($rmd);
+}
+
+function user_str_session() {
+	return get_appname() . '_user_str_session';
+}
+
+// Register 'remember me'.
+// Only one device allowed.
+function reg_remember_me() {
+	$rmd = remember_me_days();
+	
+	if ($rmd <= 0) // no duration setting, so no remember_me
+		return FALSE;
+		
+	$userid = get_session('uid');
+	
+	if ($userid <= 0)
+		return FALSE;
+	
+	$cookie_name  = user_str_session();
+	$cookie_value = hash('sha512', $userid . $_SERVER['HTTP_USER_AGENT'] . time());
+	setcookie($cookie_name, $cookie_value, time() + (86400 * $rmd), "/");
+
+	$now = time();
+
+	$where = equ('userid', $userid);
+	$records = read('remember_me', FALSE, $where);
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt > 0) {
+		$id = intval($records[0]['id']);
+		
+		if ($id <= 0)
+			return FALSE;
+			
+		if (!update('remember_me', array(
+			'userstr' => $cookie_value,
+			'created_utc' => $now
+			), $where))
+			return FALSE;
+	}
+	else {
+		$id = create('remember_me', array(
+			'userid' => $userid,
+			'userstr' => $cookie_value,
+			'created_utc' => $now,
+		));
+		
+		if ($id <= 0)
+			return FALSE;
+	}
+			
+	return TRUE;
+}
+
+function unreg_remember_me() {
+	$cookie_name  = user_str_session();
+	setcookie($cookie_name, "", time() - 3600, "/");
+}
+
+function check_remember_me() {
+	if (isset_session('uid')) // already in a session
+		return;
+		
+	$cookie_name  = user_str_session();
+	
+	if (!isset($_COOKIE[$cookie_name]))
+		return;
+		
+	$user_string = $_COOKIE[$cookie_name];
+	
+	if (strlen($user_string) <= 0)
+		return; 
+	
+	$where = equ('userstr', $user_string);
+	$records = read('remember_me', FALSE, $where);
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt <= 0)
+		return;
+		
+	$uid = intval($records[0]['userid']);
+	
+	if ($uid <= 0)
+		return;
+
+	$where = equ('id', $uid);
+	$records = read('user', FALSE, $where);
+	$rcnt = record_cnt($records);
+	
+	if ($rcnt <= 0)
+		return;
+		
+	$premium = FALSE;
+	$name = $records[0]['name'];
+	$uroleid = intval($records[0]['roleid']);
+	
+	if ($uid == 1) { // superadmin
+		set_session('admin_uid', $uid);
+		$premium = TRUE;
+	}
+	else {
+		$rolename = get_rolename_by_id($uroleid);
+	
+		if ($rolename == 'administrator') { // administrator
+			set_session('admin_uid', $uid);
+			$premium = TRUE;
+		}
+		else {
+			$prids = get_premium_role_ids();
+
+			if (in_array($uroleid, $prids)) // premium member
+				$premium = TRUE;
+		}
+	}
+
+	set_session('uid', $uid);
+	set_session('uname', $name);
+	set_session('uroleid', $uroleid);
+	set_session('upremium', $premium);
+	set_session('last_accessed', time());
+	set_session('language', $records[0]['language']);
+}
+
 // Sign out the current user
 function sign_out() {
 	set_session('uid', 0);
@@ -732,6 +870,8 @@ function sign_out() {
 	set_session('uname', '');
 	unset_session('uname');
 	set_session('uroleid', 0);
+	unset_session('upremium');
+	set_session('upremium', FALSE);
 	unset_session('uroleid');
 	unset_session('last_accessed');
 	unset_session('language');
@@ -741,6 +881,8 @@ function sign_out() {
 
 function is_signedin($uid = 0)
 {
+	check_remember_me();
+	
 	if (!isset_session('uid') || get_session('uid') <= 0)
 		return false;
 		
@@ -794,6 +936,14 @@ function signedin_uname()
 		return get_session('uname');
 		
 	return '';
+}
+
+function is_signedin_premium()
+{
+	if (isset_session('upremium'))
+		return get_session('upremium');
+		
+	return FALSE;
 }
 
 function split_signin_note($note)
@@ -905,6 +1055,7 @@ function has_permission($permname) {
 			return TRUE;
 	}
 	
+	check_remember_me();
 	$valid_user = false;
 	
 	// Administrator is always allowed.
@@ -967,6 +1118,7 @@ beat('system', 'signedin', function ()
 		'data' => array(
 			'is_signedin' => $is_signedin,
 			'is_signedin_admin' => is_signedin_admin(),
+			'is_signedin_premium' => is_signedin_premium(),
 			'signedin_language' => signedin_language(),
 			'signedin_uname' => signedin_uname()
 		)
@@ -983,7 +1135,7 @@ beat('user', 'has_permission', function ($permname)
 	);
 });
 
-beat('user', 'signup', function ($name, $password, $email)
+beat('user', 'signup', function ($name, $password, $email, $remember_me = FALSE)
 {
 	// Delay next user sign up for 5 minutes to deter spamming
 	if (isset_session('last_reg') && (time() - get_session('last_reg')) < 300)
@@ -1030,6 +1182,9 @@ beat('user', 'signup', function ($name, $password, $email)
 			set_session('last_accessed', $now);
 			set_session('language', $ulang);
 
+			if ($remember_me)
+				reg_remember_me();
+
 			return array(
 				'status' => 1
 			);
@@ -1041,7 +1196,7 @@ beat('user', 'signup', function ($name, $password, $email)
 	return error_pack(err_user_exists);
 });
 
-beat('user', 'signin', function ($name, $password)
+beat('user', 'signin', function ($name, $password, $remember_me = FALSE)
 {    
 	$now = time();
 	$where = equ('name', $name, 'string');
@@ -1120,8 +1275,12 @@ beat('user', 'signin', function ($name, $password)
 				set_session('uid', $uid);
 				set_session('uname', $name);
 				set_session('uroleid', $uroleid);
+				set_session('upremium', $data['premium']);
 				set_session('last_accessed', time());
 				set_session('language', $records[0]['language']);
+				
+				if ($remember_me)
+					reg_remember_me();
 				
 				return array(
 					'status' => 1,
@@ -1138,6 +1297,7 @@ beat('user', 'signin', function ($name, $password)
 
 beat('user', 'signout', function ()
 {
+	unreg_remember_me();
 	sign_out();
 				
 	return array(
@@ -1573,6 +1733,7 @@ beat('post', 'count_unread', function ($restart, $discussion_typeref = "all")
 	
 	$userid = signedin_uid();
 	$unread_count = 0;
+	$unread_count_limit = 0;
 	$discussion_id = 0;
 	$discussion_type_id = 0;
 

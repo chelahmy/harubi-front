@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 27, 2023 at 05:58 PM
--- Server version: 8.0.32
+-- Generation Time: May 02, 2023 at 07:09 PM
+-- Server version: 8.0.33
 -- PHP Version: 7.4.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -162,6 +162,19 @@ CREATE TABLE `preference` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `remember_me`
+--
+
+CREATE TABLE `remember_me` (
+  `id` bigint NOT NULL,
+  `userid` bigint NOT NULL,
+  `userstr` char(128) NOT NULL,
+  `created_utc` bigint NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `role`
 --
 
@@ -290,6 +303,15 @@ ALTER TABLE `preference`
   ADD UNIQUE KEY `name` (`name`);
 
 --
+-- Indexes for table `remember_me`
+--
+ALTER TABLE `remember_me`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `userstr` (`userstr`),
+  ADD KEY `user` (`userid`) USING BTREE,
+  ADD KEY `created_utc` (`created_utc`) USING BTREE;
+
+--
 -- Indexes for table `role`
 --
 ALTER TABLE `role`
@@ -381,6 +403,12 @@ ALTER TABLE `postread`
 --
 ALTER TABLE `preference`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `remember_me`
+--
+ALTER TABLE `remember_me`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `role`

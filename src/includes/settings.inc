@@ -8,7 +8,8 @@
 	
 	"session" : {
 		"timeout" : 7200,
-		"max_signins_per_week" : 10
+		"max_signins_per_week" : 10,
+		"remember_me_days" : 30
 	},
 	
     "mysql" : {
@@ -34,6 +35,12 @@
             "signin_note" : "int",
             "created_utc" : "int",
             "updated_utc" : "int"
+        },
+        "remember_me" : {
+            "id" : "int",
+            "userid" : "int",
+            "userstr" : "string",
+            "created_utc" : "int"
         },
         "usergroup" : {
             "id" : "int",
