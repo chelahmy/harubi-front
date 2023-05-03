@@ -1109,6 +1109,20 @@ beat('system', 'heartbeat', function ()
 	);
 });
 
+beat('system', 'set_visitor_language', function ($language)
+{
+	if ($language == 'en' || $language == 'ms') { // TODO: generalize this
+		set_session('visitor_language', $language);
+	}
+	
+	return array(
+		'status' => 1,
+		'data' => array(
+			'visitor_language' => get_session('visitor_language')
+		)
+	);
+});
+
 beat('system', 'signedin', function ()
 {
 	$is_signedin = is_signedin(); // this will update the last access time
@@ -1312,11 +1326,38 @@ beat('preference', 'read_site', function ()
 	$where = "name LIKE 'site%'";
 	$records = read('preference', FALSE, $where, 'name', 'ASC');
 	$rcnt = record_cnt($records);
+	$has_lang = FALSE;
 
 	if ($rcnt > 0) {	
 		foreach ($records as &$r) {
 			unset($r['id']);
+			if ($r['name'] == 'site_language') {
+				$has_lang = TRUE;
+				if (isset_session("visitor_language"))
+					$r['value'] = get_session("visitor_language"); // overwrite with the visitor selected language
+				elseif (isset_session("language"))
+					$r['value'] = get_session("language"); // overwrite with the signed in user selected language
+			}
 		}
+	}
+	else {
+		$rcnt = 0;
+		$records = array();
+	}
+
+	if (!$has_lang) {
+		if (isset_session("visitor_language"))
+			$lang = get_session("visitor_language");
+		elseif (isset_session("language"))
+			$lang = get_session("language");
+		else
+			$lang = get_language();
+		
+		$records[] = array(
+			'name'=> 'site_language',
+			'value' => $lang
+			);
+		++$rcnt;
 	}
 
 	return array(

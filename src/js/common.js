@@ -432,6 +432,13 @@ var te = function () {
 	});	
 }
 
+var set_visitor_language = function (visitor_language, on_ready) {
+	qserv(main_server, {model: 'system', action: 'set_visitor_language', language: visitor_language}, function(rst, extra) {
+		if (typeof on_ready === 'function')
+			on_ready(rst.data);
+	});
+}
+
 // Load language strings.
 // And translate the current page.
 // And trigger on_ready() if specified.
