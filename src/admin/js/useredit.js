@@ -114,7 +114,13 @@ var load_user = function (name) {
 		name: name}, function (rst, extra) {
 		if (rst.data.count > 0) {
 			var r = rst.data.records[0];
-			$("#username").text(r.name);
+
+			var ele_uname = $("<a>", {
+				"href" : "../main/userview.html?name=" + r.name,
+				"text" : r.name 
+			});
+			
+			$('#username').html(ele_uname.prop("outerHTML"));
 			$("#name").val(r.name);
 			$("#email").val(r.email);
 			$("#role_" + r.rolename).prop('checked', true);
