@@ -142,10 +142,12 @@ function create_superadmin() {
 	$now = time();
 	$hash = password_hash($superuser_password, PASSWORD_BCRYPT);
 	$id = create('user', array(
+		'avatar' => '',
 		'name' => $superuser_name,
 		'password' => $hash,
 		'email' => '',
 		'roleid' => get_roleid_by_name("administrator"),
+		'language' => get_language(),
 		'valid_thru' => 0,
 		'signins' => 0,
 		'last_signedin_utc' => 0,
